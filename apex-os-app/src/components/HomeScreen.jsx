@@ -113,7 +113,7 @@ export default function HomeScreen({ workoutPlan, currentDay, onNavigate, system
                 padding:'6px 16px',
                 borderRadius:'var(--radius-pill)',
                 border:'none',
-                background:heatmapRange===r?'#E6B055':'transparent',
+                background:heatmapRange===r?'var(--cyan)':'transparent',
                 color:heatmapRange===r?'#000':'var(--muted)',
                 fontFamily:'var(--font-display)',
                 fontWeight:700,
@@ -135,9 +135,9 @@ export default function HomeScreen({ workoutPlan, currentDay, onNavigate, system
                   aspectRatio:'1/1',
                   borderRadius:'4px',
                   background: cell === 0 ? 'rgba(255,255,255,0.04)' :
-                              cell === 1 ? 'rgba(230,176,85,0.2)' :
-                              cell === 2 ? 'rgba(230,176,85,0.5)' :
-                              '#E6B055'
+                              cell === 1 ? 'rgba(0,255,204,0.2)' :
+                              cell === 2 ? 'rgba(0,255,204,0.5)' :
+                              'var(--cyan)'
                 }}/>
               ))}
             </div>
@@ -151,12 +151,12 @@ export default function HomeScreen({ workoutPlan, currentDay, onNavigate, system
               height:'12px',
               borderRadius:'3px',
               background: l === 0 ? 'rgba(255,255,255,0.04)' :
-                          l === 1 ? 'rgba(230,176,85,0.2)' :
-                          l === 2 ? 'rgba(230,176,85,0.5)' :
-                          '#E6B055'
+                          l === 1 ? 'rgba(0,255,204,0.2)' :
+                          l === 2 ? 'rgba(0,255,204,0.5)' :
+                          'var(--cyan)'
             }}/>
           ))}
-          <span style={{ color:'#E6B055' }}>More</span>
+          <span style={{ color:'var(--cyan)' }}>More</span>
         </div>
       </GlassCard>
     </div>
