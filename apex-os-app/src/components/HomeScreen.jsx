@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import GlassCard from './GlassCard';
 import { HEATMAP_DATA, QUICK_LOG_DEFAULTS } from '../data/sampleData';
 
-export default function HomeScreen({ workoutPlan, currentDay, onNavigate }) {
+export default function HomeScreen({ workoutPlan, currentDay, onNavigate, systemState }) {
   const [quickLog, setQuickLog] = useState({ ...QUICK_LOG_DEFAULTS });
   const [heatmapRange, setHeatmapRange] = useState('30d');
   const todayPlan = workoutPlan[currentDay];
@@ -30,9 +30,22 @@ export default function HomeScreen({ workoutPlan, currentDay, onNavigate }) {
         <div style={{ width:'44px', height:'44px', borderRadius:'50%', background:'linear-gradient(135deg, var(--cyan), #00AA88)', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'var(--font-display)', fontWeight:700, fontSize:'16px', color:'#000', boxShadow:'var(--cyan-glow-sm)' }}>AO</div>
       </div>
 
-      {/* Quick Log */}
+      {/* Readiness / Quick Log */}
       <div style={{ marginBottom:'20px', animation:'fadeInUp 0.6s ease-out' }}>
-        <h3 style={{ fontSize:'16px', fontWeight:700, marginBottom:'12px' }}>Quick Log</h3>
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+          {systemState && (
+            <GlassCard style={{ flex: 1, padding: '14px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', borderColor: systemState.readiness > 7 ? 'rgba(0,255,136,0.3)' : systemState.readiness < 4 ? 'rgba(255,68,0,0.3)' : 'var(--surface-border)' }}>
+               <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--muted)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Readiness</span>
+               <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '24px', color: systemState.readiness > 7 ? 'var(--green)' : systemState.readiness < 4 ? 'var(--orange)' : 'var(--text)' }}>{systemState.readiness}/10</span>
+            </GlassCard>
+          )}
+          {systemState && (
+            <GlassCard style={{ flex: 1, padding: '14px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', borderColor: systemState.pain > 7 ? 'rgba(255,68,0,0.3)' : 'var(--surface-border)' }}>
+               <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--muted)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Pain Log</span>
+               <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '24px', color: systemState.pain > 7 ? 'var(--orange)' : 'var(--text)' }}>{systemState.pain}/10</span>
+            </GlassCard>
+          )}
+        </div>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:'8px' }}>
           {qItems.map((item) => (
             <GlassCard key={item.key} onClick={() => incrementLog(item.key)} style={{ padding:'14px 8px', display:'flex', flexDirection:'column', alignItems:'center', gap:'8px' }}>

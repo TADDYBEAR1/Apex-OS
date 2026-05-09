@@ -3,11 +3,17 @@ import GlassCard from './GlassCard';
 import ExerciseModal from './ExerciseModal';
 import { DAYS } from '../data/sampleData';
 
-export default function WorkoutScreen({ workoutPlan, setWorkoutPlan, currentDay, setCurrentDay, onEnterFocus }) {
+export default function WorkoutScreen({ workoutPlan, setWorkoutPlan, currentDay, setCurrentDay, onEnterFocus, systemState }) {
   const [showModal, setShowModal] = useState(false);
   const [editingExercise, setEditingExercise] = useState(null);
   const [addSection, setAddSection] = useState('main');
   const todayPlan = workoutPlan[currentDay];
+
+  const shouldSuggestOverride = systemState && (systemState.readiness < 4 || systemState.pain > 7) && todayPlan && todayPlan.name !== 'Rest Day' && todayPlan.name !== 'Recovery Flow';
+
+  const handleOverride = () => {
+    setCurrentDay(0); // Assuming Day 0 is 'Recovery Flow' in sample data
+  };
   const sections = [
     { key: 'warmup', label: 'WARM-UP', color: '#FFD54F' },
     { key: 'main', label: 'MAIN WORKOUT', color: 'var(--cyan)' },
@@ -64,6 +70,31 @@ export default function WorkoutScreen({ workoutPlan, setWorkoutPlan, currentDay,
           }}>{day}</button>
         ))}
       </div>
+
+      {/* Smart Override Banner */}
+      {shouldSuggestOverride && (
+        <div style={{
+          marginBottom: '20px', padding: '16px', borderRadius: 'var(--radius-md)',
+          background: 'rgba(255, 68, 0, 0.1)', border: '1px solid rgba(255, 68, 0, 0.3)',
+          animation: 'fadeInUp 0.55s ease-out'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <span style={{ fontSize: '18px' }}>⚠️</span>
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '13px', letterSpacing: '0.1em', color: 'var(--orange)', textTransform: 'uppercase' }}>SYSTEM OVERRIDE SUGGESTED</span>
+          </div>
+          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
+            Your readiness score is low ({systemState.readiness}/10) and/or pain is high ({systemState.pain}/10). We recommend switching to the Recovery Flow protocol today.
+          </p>
+          <button onClick={handleOverride} style={{
+            width: '100%', padding: '12px', background: 'var(--orange)', color: '#000',
+            border: 'none', borderRadius: 'var(--radius-pill)', fontFamily: 'var(--font-display)',
+            fontWeight: 700, fontSize: '13px', letterSpacing: '0.06em', cursor: 'pointer',
+            textTransform: 'uppercase'
+          }}>
+            Accept Override
+          </button>
+        </div>
+      )}
 
       {/* Workout Name */}
       {todayPlan && (
