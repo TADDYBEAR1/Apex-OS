@@ -102,17 +102,61 @@ export default function HomeScreen({ workoutPlan, currentDay, onNavigate, system
 
       {/* Heatmap */}
       <GlassCard style={{ padding:'20px', animation:'fadeInUp 0.9s ease-out' }}>
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'16px' }}>
-          <div><h3 style={{ fontSize:'16px', fontWeight:700 }}>Training Consistency</h3><span style={{ fontSize:'13px', color:'var(--muted)' }}>{stats.consistency}% ({stats.activeDays}/{stats.totalDays}d)</span></div>
-          <div style={{ display:'flex', gap:'4px' }}>
-            {['30d','90d'].map((r) => (<button key={r} onClick={() => setHeatmapRange(r)} style={{ padding:'6px 12px', borderRadius:'var(--radius-pill)', border:'1px solid', borderColor:heatmapRange===r?'var(--cyan)':'var(--surface-border)', background:heatmapRange===r?'var(--cyan-dim)':'transparent', color:heatmapRange===r?'var(--cyan)':'var(--muted)', fontFamily:'var(--font-display)', fontWeight:600, fontSize:'12px', cursor:'pointer', transition:'all 0.2s ease' }}>{r}</button>))}
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'20px' }}>
+          <div>
+            <h3 style={{ fontSize:'16px', fontWeight:700, fontFamily:'var(--font-display)', color:'var(--text)', marginBottom:'2px' }}>Training Consistency</h3>
+            <span style={{ fontSize:'12px', color:'var(--cyan)' }}>{stats.consistency}% <span style={{ color:'var(--cyan)' }}>({stats.activeDays}/{stats.totalDays}d)</span></span>
+          </div>
+          <div style={{ display:'flex', background:'rgba(255,255,255,0.03)', borderRadius:'var(--radius-pill)', padding:'4px' }}>
+            {['30d','90d'].map((r) => (
+              <button key={r} onClick={() => setHeatmapRange(r)} style={{
+                padding:'6px 16px',
+                borderRadius:'var(--radius-pill)',
+                border:'none',
+                background:heatmapRange===r?'#E6B055':'transparent',
+                color:heatmapRange===r?'#000':'var(--muted)',
+                fontFamily:'var(--font-display)',
+                fontWeight:700,
+                fontSize:'12px',
+                cursor:'pointer',
+                transition:'all 0.2s ease'
+              }}>
+                {r}
+              </button>
+            ))}
           </div>
         </div>
-        <div style={{ display:'flex', flexDirection:'column', gap:'4px' }}>
-          {HEATMAP_DATA.map((row, ri) => (<div key={ri} style={{ display:'flex', gap:'4px' }}>{row.map((cell, ci) => (<div key={ci} style={{ width:'20px', height:'20px', borderRadius:'4px', background:cell===0?'rgba(255,255,255,0.04)':cell===1?'rgba(0,255,204,0.15)':cell===2?'rgba(0,255,204,0.35)':'var(--cyan)', boxShadow:cell===3?'0 0 6px rgba(0,255,204,0.3)':'none' }}/>))}</div>))}
+        <div style={{ display:'flex', flexDirection:'column', gap:'6px' }}>
+          {HEATMAP_DATA.map((row, ri) => (
+            <div key={ri} style={{ display:'flex', gap:'6px' }}>
+              {row.map((cell, ci) => (
+                <div key={ci} style={{
+                  flex:1,
+                  aspectRatio:'1/1',
+                  borderRadius:'4px',
+                  background: cell === 0 ? 'rgba(255,255,255,0.04)' :
+                              cell === 1 ? 'rgba(230,176,85,0.2)' :
+                              cell === 2 ? 'rgba(230,176,85,0.5)' :
+                              '#E6B055'
+                }}/>
+              ))}
+            </div>
+          ))}
         </div>
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'flex-end', gap:'4px', marginTop:'12px', fontSize:'11px', color:'var(--muted)' }}>
-          Less {[0,1,2,3].map((l) => (<div key={l} style={{ width:'12px', height:'12px', borderRadius:'2px', background:l===0?'rgba(255,255,255,0.04)':l===1?'rgba(0,255,204,0.15)':l===2?'rgba(0,255,204,0.35)':'var(--cyan)' }}/>))} More
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'flex-end', gap:'6px', marginTop:'16px', fontSize:'11px', color:'var(--muted)' }}>
+          <span>Less</span>
+          {[0,1,2,3].map((l) => (
+            <div key={l} style={{
+              width:'12px',
+              height:'12px',
+              borderRadius:'3px',
+              background: l === 0 ? 'rgba(255,255,255,0.04)' :
+                          l === 1 ? 'rgba(230,176,85,0.2)' :
+                          l === 2 ? 'rgba(230,176,85,0.5)' :
+                          '#E6B055'
+            }}/>
+          ))}
+          <span style={{ color:'#E6B055' }}>More</span>
         </div>
       </GlassCard>
     </div>
