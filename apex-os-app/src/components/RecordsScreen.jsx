@@ -104,34 +104,59 @@ export default function RecordsScreen() {
       </div>
 
       {benchmarks.map((record, i) => (
-        <GlassCard key={i} style={{ padding: '20px', marginBottom: '12px', animation: `fadeInUp ${0.7 + i * 0.1}s ease-out` }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div>
-              <span className="label-sm" style={{ marginBottom: '6px', display: 'block' }}>{record.label}</span>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', marginBottom: '6px' }}>
-                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '48px', lineHeight: 1, color: 'var(--text)' }}>{record.value}</span>
-                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '18px', color: 'var(--muted)' }}>{record.unit}</span>
+        <GlassCard key={i} style={{ padding: '16px', marginBottom: '12px', animation: `fadeInUp ${0.7 + i * 0.1}s ease-out` }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#1A1D24', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
+                {record.unit === 'REPS' ? '💪' : record.label.includes('Run') ? '🏃' : '🏋️'}
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <span style={{ color: record.positive ? 'var(--cyan)' : 'var(--orange)', fontSize: '13px' }}>↗</span>
-                <span style={{ fontSize: '13px', color: record.positive ? 'var(--cyan)' : 'var(--orange)' }}>{record.trend}</span>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '16px', color: 'var(--text)' }}>
+                    {record.label}
+                  </h3>
+                  <span style={{ fontSize: '10px', background: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: 'var(--radius-pill)', color: record.unit === 'REPS' ? '#4CAF50' : '#E6B055', fontWeight: 500 }}>
+                    {record.unit === 'REPS' ? 'Bodyweight' : 'Strength'}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '4px' }}>
+                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '20px', color: '#E6B055' }}>
+                    {record.value}
+                  </span>
+                  <span style={{ fontSize: '12px', color: 'var(--muted)' }}>
+                    {record.unit.toLowerCase()}
+                  </span>
+                </div>
+                <span style={{ fontSize: '12px', color: '#4F84A6' }}>2026-03-01</span>
               </div>
             </div>
+            <button style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#E6B055', color: '#000', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(230,176,85,0.2)' }}>
+              +
+            </button>
+          </div>
 
-            {/* Sparkline Chart */}
-            <div style={{ width: '100px', height: '50px', marginTop: '10px' }}>
-               <svg viewBox="0 0 100 50" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
-                  <path
-                    d={generateTrendLine(record.positive)}
-                    fill="none"
-                    stroke={record.positive ? "var(--cyan)" : "var(--orange)"}
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    style={{ filter: `drop-shadow(0 4px 6px ${record.positive ? 'rgba(0,255,204,0.4)' : 'rgba(255,68,0,0.4)'})` }}
-                  />
-               </svg>
-            </div>
+          {/* Sparkline Chart */}
+          <div style={{ width: '100%', height: '80px', position: 'relative' }}>
+            <svg viewBox="0 0 200 80" style={{ width: '100%', height: '100%', overflow: 'visible', preserveAspectRatio: 'none' }}>
+              <defs>
+                <linearGradient id={`grad-${i}`} x1="0" x2="0" y1="0" y2="1">
+                  <stop offset="0%" stopColor="#E6B055" stopOpacity="0.4" />
+                  <stop offset="100%" stopColor="#E6B055" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              <path
+                d={`${generateTrendLine(record.positive).replace(/(\d+),(\d+)/g, (match, x, y) => `${x * 2},${(y / 50) * 80}`)} L 200,80 L 0,80 Z`}
+                fill={`url(#grad-${i})`}
+              />
+              <path
+                d={generateTrendLine(record.positive).replace(/(\d+),(\d+)/g, (match, x, y) => `${x * 2},${(y / 50) * 80}`)}
+                fill="none"
+                stroke="#E6B055"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </div>
         </GlassCard>
       ))}
@@ -144,8 +169,8 @@ export default function RecordsScreen() {
           animation: 'fadeIn 0.3s ease-out', padding: '20px'
         }}>
           <div style={{
-            width: '100%', maxWidth: '430px', maxHeight: '80vh', overflowY: 'auto', background: 'var(--surface)', border: '1px solid var(--surface-border)',
-            borderRadius: 'var(--radius-lg)', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px'
+            width: '100%', maxWidth: '100%', maxHeight: '80vh', overflowY: 'auto', background: 'var(--surface)', border: '1px solid var(--surface-border)',
+            borderRadius: 'var(--radius-lg)', padding: '24px env(safe-area-inset-right, 24px) calc(24px + env(safe-area-inset-bottom, 0px)) env(safe-area-inset-left, 24px)', display: 'flex', flexDirection: 'column', gap: '24px'
           }}>
             <h2 style={{ fontSize: '20px', fontWeight: 700, fontFamily: 'var(--font-display)', textAlign: 'center' }}>Create Benchmark</h2>
 

@@ -12,8 +12,8 @@ export default function ReadinessModal({ onComplete }) {
       animation: 'fadeIn 0.3s ease-out', padding: '20px'
     }}>
       <div style={{
-        width: '100%', maxWidth: '430px', background: 'var(--surface)', border: '1px solid var(--surface-border)',
-        borderRadius: 'var(--radius-lg)', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px'
+        width: '100%', maxWidth: '100%', background: 'var(--surface)', border: '1px solid var(--surface-border)',
+        borderRadius: 'var(--radius-lg)', padding: '24px env(safe-area-inset-right, 24px) calc(24px + env(safe-area-inset-bottom, 0px)) env(safe-area-inset-left, 24px)', display: 'flex', flexDirection: 'column', gap: '24px'
       }}>
         <div style={{ textAlign: 'center' }}>
           <span style={{
