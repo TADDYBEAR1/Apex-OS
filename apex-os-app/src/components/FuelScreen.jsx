@@ -7,6 +7,16 @@ export default function FuelScreen() {
   const [nutrition, setNutrition] = useState(NUTRITION_DATA);
   const [showAddFood, setShowAddFood] = useState(false);
   const [addMealType, setAddMealType] = useState('breakfast');
+  const [showAddGrocery, setShowAddGrocery] = useState(false);
+  const [newGroceryName, setNewGroceryName] = useState('');
+  const [newGroceryQty, setNewGroceryQty] = useState('');
+
+  // Custom Food Form State
+  const [customFoodName, setCustomFoodName] = useState('');
+  const [customCals, setCustomCals] = useState('');
+  const [customPro, setCustomPro] = useState('');
+  const [customCarbs, setCustomCarbs] = useState('');
+  const [customFat, setCustomFat] = useState('');
 
   const remaining = nutrition.calorieGoal - nutrition.calorieConsumed;
   const calPercent = Math.round((nutrition.calorieConsumed / nutrition.calorieGoal) * 100);
@@ -125,7 +135,7 @@ export default function FuelScreen() {
         <div style={{ animation: 'fadeInUp 0.5s ease-out' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h2 style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '0.1em', color: 'var(--muted)', textTransform: 'uppercase' }}>Provisioning Queue</h2>
-            <button style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid rgba(0,255,204,0.2)', background: 'transparent', color: 'var(--cyan)', fontSize: '18px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+            <button onClick={() => setShowAddGrocery(true)} style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid rgba(0,255,204,0.2)', background: 'transparent', color: 'var(--cyan)', fontSize: '18px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
           </div>
           {nutrition.groceryList.map((item) => (
             <GlassCard key={item.id} onClick={() => toggleGroceryItem(item.id)} style={{ padding: '16px', marginBottom: '8px', opacity: item.checked ? 0.5 : 1, transition: 'opacity 0.3s ease' }}>
@@ -149,37 +159,102 @@ export default function FuelScreen() {
         </div>
       )}
 
-      {/* Add Food Modal */}
+      {/* Add Custom Food Modal */}
       {showAddFood && (
         <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setShowAddFood(false)}>
-          <div className="modal-sheet" style={{ maxHeight: '60vh' }}>
+            <div className="modal-sheet">
+              <div className="modal-handle" />
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, marginBottom: '20px' }}>Add Custom Meal to {addMealType}</h2>
+
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '13px', color: 'var(--muted)', textTransform: 'uppercase' }}>Meal Name</label>
+                <input value={customFoodName} onChange={(e) => setCustomFoodName(e.target.value)} placeholder="e.g. Avocado Toast" style={{ width: '100%', padding: '14px 16px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--surface-border)', borderRadius: 'var(--radius-md)', color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: '15px', outline: 'none' }} />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '13px', color: 'var(--cyan)', textTransform: 'uppercase' }}>Calories</label>
+                  <input type="number" value={customCals} onChange={(e) => setCustomCals(e.target.value)} placeholder="0" style={{ width: '100%', padding: '14px 16px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--surface-border)', borderRadius: 'var(--radius-md)', color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: '15px', outline: 'none' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '13px', color: 'var(--muted)', textTransform: 'uppercase' }}>Protein (g)</label>
+                  <input type="number" value={customPro} onChange={(e) => setCustomPro(e.target.value)} placeholder="0" style={{ width: '100%', padding: '14px 16px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--surface-border)', borderRadius: 'var(--radius-md)', color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: '15px', outline: 'none' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '13px', color: 'var(--muted)', textTransform: 'uppercase' }}>Carbs (g)</label>
+                  <input type="number" value={customCarbs} onChange={(e) => setCustomCarbs(e.target.value)} placeholder="0" style={{ width: '100%', padding: '14px 16px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--surface-border)', borderRadius: 'var(--radius-md)', color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: '15px', outline: 'none' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '8px', fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '13px', color: 'var(--muted)', textTransform: 'uppercase' }}>Fat (g)</label>
+                  <input type="number" value={customFat} onChange={(e) => setCustomFat(e.target.value)} placeholder="0" style={{ width: '100%', padding: '14px 16px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--surface-border)', borderRadius: 'var(--radius-md)', color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: '15px', outline: 'none' }} />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+                <button onClick={() => setShowAddFood(false)} className="btn-ghost" style={{ flex: 1 }}>Cancel</button>
+                <button onClick={() => {
+                  if (customFoodName.trim() === '') return;
+                  const newFood = {
+                    id: `mf-${Date.now()}`,
+                    name: customFoodName,
+                    calories: parseInt(customCals) || 0,
+                    protein: parseInt(customPro) || 0,
+                    carbs: parseInt(customCarbs) || 0,
+                    fat: parseInt(customFat) || 0
+                  };
+
+                  setNutrition(prev => ({
+                    ...prev,
+                    meals: {
+                      ...prev.meals,
+                      [addMealType]: [...(prev.meals[addMealType]||[]), newFood]
+                    },
+                    calorieConsumed: prev.calorieConsumed + newFood.calories
+                  }));
+                  setShowAddFood(false);
+                  setCustomFoodName('');
+                  setCustomCals('');
+                  setCustomPro('');
+                  setCustomCarbs('');
+                  setCustomFat('');
+                }} className="btn-primary" style={{ flex: 2 }}>Save Meal</button>
+              </div>
+            </div>
+          </div>
+      )}
+
+      {/* Add Grocery Modal */}
+      {showAddGrocery && (
+        <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setShowAddGrocery(false)}>
+          <div className="modal-sheet">
             <div className="modal-handle" />
-            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, marginBottom: '20px' }}>Add Food</h2>
-            <input placeholder="Search food..." style={{
-              width: '100%', padding: '14px 16px', background: 'rgba(255,255,255,0.03)',
-              border: '1px solid var(--surface-border)', borderRadius: 'var(--radius-md)',
-              color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: '15px', outline: 'none',
-              marginBottom: '16px',
-            }} />
-            {['Chicken Breast (200g)', 'Brown Rice (150g)', 'Banana', 'Whey Protein Shake', 'Mixed Nuts (30g)'].map((food, i) => (
-              <button key={i} onClick={() => {
-                const newFood = { id: `mf-${Date.now()}-${i}`, name: food, calories: [165, 195, 105, 130, 175][i], protein: [31, 4, 1, 25, 5][i], carbs: [0, 43, 27, 3, 6][i], fat: [4, 1, 0, 2, 15][i] };
-                setNutrition(prev => ({ ...prev, meals: { ...prev.meals, [addMealType]: [...(prev.meals[addMealType]||[]), newFood] }, calorieConsumed: prev.calorieConsumed + newFood.calories }));
-                setShowAddFood(false);
-              }} style={{
-                width: '100%', padding: '14px 16px', border: '1px solid var(--surface-border)',
-                borderRadius: 'var(--radius-md)', background: 'rgba(255,255,255,0.02)',
-                color: 'var(--text)', fontFamily: 'var(--font-display)', fontSize: '14px',
-                fontWeight: 500, cursor: 'pointer', marginBottom: '6px', textAlign: 'left',
-                transition: 'all 0.2s ease',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,255,204,0.2)'; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--surface-border)'; }}
-              >{food}</button>
-            ))}
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 700, marginBottom: '20px' }}>Add to Provisioning Queue</h2>
+
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '13px', color: 'var(--muted)', textTransform: 'uppercase' }}>Item Name</label>
+              <input value={newGroceryName} onChange={(e) => setNewGroceryName(e.target.value)} placeholder="e.g. Eggs" style={{ width: '100%', padding: '14px 16px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--surface-border)', borderRadius: 'var(--radius-md)', color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: '15px', outline: 'none' }} />
+            </div>
+
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '13px', color: 'var(--muted)', textTransform: 'uppercase' }}>Quantity / Amount</label>
+              <input value={newGroceryQty} onChange={(e) => setNewGroceryQty(e.target.value)} placeholder="e.g. 2 Dozen" style={{ width: '100%', padding: '14px 16px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--surface-border)', borderRadius: 'var(--radius-md)', color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: '15px', outline: 'none' }} />
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button onClick={() => setShowAddGrocery(false)} className="btn-ghost" style={{ flex: 1 }}>Cancel</button>
+              <button onClick={() => {
+                if (newGroceryName.trim() === '') return;
+                const newItem = { id: `g-${Date.now()}`, name: newGroceryName, qty: newGroceryQty || '1 unit', category: 'General', checked: false };
+                setNutrition(prev => ({ ...prev, groceryList: [...prev.groceryList, newItem] }));
+                setNewGroceryName('');
+                setNewGroceryQty('');
+                setShowAddGrocery(false);
+              }} className="btn-primary" style={{ flex: 2 }}>Add Item</button>
+            </div>
           </div>
         </div>
       )}
+
     </div>
   );
 }

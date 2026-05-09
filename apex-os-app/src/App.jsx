@@ -9,6 +9,8 @@ import ReadinessModal from './components/ReadinessModal';
 import { DEFAULT_WORKOUT_PLAN } from './data/sampleData';
 import './index.css';
 
+import WorkoutCompleteOverlay from './components/WorkoutCompleteOverlay';
+
 export default function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [workoutPlan, setWorkoutPlan] = useState(DEFAULT_WORKOUT_PLAN);
@@ -16,12 +18,29 @@ export default function App() {
   const [focusExercises, setFocusExercises] = useState(null);
   const [systemState, setSystemState] = useState(null); // { readiness, pain }
 
+  // Track workout duration
+  const [workoutStartTime, setWorkoutStartTime] = useState(null);
+  const [showCompletion, setShowCompletion] = useState(false);
+  const [lastWorkoutDuration, setLastWorkoutDuration] = useState(0);
+
   const handleEnterFocus = (exercises) => {
     setFocusExercises(exercises);
+    setWorkoutStartTime(Date.now());
   };
 
   const handleExitFocus = () => {
     setFocusExercises(null);
+    if (workoutStartTime) {
+      const durationSecs = Math.floor((Date.now() - workoutStartTime) / 1000);
+      setLastWorkoutDuration(durationSecs);
+      setShowCompletion(true);
+      setWorkoutStartTime(null);
+    }
+  };
+
+  const dismissCompletion = () => {
+    setShowCompletion(false);
+    setActiveTab('home'); // Route back to hub to feel like a "return"
   };
 
   const handleNavigate = (tab) => {
@@ -44,6 +63,7 @@ export default function App() {
 
   return (
     <>
+      {showCompletion && <WorkoutCompleteOverlay onDismiss={dismissCompletion} durationSeconds={lastWorkoutDuration} />}
       {!systemState && <ReadinessModal onComplete={handleSystemStateComplete} />}
       <div style={{ position: 'relative' }}>
         {activeTab === 'home' && (
