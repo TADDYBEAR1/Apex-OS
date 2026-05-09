@@ -79,7 +79,11 @@ export default function FocusMode({ exercises, onExit }) {
   return (
     <div style={{
       position: 'fixed', inset: 0, background: 'var(--bg)', zIndex: 90,
-      display: 'flex', flexDirection: 'column', maxWidth: '430px', margin: '0 auto',
+      display: 'flex', flexDirection: 'column', width: '100%',
+      paddingTop: 'env(safe-area-inset-top, 24px)',
+      paddingBottom: 'env(safe-area-inset-bottom, 24px)',
+      paddingLeft: 'env(safe-area-inset-left, 0px)',
+      paddingRight: 'env(safe-area-inset-right, 0px)',
       animation: 'fadeIn 0.3s ease-out', overflow: 'auto',
     }}>
       {/* Top Bar */}

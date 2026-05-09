@@ -55,7 +55,7 @@
 }
 
 html {
-  font-size: 16px;
+  font-size: 18px; /* Scaled up for larger displays */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -69,8 +69,9 @@ body {
 }
 
 #root {
-  max-width: 430px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
   min-height: 100vh;
   position: relative;
   overflow: hidden;
@@ -169,13 +170,13 @@ h1, h2, h3, h4 {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 56px;
-  padding: 0 28px;
+  height: 64px; /* Increased touch target */
+  padding: 0 32px;
   background: var(--cyan);
   color: #000;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 15px;
+  font-size: 16px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   border: none;
@@ -199,13 +200,13 @@ h1, h2, h3, h4 {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 48px;
-  padding: 0 20px;
+  height: 56px; /* Increased touch target */
+  padding: 0 24px;
   background: transparent;
   color: var(--muted);
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 13px;
+  font-size: 14px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   border: 1px solid var(--surface-border);
@@ -224,13 +225,13 @@ h1, h2, h3, h4 {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 56px;
-  padding: 0 24px;
+  height: 64px; /* Increased touch target */
+  padding: 0 28px;
   background: var(--surface);
   color: var(--text);
   font-family: var(--font-display);
   font-weight: 600;
-  font-size: 14px;
+  font-size: 15px;
   letter-spacing: 0.04em;
   border: 1px solid var(--surface-border);
   border-radius: var(--radius-lg);
@@ -310,7 +311,7 @@ h1, h2, h3, h4 {
 /* ── Screen Container ──────────────────────────────────────── */
 .screen {
   min-height: 100vh;
-  padding: 20px 16px 100px;
+  padding: env(safe-area-inset-top, 24px) env(safe-area-inset-right, 20px) calc(100px + env(safe-area-inset-bottom, 24px)) env(safe-area-inset-left, 20px);
   animation: fadeIn 0.3s ease-out;
 }
 
@@ -325,26 +326,27 @@ h1, h2, h3, h4 {
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
   animation: fadeIn 0.2s ease-out;
 }
 
 .modal-sheet {
   width: 100%;
-  max-width: 430px;
+  max-width: 100%;
   max-height: 92vh;
   background: var(--surface);
   border-top-left-radius: var(--radius-lg);
   border-top-right-radius: var(--radius-lg);
   border: 1px solid var(--surface-border);
   border-bottom: none;
-  padding: 12px 20px 32px;
+  padding: 16px env(safe-area-inset-right, 24px) calc(32px + env(safe-area-inset-bottom, 0px)) env(safe-area-inset-left, 24px);
   overflow-y: auto;
   animation: fadeInUp 0.35s ease-out;
 }
 
 .modal-handle {
-  width: 40px;
-  height: 4px;
+  width: 60px; /* Increased touch target indicator */
+  height: 6px;
   background: rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-pill);
   margin: 0 auto 20px;

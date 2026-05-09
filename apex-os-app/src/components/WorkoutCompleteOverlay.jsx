@@ -69,7 +69,7 @@ export default function WorkoutCompleteOverlay({ onDismiss, durationSeconds }) {
       </div>
 
       <button onClick={onDismiss} className="btn-primary" style={{
-        width: '100%', maxWidth: '280px',
+        width: '100%', maxWidth: '340px',
         opacity: show ? 1 : 0, transform: show ? 'translateY(0)' : 'translateY(10px)',
         transition: 'all 0.6s ease 0.6s'
       }}>
