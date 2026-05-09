@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import GlassCard from './GlassCard';
 import { HEATMAP_DATA, QUICK_LOG_DEFAULTS } from '../data/sampleData';
+import { calculateStats } from '../utils/stats';
 
-export default function HomeScreen({ workoutPlan, currentDay, onNavigate }) {
+export default function HomeScreen({ workoutPlan, currentDay, onNavigate, systemState }) {
   const [quickLog, setQuickLog] = useState({ ...QUICK_LOG_DEFAULTS });
   const [heatmapRange, setHeatmapRange] = useState('30d');
   const todayPlan = workoutPlan[currentDay];
@@ -10,14 +11,11 @@ export default function HomeScreen({ workoutPlan, currentDay, onNavigate }) {
   const now = new Date();
   const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const weekProgress = Math.round((quickLog.workout / 5) * 100);
+
+  const stats = calculateStats(HEATMAP_DATA);
+  const weekProgress = Math.round((stats.weeklySessions / 5) * 100);
+
   const incrementLog = (k) => setQuickLog((p) => ({ ...p, [k]: p[k] + 1 }));
-  const qItems = [
-    { key:'water', label:'Water', icon:'💧' },
-    { key:'protein', label:'Protein', icon:'⚡' },
-    { key:'logged', label:'Logged', icon:'🍴' },
-    { key:'workout', label:'Workout', icon:'🎯' },
-  ];
 
   return (
     <div className="screen" style={{ paddingTop: '16px' }}>
@@ -30,17 +28,21 @@ export default function HomeScreen({ workoutPlan, currentDay, onNavigate }) {
         <div style={{ width:'44px', height:'44px', borderRadius:'50%', background:'linear-gradient(135deg, var(--cyan), #00AA88)', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'var(--font-display)', fontWeight:700, fontSize:'16px', color:'#000', boxShadow:'var(--cyan-glow-sm)' }}>AO</div>
       </div>
 
-      {/* Quick Log */}
+      {/* Readiness Log */}
       <div style={{ marginBottom:'20px', animation:'fadeInUp 0.6s ease-out' }}>
-        <h3 style={{ fontSize:'16px', fontWeight:700, marginBottom:'12px' }}>Quick Log</h3>
-        <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:'8px' }}>
-          {qItems.map((item) => (
-            <GlassCard key={item.key} onClick={() => incrementLog(item.key)} style={{ padding:'14px 8px', display:'flex', flexDirection:'column', alignItems:'center', gap:'8px' }}>
-              <span style={{ fontSize:'20px' }}>{item.icon}</span>
-              <span style={{ fontFamily:'var(--font-display)', fontWeight:700, fontSize:'24px' }}>{quickLog[item.key]}</span>
-              <span style={{ fontSize:'10px', fontWeight:600, color:'var(--muted)', letterSpacing:'0.06em', textTransform:'uppercase' }}>{item.label}</span>
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+          {systemState && (
+            <GlassCard style={{ flex: 1, padding: '14px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', borderColor: systemState.readiness > 7 ? 'rgba(0,255,136,0.3)' : systemState.readiness < 4 ? 'rgba(255,68,0,0.3)' : 'var(--surface-border)' }}>
+               <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--muted)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Readiness</span>
+               <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '24px', color: systemState.readiness > 7 ? 'var(--green)' : systemState.readiness < 4 ? 'var(--orange)' : 'var(--text)' }}>{systemState.readiness}/10</span>
             </GlassCard>
-          ))}
+          )}
+          {systemState && (
+            <GlassCard style={{ flex: 1, padding: '14px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', borderColor: systemState.pain > 7 ? 'rgba(255,68,0,0.3)' : 'var(--surface-border)' }}>
+               <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--muted)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Pain Log</span>
+               <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '24px', color: systemState.pain > 7 ? 'var(--orange)' : 'var(--text)' }}>{systemState.pain}/10</span>
+            </GlassCard>
+          )}
         </div>
       </div>
 
@@ -52,16 +54,16 @@ export default function HomeScreen({ workoutPlan, currentDay, onNavigate }) {
             <svg width="48" height="48" viewBox="0 0 48 48"><circle cx="24" cy="24" r="19" stroke="rgba(255,255,255,0.06)" strokeWidth="4" fill="none"/><circle cx="24" cy="24" r="19" stroke="var(--cyan)" strokeWidth="4" fill="none" strokeLinecap="round" strokeDasharray={`${2*Math.PI*19}`} strokeDashoffset={`${2*Math.PI*19*(1-weekProgress/100)}`} transform="rotate(-90 24 24)" style={{ filter:'drop-shadow(0 0 4px rgba(0,255,204,0.4))', transition:'stroke-dashoffset 0.8s ease' }}/></svg>
             <span style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'var(--font-display)', fontWeight:700, fontSize:'12px', color:'var(--cyan)' }}>{weekProgress}%</span>
           </div>
-          <span style={{ fontSize:'11px', color:'var(--muted)' }}>{quickLog.workout}/5 sessions</span>
+          <span style={{ fontSize:'11px', color:'var(--muted)' }}>{stats.weeklySessions}/5 sessions</span>
         </GlassCard>
         <GlassCard style={{ padding:'14px', display:'flex', flexDirection:'column', gap:'8px' }}>
           <span className="label-sm">STREAK</span>
-          <div style={{ display:'flex', alignItems:'baseline', gap:'2px' }}><span style={{ fontSize:'14px' }}>🔥</span><span style={{ fontFamily:'var(--font-display)', fontWeight:700, fontSize:'28px' }}>3d</span></div>
+          <div style={{ display:'flex', alignItems:'baseline', gap:'2px' }}><span style={{ fontSize:'14px' }}>🔥</span><span style={{ fontFamily:'var(--font-display)', fontWeight:700, fontSize:'28px' }}>{stats.currentStreak}d</span></div>
           <span style={{ fontSize:'11px', color:'var(--muted)' }}>Current run</span>
         </GlassCard>
         <GlassCard style={{ padding:'14px', display:'flex', flexDirection:'column', gap:'8px' }}>
           <span className="label-sm" style={{ fontSize:'9px' }}>TOTAL SESSIONS</span>
-          <span style={{ fontFamily:'var(--font-display)', fontWeight:700, fontSize:'28px' }}>23</span>
+          <span style={{ fontFamily:'var(--font-display)', fontWeight:700, fontSize:'28px' }}>{stats.totalSessions}</span>
           <span style={{ fontSize:'11px', color:'var(--muted)' }}>Logged all-time</span>
         </GlassCard>
       </div>
@@ -101,7 +103,7 @@ export default function HomeScreen({ workoutPlan, currentDay, onNavigate }) {
       {/* Heatmap */}
       <GlassCard style={{ padding:'20px', animation:'fadeInUp 0.9s ease-out' }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'16px' }}>
-          <div><h3 style={{ fontSize:'16px', fontWeight:700 }}>Training Consistency</h3><span style={{ fontSize:'13px', color:'var(--muted)' }}>33% (10/{heatmapRange==='30d'?'30':'90'}d)</span></div>
+          <div><h3 style={{ fontSize:'16px', fontWeight:700 }}>Training Consistency</h3><span style={{ fontSize:'13px', color:'var(--muted)' }}>{stats.consistency}% ({stats.activeDays}/{stats.totalDays}d)</span></div>
           <div style={{ display:'flex', gap:'4px' }}>
             {['30d','90d'].map((r) => (<button key={r} onClick={() => setHeatmapRange(r)} style={{ padding:'6px 12px', borderRadius:'var(--radius-pill)', border:'1px solid', borderColor:heatmapRange===r?'var(--cyan)':'var(--surface-border)', background:heatmapRange===r?'var(--cyan-dim)':'transparent', color:heatmapRange===r?'var(--cyan)':'var(--muted)', fontFamily:'var(--font-display)', fontWeight:600, fontSize:'12px', cursor:'pointer', transition:'all 0.2s ease' }}>{r}</button>))}
           </div>

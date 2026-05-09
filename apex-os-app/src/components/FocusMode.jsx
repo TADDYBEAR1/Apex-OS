@@ -1,17 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SwipeToComplete from './SwipeToComplete';
 import RestTimer from './RestTimer';
+import Stepper from './Stepper';
 
 export default function FocusMode({ exercises, onExit }) {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [completed, setCompleted] = useState([]);
+  const [currentSet, setCurrentSet] = useState(1);
   const [showRest, setShowRest] = useState(false);
 
+  // Track actual performance for the current set
+  const [actualReps, setActualReps] = useState(0);
+  const [actualWeight, setActualWeight] = useState(0);
+
   const exercise = exercises[currentIndex];
+
+  useEffect(() => {
+    if (exercise) {
+      setActualReps(exercise.reps);
+      setActualWeight(exercise.isBodyweight ? 0 : exercise.weight);
+    }
+  }, [currentIndex, currentSet, exercise]);
+
   if (!exercise) return null;
 
   const totalCount = exercises.length;
-  const completedCount = completed.length;
 
   const getSection = () => {
     // Determine section from index position
@@ -20,28 +32,49 @@ export default function FocusMode({ exercises, onExit }) {
     return 'Main Workout';
   };
 
-  const handleComplete = () => {
-    setCompleted([...completed, exercise.id]);
-    if (exercise.rest > 0 && currentIndex < totalCount - 1) {
-      setShowRest(true);
+  const handleCompleteSet = () => {
+    // Log the set (actualReps, actualWeight) here if saving to a backend
+    if (currentSet < exercise.sets) {
+      if (exercise.rest > 0) {
+        setShowRest(true);
+      } else {
+        setCurrentSet(currentSet + 1);
+      }
     } else {
-      advanceNext();
+      // Finished all sets for this exercise
+      if (exercise.rest > 0 && currentIndex < totalCount - 1) {
+        setShowRest(true);
+      } else {
+        advanceNextExercise();
+      }
     }
   };
 
-  const advanceNext = () => {
+  const advanceNextExercise = () => {
     if (currentIndex < totalCount - 1) {
       setCurrentIndex(currentIndex + 1);
+      setCurrentSet(1);
     } else {
       onExit();
     }
   };
 
   const handlePrevious = () => {
-    if (currentIndex > 0) setCurrentIndex(currentIndex - 1);
+    if (currentSet > 1) {
+      setCurrentSet(currentSet - 1);
+    } else if (currentIndex > 0) {
+      setCurrentIndex(currentIndex - 1);
+      setCurrentSet(exercises[currentIndex - 1].sets);
+    }
   };
 
-  const handleSkip = () => advanceNext();
+  const handleSkip = () => {
+     if (currentSet < exercise.sets) {
+       setCurrentSet(currentSet + 1);
+     } else {
+       advanceNextExercise();
+     }
+  };
 
   return (
     <div style={{
@@ -84,8 +117,11 @@ export default function FocusMode({ exercises, onExit }) {
           fontSize: '28px', fontWeight: 700, marginTop: '4px', marginBottom: '6px',
           lineHeight: 1.1,
         }}>{exercise.name}</h1>
+        <span style={{ fontSize: '13px', color: 'var(--cyan)' }}>
+          Set {currentSet} of {exercise.sets}
+        </span>
         <span style={{ fontSize: '13px', color: 'var(--muted)' }}>
-          {completedCount}/{totalCount} complete · {getSection()}
+           {' '}· {currentIndex + 1}/{totalCount} Exercises
         </span>
       </div>
 
@@ -107,26 +143,26 @@ export default function FocusMode({ exercises, onExit }) {
           )}
         </div>
 
-        {/* Details Cards */}
-        <div style={{
-          background: 'var(--surface)', border: '1px solid var(--surface-border)',
-          borderRadius: 'var(--radius-lg)', padding: '0', marginBottom: '16px',
-          overflow: 'hidden',
-        }}>
-          {[
-            { label: 'Prescription', value: `${exercise.sets} × ${exercise.reps} reps` },
-            { label: 'Load', value: exercise.isBodyweight ? 'Bodyweight' : `${exercise.weight} kg` },
-            { label: 'Rest', value: `${exercise.rest}s` },
-          ].map((item, i, arr) => (
-            <div key={i} style={{
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              padding: '16px 20px',
-              borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
-            }}>
-              <span style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>{item.label}</span>
-              <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '15px' }}>{item.value}</span>
-            </div>
-          ))}
+        {/* Set Data Entry (Steppers) */}
+        <div style={{ marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <Stepper
+              label="Reps Performed"
+              value={actualReps}
+              onChange={setActualReps}
+              min={0}
+              max={100}
+            />
+            {!exercise.isBodyweight && (
+              <Stepper
+                label="Weight Load"
+                value={actualWeight}
+                onChange={setActualWeight}
+                min={0}
+                max={500}
+                step={2.5}
+                unit="kg"
+              />
+            )}
         </div>
 
         {/* Coaching Note */}
@@ -154,7 +190,7 @@ export default function FocusMode({ exercises, onExit }) {
           }}>
             <span style={{ fontSize: '16px' }}>⏱️</span>
             <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-              Rest timer will begin after you finish this exercise
+              Rest timer will begin after you finish this set
             </span>
           </div>
         )}
@@ -162,7 +198,7 @@ export default function FocusMode({ exercises, onExit }) {
 
       {/* Swipe to Complete */}
       <div style={{ padding: '16px 20px 32px', flexShrink: 0 }}>
-        <SwipeToComplete onComplete={handleComplete} />
+        <SwipeToComplete onComplete={handleCompleteSet} label="SWIPE TO FINISH SET" />
         <button onClick={onExit} style={{
           display: 'block', margin: '12px auto 0', background: 'none', border: 'none',
           color: 'var(--muted)', fontSize: '13px', fontFamily: 'var(--font-display)',
@@ -174,8 +210,22 @@ export default function FocusMode({ exercises, onExit }) {
       {showRest && (
         <RestTimer
           duration={exercise.rest}
-          onComplete={() => { setShowRest(false); advanceNext(); }}
-          onSkip={() => { setShowRest(false); advanceNext(); }}
+          onComplete={() => {
+             setShowRest(false);
+             if (currentSet < exercise.sets) {
+                 setCurrentSet(currentSet + 1);
+             } else {
+                 advanceNextExercise();
+             }
+          }}
+          onSkip={() => {
+             setShowRest(false);
+             if (currentSet < exercise.sets) {
+                 setCurrentSet(currentSet + 1);
+             } else {
+                 advanceNextExercise();
+             }
+          }}
         />
       )}
     </div>

@@ -153,120 +153,14 @@ export default function ExerciseModal({ onClose, onSave, editExercise = null, se
               ))}
             </div>
 
-            {/* Custom Exercise Button */}
-            <button
-              onClick={() => { setShowLibrary(false); setCustomName(''); }}
-              style={{
-                width: '100%',
-                padding: '14px',
-                border: '1px dashed rgba(0,255,204,0.3)',
-                borderRadius: 'var(--radius-md)',
-                background: 'transparent',
-                color: 'var(--cyan)',
-                fontFamily: 'var(--font-display)',
-                fontWeight: 600,
-                fontSize: '14px',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-              }}
-            >
-              ＋ Create Custom Exercise
-            </button>
           </>
         ) : (
           <>
-            {/* Image Upload Area */}
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              style={{
-                width: '100%',
-                height: '160px',
-                borderRadius: 'var(--radius-md)',
-                border: imagePreview ? 'none' : '2px dashed rgba(0,255,204,0.25)',
-                background: imagePreview
-                  ? `url(${imagePreview}) center/cover no-repeat`
-                  : 'rgba(0,255,204,0.03)',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                cursor: 'pointer',
-                transition: 'all 0.25s ease',
-                marginBottom: '20px',
-                overflow: 'hidden',
-                position: 'relative',
-              }}
-              onMouseEnter={(e) => {
-                if (!imagePreview) e.currentTarget.style.borderColor = 'rgba(0,255,204,0.5)';
-              }}
-              onMouseLeave={(e) => {
-                if (!imagePreview) e.currentTarget.style.borderColor = 'rgba(0,255,204,0.25)';
-              }}
-            >
-              {imagePreview && (
-                <div style={{
-                  position: 'absolute', inset: 0,
-                  background: 'linear-gradient(to top, rgba(0,0,0,0.7), transparent)',
-                }} />
-              )}
-              <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-                <div style={{
-                  width: '48px', height: '48px', borderRadius: '50%',
-                  background: 'rgba(0,255,204,0.12)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                    <path d="M4 16L8.586 11.414C9.367 10.633 10.633 10.633 11.414 11.414L16 16M14 14L15.586 12.414C16.367 11.633 17.633 11.633 18.414 12.414L20 14M14 8H14.01M6 20H18C19.1046 20 20 19.1046 20 18V6C20 4.89543 19.1046 4 18 4H6C4.89543 4 4 4.89543 4 6V18C4 19.1046 4.89543 20 6 20Z"
-                      stroke="var(--cyan)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-                <span style={{
-                  fontFamily: 'var(--font-display)',
-                  fontWeight: 600,
-                  fontSize: '13px',
-                  color: imagePreview ? 'var(--text)' : 'var(--cyan)',
-                  letterSpacing: '0.06em',
-                }}>
-                  {imagePreview ? 'Change Image' : 'Upload from Gallery'}
-                </span>
-              </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                style={{ display: 'none' }}
-              />
-            </div>
-
-            {/* Exercise Name */}
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{
-                display: 'block', marginBottom: '8px',
-                fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '13px',
-                color: 'var(--muted)', letterSpacing: '0.08em', textTransform: 'uppercase',
-              }}>Exercise Name</label>
-              <input
-                type="text"
-                value={customName}
-                onChange={(e) => setCustomName(e.target.value)}
-                placeholder="e.g. Barbell Bench Press"
-                style={{
-                  width: '100%',
-                  padding: '14px 16px',
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid var(--surface-border)',
-                  borderRadius: 'var(--radius-md)',
-                  color: 'var(--text)',
-                  fontFamily: 'var(--font-body)',
-                  fontSize: '15px',
-                  outline: 'none',
-                  transition: 'border-color 0.2s ease',
-                }}
-                onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(0,255,204,0.3)'; }}
-                onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--surface-border)'; }}
-              />
+            {/* Exercise Details Header */}
+            <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '20px', color: 'var(--text)' }}>
+                 {customName || (selectedLibraryId ? EXERCISE_LIBRARY.find(e => e.id === selectedLibraryId)?.name : 'Exercise')}
+              </h3>
             </div>
 
             {/* Bodyweight Toggle */}
@@ -305,36 +199,6 @@ export default function ExerciseModal({ onClose, onSave, editExercise = null, se
               <Stepper label="Rest" value={rest} onChange={setRest} min={0} max={600} step={15} unit="s" />
             </div>
 
-            {/* Coaching Note */}
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{
-                display: 'block', marginBottom: '8px',
-                fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '13px',
-                color: 'var(--muted)', letterSpacing: '0.08em', textTransform: 'uppercase',
-              }}>Coaching Note</label>
-              <textarea
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                placeholder="Form cues, tips, etc..."
-                rows={3}
-                style={{
-                  width: '100%',
-                  padding: '14px 16px',
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid var(--surface-border)',
-                  borderRadius: 'var(--radius-md)',
-                  color: 'var(--text)',
-                  fontFamily: 'var(--font-body)',
-                  fontSize: '14px',
-                  outline: 'none',
-                  resize: 'vertical',
-                  minHeight: '80px',
-                  transition: 'border-color 0.2s ease',
-                }}
-                onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(0,255,204,0.3)'; }}
-                onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--surface-border)'; }}
-              />
-            </div>
 
             {/* Actions */}
             <div style={{ display: 'flex', gap: '12px' }}>
