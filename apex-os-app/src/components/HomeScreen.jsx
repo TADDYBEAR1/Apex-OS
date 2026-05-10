@@ -28,24 +28,6 @@ export default function HomeScreen({ workoutPlan, currentDay, onNavigate, system
         <div style={{ width:'44px', height:'44px', borderRadius:'50%', background:'linear-gradient(135deg, var(--cyan), #00AA88)', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'var(--font-display)', fontWeight:700, fontSize:'16px', color:'#000', boxShadow:'var(--cyan-glow-sm)' }}>AO</div>
       </div>
 
-      {/* Readiness Log */}
-      <div style={{ marginBottom:'20px', animation:'fadeInUp 0.6s ease-out' }}>
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
-          {systemState && (
-            <GlassCard style={{ flex: 1, padding: '14px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', borderColor: systemState.readiness > 7 ? 'rgba(0,255,136,0.3)' : systemState.readiness < 4 ? 'rgba(255,68,0,0.3)' : 'var(--surface-border)' }}>
-               <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--muted)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Readiness</span>
-               <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '24px', color: systemState.readiness > 7 ? 'var(--green)' : systemState.readiness < 4 ? 'var(--orange)' : 'var(--text)' }}>{systemState.readiness}/10</span>
-            </GlassCard>
-          )}
-          {systemState && (
-            <GlassCard style={{ flex: 1, padding: '14px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', borderColor: systemState.pain > 7 ? 'rgba(255,68,0,0.3)' : 'var(--surface-border)' }}>
-               <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--muted)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Pain Log</span>
-               <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '24px', color: systemState.pain > 7 ? 'var(--orange)' : 'var(--text)' }}>{systemState.pain}/10</span>
-            </GlassCard>
-          )}
-        </div>
-      </div>
-
       {/* Stats Row */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:'8px', marginBottom:'20px', animation:'fadeInUp 0.7s ease-out' }}>
         <GlassCard style={{ padding:'14px', display:'flex', flexDirection:'column', gap:'8px' }}>
@@ -113,7 +95,7 @@ export default function HomeScreen({ workoutPlan, currentDay, onNavigate, system
                 padding:'6px 16px',
                 borderRadius:'var(--radius-pill)',
                 border:'none',
-                background:heatmapRange===r?'#E6B055':'transparent',
+                background:heatmapRange===r?'var(--cyan)':'transparent',
                 color:heatmapRange===r?'#000':'var(--muted)',
                 fontFamily:'var(--font-display)',
                 fontWeight:700,
@@ -135,9 +117,9 @@ export default function HomeScreen({ workoutPlan, currentDay, onNavigate, system
                   aspectRatio:'1/1',
                   borderRadius:'4px',
                   background: cell === 0 ? 'rgba(255,255,255,0.04)' :
-                              cell === 1 ? 'rgba(230,176,85,0.2)' :
-                              cell === 2 ? 'rgba(230,176,85,0.5)' :
-                              '#E6B055'
+                              cell === 1 ? 'rgba(0,255,204,0.2)' :
+                              cell === 2 ? 'rgba(0,255,204,0.5)' :
+                              'var(--cyan)'
                 }}/>
               ))}
             </div>
@@ -151,12 +133,12 @@ export default function HomeScreen({ workoutPlan, currentDay, onNavigate, system
               height:'12px',
               borderRadius:'3px',
               background: l === 0 ? 'rgba(255,255,255,0.04)' :
-                          l === 1 ? 'rgba(230,176,85,0.2)' :
-                          l === 2 ? 'rgba(230,176,85,0.5)' :
-                          '#E6B055'
+                          l === 1 ? 'rgba(0,255,204,0.2)' :
+                          l === 2 ? 'rgba(0,255,204,0.5)' :
+                          'var(--cyan)'
             }}/>
           ))}
-          <span style={{ color:'#E6B055' }}>More</span>
+          <span style={{ color:'var(--cyan)' }}>More</span>
         </div>
       </GlassCard>
     </div>

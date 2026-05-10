@@ -5,7 +5,6 @@ import FocusMode from './components/FocusMode';
 import RecordsScreen from './components/RecordsScreen';
 import FuelScreen from './components/FuelScreen';
 import BottomNav from './components/BottomNav';
-import ReadinessModal from './components/ReadinessModal';
 import { DEFAULT_WORKOUT_PLAN } from './data/sampleData';
 import './index.css';
 
@@ -16,7 +15,6 @@ export default function App() {
   const [workoutPlan, setWorkoutPlan] = useState(DEFAULT_WORKOUT_PLAN);
   const [currentDay, setCurrentDay] = useState(new Date().getDay());
   const [focusExercises, setFocusExercises] = useState(null);
-  const [systemState, setSystemState] = useState(null); // { readiness, pain }
 
   // Track workout duration
   const [workoutStartTime, setWorkoutStartTime] = useState(null);
@@ -57,21 +55,15 @@ export default function App() {
     );
   }
 
-  const handleSystemStateComplete = (state) => {
-    setSystemState(state);
-  };
-
   return (
     <>
       {showCompletion && <WorkoutCompleteOverlay onDismiss={dismissCompletion} durationSeconds={lastWorkoutDuration} />}
-      {!systemState && <ReadinessModal onComplete={handleSystemStateComplete} />}
       <div style={{ position: 'relative' }}>
         {activeTab === 'home' && (
           <HomeScreen
             workoutPlan={workoutPlan}
             currentDay={currentDay}
             onNavigate={handleNavigate}
-            systemState={systemState}
           />
         )}
         {activeTab === 'workout' && (
@@ -81,7 +73,6 @@ export default function App() {
             currentDay={currentDay}
             setCurrentDay={setCurrentDay}
             onEnterFocus={handleEnterFocus}
-            systemState={systemState}
           />
         )}
         {activeTab === 'records' && <RecordsScreen />}

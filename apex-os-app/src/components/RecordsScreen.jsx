@@ -18,6 +18,8 @@ export default function RecordsScreen() {
   const [showAddBenchmark, setShowAddBenchmark] = useState(false);
   const [selectedLibraryId, setSelectedLibraryId] = useState(null);
   const [newBenchmarkValue, setNewBenchmarkValue] = useState(0);
+  const [customBenchmarkName, setCustomBenchmarkName] = useState('');
+  const [customBenchmarkUnit, setCustomBenchmarkUnit] = useState('KG');
 
   const { workCapacity } = RECORDS_DATA;
   const stats = calculateStats(HEATMAP_DATA);
@@ -25,21 +27,36 @@ export default function RecordsScreen() {
 
   const handleAddBenchmark = () => {
     if (!selectedLibraryId) return;
-    const ex = EXERCISE_LIBRARY.find(e => e.id === selectedLibraryId);
-    if (!ex) return;
 
-    const newBenchmark = {
-      label: `${ex.name.toUpperCase()} (1RM)`,
-      value: newBenchmarkValue,
-      unit: ex.isBodyweight ? 'REPS' : 'KG',
-      trend: 'New Benchmark',
-      positive: true
-    };
+    let newBenchmark;
+
+    if (selectedLibraryId === 'custom') {
+      if (!customBenchmarkName.trim()) return;
+      newBenchmark = {
+        label: customBenchmarkName.trim(),
+        value: newBenchmarkValue,
+        unit: customBenchmarkUnit,
+        trend: 'New Benchmark',
+        positive: true
+      };
+    } else {
+      const ex = EXERCISE_LIBRARY.find(e => e.id === selectedLibraryId);
+      if (!ex) return;
+      newBenchmark = {
+        label: `${ex.name} 1RM`,
+        value: newBenchmarkValue,
+        unit: ex.isBodyweight ? 'REPS' : 'KG',
+        trend: 'New Benchmark',
+        positive: true
+      };
+    }
 
     setBenchmarks([newBenchmark, ...benchmarks]);
     setShowAddBenchmark(false);
     setSelectedLibraryId(null);
     setNewBenchmarkValue(0);
+    setCustomBenchmarkName('');
+    setCustomBenchmarkUnit('KG');
   };
 
   return (
@@ -115,12 +132,12 @@ export default function RecordsScreen() {
                   <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '16px', color: 'var(--text)' }}>
                     {record.label}
                   </h3>
-                  <span style={{ fontSize: '10px', background: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: 'var(--radius-pill)', color: record.unit === 'REPS' ? '#4CAF50' : '#E6B055', fontWeight: 500 }}>
+                  <span style={{ fontSize: '10px', background: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: 'var(--radius-pill)', color: record.unit === 'REPS' ? 'var(--cyan)' : 'var(--cyan)', fontWeight: 500 }}>
                     {record.unit === 'REPS' ? 'Bodyweight' : 'Strength'}
                   </span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '4px' }}>
-                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '20px', color: '#E6B055' }}>
+                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '20px', color: 'var(--cyan)' }}>
                     {record.value}
                   </span>
                   <span style={{ fontSize: '12px', color: 'var(--muted)' }}>
@@ -130,7 +147,7 @@ export default function RecordsScreen() {
                 <span style={{ fontSize: '12px', color: '#4F84A6' }}>2026-03-01</span>
               </div>
             </div>
-            <button style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#E6B055', color: '#000', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(230,176,85,0.2)' }}>
+            <button style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--cyan)', color: '#000', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(0,255,204,0.2)' }}>
               +
             </button>
           </div>
@@ -140,8 +157,8 @@ export default function RecordsScreen() {
             <svg viewBox="0 0 200 80" style={{ width: '100%', height: '100%', overflow: 'visible', preserveAspectRatio: 'none' }}>
               <defs>
                 <linearGradient id={`grad-${i}`} x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0%" stopColor="#E6B055" stopOpacity="0.4" />
-                  <stop offset="100%" stopColor="#E6B055" stopOpacity="0" />
+                  <stop offset="0%" stopColor="var(--cyan)" stopOpacity="0.4" />
+                  <stop offset="100%" stopColor="var(--cyan)" stopOpacity="0" />
                 </linearGradient>
               </defs>
               <path
@@ -151,7 +168,7 @@ export default function RecordsScreen() {
               <path
                 d={generateTrendLine(record.positive).replace(/(\d+),(\d+)/g, (match, x, y) => `${x * 2},${(y / 50) * 80}`)}
                 fill="none"
-                stroke="#E6B055"
+                stroke="var(--cyan)"
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -177,6 +194,19 @@ export default function RecordsScreen() {
             {!selectedLibraryId ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <span className="label-sm">Select Exercise</span>
+                <button
+                  onClick={() => {
+                    setSelectedLibraryId('custom');
+                    setNewBenchmarkValue(0);
+                  }}
+                  style={{
+                    padding: '12px', background: 'var(--cyan-dim)', border: '1px dashed var(--cyan)',
+                    borderRadius: 'var(--radius-sm)', color: 'var(--cyan)', textAlign: 'center', cursor: 'pointer',
+                    fontFamily: 'var(--font-display)', fontSize: '14px', fontWeight: 600, marginBottom: '8px'
+                  }}
+                >
+                  + Create Custom Benchmark
+                </button>
                 {EXERCISE_LIBRARY.map(ex => (
                   <button
                     key={ex.id}
@@ -193,6 +223,59 @@ export default function RecordsScreen() {
                     {ex.name}
                   </button>
                 ))}
+              </div>
+            ) : selectedLibraryId === 'custom' ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                <div style={{ textAlign: 'center', fontFamily: 'var(--font-display)', fontSize: '18px', color: 'var(--cyan)' }}>
+                  Custom Benchmark
+                </div>
+
+                <div>
+                  <span className="label-sm" style={{ display: 'block', marginBottom: '8px' }}>Benchmark Name</span>
+                  <input
+                    type="text"
+                    value={customBenchmarkName}
+                    onChange={e => setCustomBenchmarkName(e.target.value)}
+                    placeholder="e.g. 5K Row, Max Pushups"
+                    style={{
+                      width: '100%', padding: '16px', background: 'rgba(255,255,255,0.02)', border: '1px solid var(--surface-border)',
+                      borderRadius: 'var(--radius-sm)', color: 'var(--text)', fontSize: '16px', fontFamily: 'var(--font-body)',
+                      outline: 'none', transition: 'border-color 0.2s'
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {['KG', 'LBS', 'REPS', 'TIME'].map(u => (
+                    <button
+                      key={u}
+                      onClick={() => setCustomBenchmarkUnit(u)}
+                      style={{
+                        flex: 1, padding: '10px 0', borderRadius: 'var(--radius-sm)',
+                        background: customBenchmarkUnit === u ? 'var(--cyan-dim)' : 'transparent',
+                        border: '1px solid', borderColor: customBenchmarkUnit === u ? 'var(--cyan)' : 'var(--surface-border)',
+                        color: customBenchmarkUnit === u ? 'var(--cyan)' : 'var(--muted)',
+                        fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '12px'
+                      }}
+                    >
+                      {u}
+                    </button>
+                  ))}
+                </div>
+
+                <Stepper
+                  label={`Target Value (${customBenchmarkUnit})`}
+                  value={newBenchmarkValue}
+                  onChange={setNewBenchmarkValue}
+                  min={0}
+                  max={9999}
+                  step={customBenchmarkUnit === 'KG' || customBenchmarkUnit === 'LBS' ? 2.5 : 1}
+                />
+
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button onClick={() => { setSelectedLibraryId(null); setShowAddBenchmark(false); }} className="btn-ghost" style={{ flex: 1 }}>Cancel</button>
+                  <button onClick={handleAddBenchmark} className="btn-primary" style={{ flex: 1 }}>Save</button>
+                </div>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>

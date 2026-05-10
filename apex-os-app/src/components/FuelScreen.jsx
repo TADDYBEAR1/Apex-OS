@@ -18,8 +18,43 @@ export default function FuelScreen() {
   const [customCarbs, setCustomCarbs] = useState('');
   const [customFat, setCustomFat] = useState('');
 
-  const remaining = nutrition.calorieGoal - nutrition.calorieConsumed;
-  const calPercent = Math.round((nutrition.calorieConsumed / nutrition.calorieGoal) * 100);
+  const calculateTotals = (meals) => {
+    let totals = { calories: 0, protein: 0, carbs: 0, fats: 0 };
+    Object.values(meals).flat().forEach(meal => {
+      if (meal.checked) {
+        totals.calories += meal.calories || 0;
+        totals.protein += meal.protein || 0;
+        totals.carbs += meal.carbs || 0;
+        totals.fats += meal.fat || 0;
+      }
+    });
+    return totals;
+  };
+
+  const totals = calculateTotals(nutrition.meals);
+
+  const remaining = nutrition.calorieGoal - totals.calories;
+  const calPercent = Math.round((totals.calories / nutrition.calorieGoal) * 100);
+
+  const toggleMealItem = (mealKey, id) => {
+    setNutrition(prev => {
+      const newMeals = { ...prev.meals };
+      newMeals[mealKey] = newMeals[mealKey].map(item =>
+        item.id === id ? { ...item, checked: !item.checked } : item
+      );
+      return { ...prev, meals: newMeals };
+    });
+  };
+
+  const handleResetMeals = () => {
+    setNutrition(prev => {
+      const newMeals = {};
+      Object.keys(prev.meals).forEach(key => {
+        newMeals[key] = prev.meals[key].map(m => ({ ...m, checked: false }));
+      });
+      return { ...prev, meals: newMeals };
+    });
+  };
 
   const toggleGroceryItem = (id) => {
     setNutrition(prev => ({
@@ -38,9 +73,9 @@ export default function FuelScreen() {
   ];
 
   const macros = [
-    { label: 'Protein', current: nutrition.protein.current, target: nutrition.protein.target, color: 'var(--cyan)' },
-    { label: 'Carbs', current: nutrition.carbs.current, target: nutrition.carbs.target, color: '#4FC3F7' },
-    { label: 'Fats', current: nutrition.fats.current, target: nutrition.fats.target, color: '#FFD54F' },
+    { label: 'Protein', current: totals.protein, target: nutrition.protein.target, color: 'var(--cyan)' },
+    { label: 'Carbs', current: totals.carbs, target: nutrition.carbs.target, color: '#4FC3F7' },
+    { label: 'Fats', current: totals.fats, target: nutrition.fats.target, color: '#FFD54F' },
   ];
 
   return (
@@ -66,6 +101,9 @@ export default function FuelScreen() {
 
       {viewMode === 'macros' ? (
         <>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
+            <button onClick={handleResetMeals} style={{ padding: '6px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--surface-border)', borderRadius: 'var(--radius-pill)', color: 'var(--muted)', fontSize: '11px', fontFamily: 'var(--font-display)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', cursor: 'pointer' }}>Reset Today</button>
+          </div>
           {/* Calorie Card */}
           <GlassCard style={{ padding: '24px', marginBottom: '20px', animation: 'fadeInUp 0.6s ease-out' }}>
             <span className="label-sm" style={{ marginBottom: '8px', display: 'block' }}>DAILY TARGET</span>
@@ -110,15 +148,22 @@ export default function FuelScreen() {
                 }}>+</button>
               </div>
               {(nutrition.meals[meal.key] || []).map((food) => (
-                <GlassCard key={food.id} style={{ padding: '14px 16px', marginBottom: '6px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '15px' }}>{food.name}</span>
-                    <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{food.calories} kcal</span>
-                  </div>
-                  <div style={{ display: 'flex', gap: '12px', marginTop: '6px' }}>
-                    <span style={{ fontSize: '12px', color: 'var(--muted)' }}>P: {food.protein}g</span>
-                    <span style={{ fontSize: '12px', color: 'var(--muted)' }}>C: {food.carbs}g</span>
-                    <span style={{ fontSize: '12px', color: 'var(--muted)' }}>F: {food.fat}g</span>
+                <GlassCard key={food.id} onClick={() => toggleMealItem(meal.key, food.id)} style={{ padding: '14px 16px', marginBottom: '6px', opacity: food.checked ? 0.5 : 1, transition: 'opacity 0.2s ease', cursor: 'pointer' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ width: '24px', height: '24px', borderRadius: '4px', border: food.checked ? 'none' : '2px solid var(--surface-border)', background: food.checked ? 'var(--cyan)' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      {food.checked && <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#000" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '15px', textDecoration: food.checked ? 'line-through' : 'none' }}>{food.name}</span>
+                        <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{food.calories} kcal</span>
+                      </div>
+                      <div style={{ display: 'flex', gap: '12px', marginTop: '6px' }}>
+                        <span style={{ fontSize: '12px', color: 'var(--muted)' }}>P: {food.protein}g</span>
+                        <span style={{ fontSize: '12px', color: 'var(--muted)' }}>C: {food.carbs}g</span>
+                        <span style={{ fontSize: '12px', color: 'var(--muted)' }}>F: {food.fat}g</span>
+                      </div>
+                    </div>
                   </div>
                 </GlassCard>
               ))}
@@ -200,7 +245,8 @@ export default function FuelScreen() {
                     calories: parseInt(customCals) || 0,
                     protein: parseInt(customPro) || 0,
                     carbs: parseInt(customCarbs) || 0,
-                    fat: parseInt(customFat) || 0
+                    fat: parseInt(customFat) || 0,
+                    checked: false
                   };
 
                   setNutrition(prev => ({
@@ -208,8 +254,7 @@ export default function FuelScreen() {
                     meals: {
                       ...prev.meals,
                       [addMealType]: [...(prev.meals[addMealType]||[]), newFood]
-                    },
-                    calorieConsumed: prev.calorieConsumed + newFood.calories
+                    }
                   }));
                   setShowAddFood(false);
                   setCustomFoodName('');
