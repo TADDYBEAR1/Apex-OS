@@ -28,24 +28,6 @@ export default function HomeScreen({ workoutPlan, currentDay, onNavigate, system
         <div style={{ width:'44px', height:'44px', borderRadius:'50%', background:'linear-gradient(135deg, var(--cyan), #00AA88)', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'var(--font-display)', fontWeight:700, fontSize:'16px', color:'#000', boxShadow:'var(--cyan-glow-sm)' }}>AO</div>
       </div>
 
-      {/* Readiness Log */}
-      <div style={{ marginBottom:'20px', animation:'fadeInUp 0.6s ease-out' }}>
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
-          {systemState && (
-            <GlassCard style={{ flex: 1, padding: '14px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', borderColor: systemState.readiness > 7 ? 'rgba(0,255,136,0.3)' : systemState.readiness < 4 ? 'rgba(255,68,0,0.3)' : 'var(--surface-border)' }}>
-               <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--muted)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Readiness</span>
-               <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '24px', color: systemState.readiness > 7 ? 'var(--green)' : systemState.readiness < 4 ? 'var(--orange)' : 'var(--text)' }}>{systemState.readiness}/10</span>
-            </GlassCard>
-          )}
-          {systemState && (
-            <GlassCard style={{ flex: 1, padding: '14px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', borderColor: systemState.pain > 7 ? 'rgba(255,68,0,0.3)' : 'var(--surface-border)' }}>
-               <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--muted)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>Pain Log</span>
-               <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '24px', color: systemState.pain > 7 ? 'var(--orange)' : 'var(--text)' }}>{systemState.pain}/10</span>
-            </GlassCard>
-          )}
-        </div>
-      </div>
-
       {/* Stats Row */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap:'8px', marginBottom:'20px', animation:'fadeInUp 0.7s ease-out' }}>
         <GlassCard style={{ padding:'14px', display:'flex', flexDirection:'column', gap:'8px' }}>
