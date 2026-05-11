@@ -60,9 +60,12 @@ export default function SwipeToComplete({ onComplete, label = 'SWIPE TO COMPLETE
   const progress = maxX > 0 ? dragX / maxX : 0;
 
   return (
-    <div
-      ref={trackRef}
-      style={{
+    <>
+      <div
+        ref={trackRef}
+        role="presentation"
+        aria-label={label}
+        style={{
         position: 'relative',
         width: '100%',
         height: '72px',
@@ -75,12 +78,12 @@ export default function SwipeToComplete({ onComplete, label = 'SWIPE TO COMPLETE
         WebkitUserSelect: 'none',
         touchAction: 'none',
       }}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-    >
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
       {/* Fill */}
       <div style={{
         position: 'absolute',
@@ -114,8 +117,17 @@ export default function SwipeToComplete({ onComplete, label = 'SWIPE TO COMPLETE
       </div>
 
       {/* Thumb */}
-      <div
-        style={{
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label={label}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onComplete?.();
+            }
+          }}
+          style={{
           position: 'absolute',
           left: `${4 + dragX}px`,
           top: '4px',
@@ -134,9 +146,9 @@ export default function SwipeToComplete({ onComplete, label = 'SWIPE TO COMPLETE
           transition: isDragging ? 'none' : 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
           zIndex: 2,
         }}
-        onMouseDown={handleMouseDown}
-        onTouchStart={handleTouchStart}
-      >
+          onMouseDown={handleMouseDown}
+          onTouchStart={handleTouchStart}
+        >
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" style={{
           opacity: isCompleted ? 0 : 1,
           transition: 'opacity 0.2s ease',
@@ -149,7 +161,16 @@ export default function SwipeToComplete({ onComplete, label = 'SWIPE TO COMPLETE
             <path d="M5 13l4 4L19 7" stroke="#000" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
         )}
+        </div>
       </div>
-    </div>
+      <button
+        type="button"
+        onClick={() => onComplete?.()}
+        className="btn-ghost"
+        style={{ width: '100%', height: '44px', marginTop: '10px', fontSize: '12px' }}
+      >
+        Tap to Finish Set
+      </button>
+    </>
   );
 }

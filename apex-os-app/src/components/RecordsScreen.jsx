@@ -1,34 +1,66 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import GlassCard from './GlassCard';
-import { RECORDS_DATA, HEATMAP_DATA, EXERCISE_LIBRARY } from '../data/sampleData';
-import { calculateStats, generateInsight } from '../utils/stats';
+import ProfileButton from './ProfileButton';
+import { RECORDS_DATA, HEATMAP_DAY_LABELS, EXERCISE_LIBRARY } from '../data/sampleData';
+import { buildHeatmapFromWorkoutHistory, calculateStats, computeBenchmarkTrend, formatBenchmarkValue, generateInsight } from '../utils/stats';
 import Stepper from './Stepper';
 
-// Helper to generate a dummy trendline (SVG path) for a benchmark
-const generateTrendLine = (positive) => {
-  const pts = positive
-    ? [[0, 40], [20, 35], [40, 30], [60, 25], [80, 15], [100, 5]]
-    : [[0, 10], [20, 15], [40, 12], [60, 25], [80, 35], [100, 40]];
-  const d = `M ${pts.map(p => p.join(',')).join(' L ')}`;
-  return d;
+// Generate SVG path from real history data
+const generateHistoryPath = (history, width, height, padding = 4) => {
+  if (!history || history.length < 2) return { linePath: '', areaPath: '', points: [] };
+
+  const values = history.map(h => h.value);
+  const minVal = Math.min(...values);
+  const maxVal = Math.max(...values);
+  const range = maxVal - minVal || 1; // avoid division by zero
+
+  const usableW = width - padding * 2;
+  const usableH = height - padding * 2;
+
+  const points = values.map((val, i) => {
+    const x = padding + (i / (values.length - 1)) * usableW;
+    const y = padding + usableH - ((val - minVal) / range) * usableH;
+    return [x, y];
+  });
+
+  const linePath = `M ${points.map(p => p.join(',')).join(' L ')}`;
+  const areaPath = `${linePath} L ${points[points.length - 1][0]},${height} L ${points[0][0]},${height} Z`;
+
+  return { linePath, areaPath, points };
 };
 
-export default function RecordsScreen() {
-  const [benchmarks, setBenchmarks] = useState(RECORDS_DATA.benchmarks);
+export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, workoutHistory, profile, onOpenProfile }) {
   const [showAddBenchmark, setShowAddBenchmark] = useState(false);
   const [selectedLibraryId, setSelectedLibraryId] = useState(null);
   const [newBenchmarkValue, setNewBenchmarkValue] = useState(0);
   const [customBenchmarkName, setCustomBenchmarkName] = useState('');
   const [customBenchmarkUnit, setCustomBenchmarkUnit] = useState('KG');
 
+  // Record new entry for existing benchmark
+  const [recordingIndex, setRecordingIndex] = useState(null);
+  const [recordValue, setRecordValue] = useState(0);
+
+  useEffect(() => {
+    if (!showAddBenchmark) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') setShowAddBenchmark(false);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showAddBenchmark]);
+
   const { workCapacity } = RECORDS_DATA;
-  const stats = calculateStats(HEATMAP_DATA);
-  const dynamicInsight = generateInsight(stats, benchmarks);
+  const heatmap = buildHeatmapFromWorkoutHistory(workoutHistory, 4);
+  const stats = calculateStats(heatmap.cells, { latestDayIndex: heatmap.latestDayIndex });
+  const dynamicInsight = generateInsight(stats, benchmarks, nutrition);
 
   const handleAddBenchmark = () => {
     if (!selectedLibraryId) return;
 
     let newBenchmark;
+    const today = new Date().toISOString().slice(0, 10);
 
     if (selectedLibraryId === 'custom') {
       if (!customBenchmarkName.trim()) return;
@@ -37,7 +69,8 @@ export default function RecordsScreen() {
         value: newBenchmarkValue,
         unit: customBenchmarkUnit,
         trend: 'New Benchmark',
-        positive: true
+        positive: true,
+        history: [{ value: newBenchmarkValue, date: today }],
       };
     } else {
       const ex = EXERCISE_LIBRARY.find(e => e.id === selectedLibraryId);
@@ -47,7 +80,8 @@ export default function RecordsScreen() {
         value: newBenchmarkValue,
         unit: ex.isBodyweight ? 'REPS' : 'KG',
         trend: 'New Benchmark',
-        positive: true
+        positive: true,
+        history: [{ value: newBenchmarkValue, date: today }],
       };
     }
 
@@ -57,6 +91,28 @@ export default function RecordsScreen() {
     setNewBenchmarkValue(0);
     setCustomBenchmarkName('');
     setCustomBenchmarkUnit('KG');
+  };
+
+  // Record a new entry for an existing benchmark
+  const handleRecordEntry = (index) => {
+    const today = new Date().toISOString().slice(0, 10);
+    const updated = [...benchmarks];
+    const b = { ...updated[index] };
+    const newHistory = [...(b.history || []), { value: recordValue, date: today }];
+    b.history = newHistory;
+
+    // Update displayed value
+    b.value = b.unit === 'TIME' ? formatBenchmarkValue(recordValue, 'TIME') : recordValue;
+
+    // Update trend
+    const trend = computeBenchmarkTrend(newHistory, b.unit);
+    b.trend = trend.text;
+    b.positive = trend.positive;
+
+    updated[index] = b;
+    setBenchmarks(updated);
+    setRecordingIndex(null);
+    setRecordValue(0);
   };
 
   return (
@@ -69,14 +125,14 @@ export default function RecordsScreen() {
           </div>
           <h1 style={{ fontSize: '28px', fontWeight: 700 }}>Records Hub</h1>
         </div>
-        <button style={{ width: '40px', height: '40px', borderRadius: '50%', border: '1px solid var(--surface-border)', background: 'transparent', color: 'var(--muted)', fontSize: '18px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>⚙</button>
+        <ProfileButton profile={profile} onClick={onOpenProfile} />
       </div>
 
-      {/* System Insight */}
+      {/* Smart Insight */}
       <GlassCard style={{ padding: '18px', marginBottom: '24px', animation: 'fadeInUp 0.5s ease-out', borderLeft: `3px solid ${dynamicInsight.positive ? 'var(--cyan)' : 'var(--orange)'}` }}>
         <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
           <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: dynamicInsight.positive ? 'var(--cyan-dim)' : 'var(--orange-dim)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <span style={{ fontSize: '18px' }}>⚡</span>
+            <span style={{ fontSize: '18px' }}>{dynamicInsight.positive ? '⚡' : '⚠️'}</span>
           </div>
           <div>
             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '12px', letterSpacing: '0.1em', color: dynamicInsight.positive ? 'var(--cyan)' : 'var(--orange)', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>{dynamicInsight.title}</span>
@@ -85,26 +141,41 @@ export default function RecordsScreen() {
         </div>
       </GlassCard>
 
-      {/* Training Frequency */}
+      {/* Training Frequency — GitHub-style heatmap */}
       <div style={{ marginBottom: '24px', animation: 'fadeInUp 0.6s ease-out' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
           <h2 style={{ fontSize: '18px', fontWeight: 700 }}>Training Frequency</h2>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '11px', letterSpacing: '0.1em', color: 'var(--muted)', textTransform: 'uppercase' }}>Last 30 Days</span>
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '11px', letterSpacing: '0.1em', color: 'var(--muted)', textTransform: 'uppercase' }}>Last 4 Weeks</span>
         </div>
         <GlassCard style={{ padding: '16px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            {HEATMAP_DATA.map((row, ri) => (
-              <div key={ri} style={{ display: 'flex', gap: '4px' }}>
+          {/* Week column headers */}
+          <div style={{ display:'grid', gridTemplateColumns:'36px repeat(4, 1fr)', gap:'5px', marginBottom:'5px' }}>
+            <div />
+            {heatmap.weekLabels.map(w => (
+              <div key={w} style={{ textAlign:'center', fontSize:'10px', color:'var(--muted)', fontFamily:'var(--font-display)', fontWeight:600 }}>{w}</div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+            {heatmap.cells.map((row, ri) => (
+              <div key={ri} style={{ display:'grid', gridTemplateColumns:'36px repeat(4, 1fr)', gap:'5px', alignItems:'center' }}>
+                <span style={{ fontSize:'10px', color:'var(--muted)', fontFamily:'var(--font-display)', fontWeight:500 }}>{HEATMAP_DAY_LABELS[ri]}</span>
                 {row.map((cell, ci) => (
                   <div key={ci} style={{
-                    width: '24px', height: '24px', borderRadius: '5px',
-                    background: cell === 0 ? 'rgba(255,255,255,0.04)' : cell === 1 ? 'rgba(0,255,204,0.15)' : cell === 2 ? 'rgba(0,255,204,0.35)' : 'var(--cyan)',
+                    aspectRatio:'1/1', borderRadius:'5px', maxHeight:'32px',
+                    background: cell === 0 ? 'rgba(255,255,255,0.04)' : cell === 1 ? 'rgba(0,255,204,0.2)' : cell === 2 ? 'rgba(0,255,204,0.5)' : 'var(--cyan)',
                     boxShadow: cell === 3 ? '0 0 6px rgba(0,255,204,0.3)' : 'none',
                     transition: 'all 0.3s ease',
                   }} />
                 ))}
               </div>
             ))}
+          </div>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'flex-end', gap:'5px', marginTop:'12px', fontSize:'10px', color:'var(--muted)' }}>
+            <span>Less</span>
+            {[0,1,2,3].map(l => (
+              <div key={l} style={{ width:'10px', height:'10px', borderRadius:'3px', background: l===0?'rgba(255,255,255,0.04)':l===1?'rgba(0,255,204,0.2)':l===2?'rgba(0,255,204,0.5)':'var(--cyan)' }} />
+            ))}
+            <span style={{ color:'var(--cyan)' }}>More</span>
           </div>
         </GlassCard>
       </div>
@@ -114,69 +185,152 @@ export default function RecordsScreen() {
           <h2 style={{ fontSize: '18px', fontWeight: 700 }}>Benchmarks</h2>
           <button
             onClick={() => setShowAddBenchmark(true)}
+            aria-label="Add benchmark"
             style={{ background: 'transparent', border: '1px solid var(--cyan)', color: 'var(--cyan)', borderRadius: 'var(--radius-pill)', padding: '6px 12px', fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', cursor: 'pointer' }}
           >
             + Add
           </button>
       </div>
 
-      {benchmarks.map((record, i) => (
-        <GlassCard key={i} style={{ padding: '16px', marginBottom: '12px', animation: `fadeInUp ${0.7 + i * 0.1}s ease-out` }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#1A1D24', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
-                {record.unit === 'REPS' ? '💪' : record.label.includes('Run') ? '🏃' : '🏋️'}
-              </div>
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                  <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '16px', color: 'var(--text)' }}>
-                    {record.label}
-                  </h3>
-                  <span style={{ fontSize: '10px', background: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: 'var(--radius-pill)', color: record.unit === 'REPS' ? 'var(--cyan)' : 'var(--cyan)', fontWeight: 500 }}>
-                    {record.unit === 'REPS' ? 'Bodyweight' : 'Strength'}
-                  </span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '4px' }}>
-                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '20px', color: 'var(--cyan)' }}>
-                    {record.value}
-                  </span>
-                  <span style={{ fontSize: '12px', color: 'var(--muted)' }}>
-                    {record.unit.toLowerCase()}
-                  </span>
-                </div>
-                <span style={{ fontSize: '12px', color: '#4F84A6' }}>2026-03-01</span>
-              </div>
-            </div>
-            <button style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--cyan)', color: '#000', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', cursor: 'pointer', boxShadow: '0 4px 12px rgba(0,255,204,0.2)' }}>
-              +
-            </button>
-          </div>
+      {benchmarks.map((record, i) => {
+        const history = record.history || [];
+        const { linePath, areaPath, points } = generateHistoryPath(history, 200, 80);
+        const latestValue = history.length > 0
+          ? formatBenchmarkValue(history[history.length - 1].value, record.unit)
+          : record.value;
+        const trend = history.length >= 2 ? computeBenchmarkTrend(history, record.unit) : { text: record.trend, positive: record.positive };
+        const isPositive = trend.positive;
 
-          {/* Sparkline Chart */}
-          <div style={{ width: '100%', height: '80px', position: 'relative' }}>
-            <svg viewBox="0 0 200 80" style={{ width: '100%', height: '100%', overflow: 'visible', preserveAspectRatio: 'none' }}>
-              <defs>
-                <linearGradient id={`grad-${i}`} x1="0" x2="0" y1="0" y2="1">
-                  <stop offset="0%" stopColor="var(--cyan)" stopOpacity="0.4" />
-                  <stop offset="100%" stopColor="var(--cyan)" stopOpacity="0" />
-                </linearGradient>
-              </defs>
-              <path
-                d={`${generateTrendLine(record.positive).replace(/(\d+),(\d+)/g, (match, x, y) => `${x * 2},${(y / 50) * 80}`)} L 200,80 L 0,80 Z`}
-                fill={`url(#grad-${i})`}
-              />
-              <path
-                d={generateTrendLine(record.positive).replace(/(\d+),(\d+)/g, (match, x, y) => `${x * 2},${(y / 50) * 80}`)}
-                fill="none"
-                stroke="var(--cyan)"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </div>
-        </GlassCard>
-      ))}
+        return (
+          <GlassCard key={i} style={{ padding: '16px', marginBottom: '12px', animation: `fadeInUp ${0.7 + i * 0.1}s ease-out` }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#1A1D24', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
+                  {record.unit === 'REPS' ? '💪' : record.unit === 'TIME' ? '🏃' : '🏋️'}
+                </div>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                    <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '16px', color: 'var(--text)' }}>
+                      {record.label}
+                    </h3>
+                    <span style={{ fontSize: '10px', background: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: 'var(--radius-pill)', color: 'var(--cyan)', fontWeight: 500 }}>
+                      {record.unit === 'REPS' ? 'Bodyweight' : record.unit === 'TIME' ? 'Endurance' : 'Strength'}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '4px' }}>
+                    <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '20px', color: 'var(--cyan)' }}>
+                      {latestValue}
+                    </span>
+                    <span style={{ fontSize: '12px', color: 'var(--muted)' }}>
+                      {record.unit.toLowerCase()}
+                    </span>
+                  </div>
+                  <span style={{ fontSize: '12px', color: isPositive ? 'var(--cyan)' : 'var(--orange)', fontWeight: 500 }}>{trend.text}</span>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  if (recordingIndex === i) {
+                    setRecordingIndex(null);
+                  } else {
+                    setRecordingIndex(i);
+                    // Default to last recorded value
+                    const lastVal = history.length > 0 ? history[history.length - 1].value : 0;
+                    setRecordValue(lastVal);
+                  }
+                }}
+                aria-label={recordingIndex === i ? `Cancel recording ${record.label}` : `Record new ${record.label} entry`}
+                style={{
+                  width: '40px', height: '40px', borderRadius: '50%',
+                  background: recordingIndex === i ? 'var(--orange)' : 'var(--cyan)',
+                  color: '#000', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '20px', cursor: 'pointer',
+                  boxShadow: recordingIndex === i ? '0 4px 12px rgba(255,68,0,0.2)' : '0 4px 12px rgba(0,255,204,0.2)',
+                  transition: 'all 0.25s ease',
+                }}
+              >
+                {recordingIndex === i ? '✕' : '+'}
+              </button>
+            </div>
+
+            {/* Record New Entry Panel */}
+            {recordingIndex === i && (
+              <div style={{
+                padding: '16px', marginBottom: '16px',
+                background: 'rgba(0,255,204,0.03)', border: '1px solid rgba(0,255,204,0.15)',
+                borderRadius: 'var(--radius-md)', animation: 'fadeInUp 0.25s ease-out',
+              }}>
+                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '12px', letterSpacing: '0.1em', color: 'var(--cyan)', textTransform: 'uppercase', display: 'block', marginBottom: '12px' }}>
+                  Record New Entry
+                </span>
+                <Stepper
+                  label={`New Record (${record.unit})`}
+                  value={recordValue}
+                  onChange={setRecordValue}
+                  min={0}
+                  max={record.unit === 'TIME' ? 99999 : 9999}
+                  step={record.unit === 'KG' || record.unit === 'LBS' ? 2.5 : record.unit === 'TIME' ? 5 : 1}
+                  unit={record.unit === 'TIME' ? 's' : undefined}
+                />
+                <button
+                  onClick={() => handleRecordEntry(i)}
+                  className="btn-primary"
+                  style={{ width: '100%', marginTop: '12px', height: '48px' }}
+                >
+                  Save Record
+                </button>
+              </div>
+            )}
+
+            {/* Sparkline Chart from Real Data */}
+            <div style={{ width: '100%', height: '80px', position: 'relative' }}>
+              {history.length >= 2 ? (
+                <svg viewBox="0 0 200 80" style={{ width: '100%', height: '100%', overflow: 'visible' }} preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id={`grad-${i}`} x1="0" x2="0" y1="0" y2="1">
+                      <stop offset="0%" stopColor={isPositive ? 'var(--cyan)' : 'var(--orange)'} stopOpacity="0.4" />
+                      <stop offset="100%" stopColor={isPositive ? 'var(--cyan)' : 'var(--orange)'} stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+                  <path d={areaPath} fill={`url(#grad-${i})`} />
+                  <path
+                    d={linePath}
+                    fill="none"
+                    stroke={isPositive ? 'var(--cyan)' : 'var(--orange)'}
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  {/* Data points */}
+                  {points.map((pt, pi) => (
+                    <circle
+                      key={pi}
+                      cx={pt[0]}
+                      cy={pt[1]}
+                      r={pi === points.length - 1 ? 4 : 2.5}
+                      fill={pi === points.length - 1 ? (isPositive ? 'var(--cyan)' : 'var(--orange)') : 'var(--surface)'}
+                      stroke={isPositive ? 'var(--cyan)' : 'var(--orange)'}
+                      strokeWidth="1.5"
+                    />
+                  ))}
+                </svg>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--muted)', fontSize: '13px', fontFamily: 'var(--font-display)' }}>
+                  Record more entries to see your trend graph
+                </div>
+              )}
+            </div>
+
+            {/* History count */}
+            {history.length > 0 && (
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
+                <span style={{ fontSize: '11px', color: 'var(--muted)' }}>{history.length} {history.length === 1 ? 'entry' : 'entries'} recorded</span>
+                <span style={{ fontSize: '11px', color: 'var(--muted)' }}>{history[history.length - 1].date}</span>
+              </div>
+            )}
+          </GlassCard>
+        );
+      })}
 
       {/* Add Benchmark Modal */}
       {showAddBenchmark && (
@@ -185,11 +339,11 @@ export default function RecordsScreen() {
           WebkitBackdropFilter: 'blur(30px)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center',
           animation: 'fadeIn 0.3s ease-out', padding: '20px'
         }}>
-          <div style={{
+          <div role="dialog" aria-modal="true" aria-labelledby="benchmark-modal-title" style={{
             width: '100%', maxWidth: '100%', maxHeight: '80vh', overflowY: 'auto', background: 'var(--surface)', border: '1px solid var(--surface-border)',
             borderRadius: 'var(--radius-lg)', padding: '24px env(safe-area-inset-right, 24px) calc(24px + env(safe-area-inset-bottom, 0px)) env(safe-area-inset-left, 24px)', display: 'flex', flexDirection: 'column', gap: '24px'
           }}>
-            <h2 style={{ fontSize: '20px', fontWeight: 700, fontFamily: 'var(--font-display)', textAlign: 'center' }}>Create Benchmark</h2>
+            <h2 id="benchmark-modal-title" style={{ fontSize: '20px', fontWeight: 700, fontFamily: 'var(--font-display)', textAlign: 'center' }}>Create Benchmark</h2>
 
             {!selectedLibraryId ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>

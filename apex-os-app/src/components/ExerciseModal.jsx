@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Stepper from './Stepper';
 import { CATEGORIES, EXERCISE_LIBRARY } from '../data/sampleData';
 
@@ -16,6 +16,15 @@ export default function ExerciseModal({ onClose, onSave, editExercise = null, se
   const [showLibrary, setShowLibrary] = useState(!editExercise);
   const fileInputRef = useRef(null);
 
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') onClose();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   const filtered = EXERCISE_LIBRARY.filter(
     (e) => activeCategory === 'All' || e.category === activeCategory
   );
@@ -28,6 +37,18 @@ export default function ExerciseModal({ onClose, onSave, editExercise = null, se
     setWeight(exercise.defaultWeight);
     setRest(exercise.defaultRest);
     setIsBodyweight(exercise.isBodyweight);
+    setShowLibrary(false);
+  };
+
+  const handleCreateCustom = () => {
+    setSelectedExercise('');
+    setCustomName('');
+    setSets(3);
+    setReps(10);
+    setWeight(0);
+    setRest(60);
+    setIsBodyweight(false);
+    setImagePreview(null);
     setShowLibrary(false);
   };
 
@@ -57,15 +78,15 @@ export default function ExerciseModal({ onClose, onSave, editExercise = null, se
 
   return (
     <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="modal-sheet">
+      <div className="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="exercise-modal-title">
         <div className="modal-handle" />
 
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 700 }}>
+          <h2 id="exercise-modal-title" style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 700 }}>
             {editExercise ? 'Edit Exercise' : 'Add Exercise'}
           </h2>
-          <button onClick={onClose} style={{
+          <button onClick={onClose} aria-label="Close exercise modal" style={{
             width: '36px', height: '36px', borderRadius: '50%', border: '1px solid var(--surface-border)',
             background: 'rgba(255,255,255,0.03)', color: 'var(--muted)', fontSize: '18px', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -74,6 +95,22 @@ export default function ExerciseModal({ onClose, onSave, editExercise = null, se
 
         {showLibrary ? (
           <>
+            {/* Create Custom Exercise Button */}
+            <button
+              onClick={handleCreateCustom}
+              style={{
+                width: '100%', padding: '16px', marginBottom: '16px',
+                background: 'var(--cyan-dim)', border: '1px dashed var(--cyan)',
+                borderRadius: 'var(--radius-md)', color: 'var(--cyan)', textAlign: 'center',
+                cursor: 'pointer', fontFamily: 'var(--font-display)', fontSize: '15px', fontWeight: 600,
+                transition: 'all 0.2s ease', letterSpacing: '0.04em',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(0,255,204,0.12)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--cyan-dim)'; }}
+            >
+              ＋ Create Custom Exercise
+            </button>
+
             {/* Category Tabs */}
             <div style={{
               display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '12px', marginBottom: '16px',
@@ -156,11 +193,88 @@ export default function ExerciseModal({ onClose, onSave, editExercise = null, se
           </>
         ) : (
           <>
-            {/* Exercise Details Header */}
-            <div style={{ marginBottom: '20px', textAlign: 'center' }}>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '20px', color: 'var(--text)' }}>
-                 {customName || (selectedLibraryId ? EXERCISE_LIBRARY.find(e => e.id === selectedLibraryId)?.name : 'Exercise')}
-              </h3>
+            {/* Exercise Name Input */}
+            <div style={{ marginBottom: '16px' }}>
+              <span className="label-sm" style={{ display: 'block', marginBottom: '8px' }}>Exercise Name</span>
+              <input
+                type="text"
+                value={customName}
+                onChange={(e) => setCustomName(e.target.value)}
+                placeholder="e.g. Bulgarian Split Squat"
+                style={{
+                  width: '100%', padding: '14px 16px',
+                  background: 'rgba(255,255,255,0.03)', border: '1px solid var(--surface-border)',
+                  borderRadius: 'var(--radius-md)', color: 'var(--text)',
+                  fontFamily: 'var(--font-body)', fontSize: '16px', outline: 'none',
+                  transition: 'border-color 0.2s',
+                }}
+                onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(0,255,204,0.3)'; }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--surface-border)'; }}
+              />
+            </div>
+
+            {/* Image Upload Area */}
+            <div style={{ marginBottom: '20px' }}>
+              <span className="label-sm" style={{ display: 'block', marginBottom: '8px' }}>Exercise Image</span>
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept="image/*"
+                onChange={handleImageUpload}
+                style={{ display: 'none' }}
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                style={{
+                  width: '100%', height: imagePreview ? 'auto' : '100px',
+                  borderRadius: 'var(--radius-md)',
+                  border: '1px dashed rgba(0,255,204,0.25)',
+                  background: imagePreview ? 'transparent' : 'rgba(0,255,204,0.03)',
+                  cursor: 'pointer', overflow: 'hidden',
+                  display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center',
+                  gap: '8px', transition: 'all 0.2s ease',
+                  padding: imagePreview ? '0' : '16px',
+                }}
+                onMouseEnter={(e) => { if (!imagePreview) e.currentTarget.style.borderColor = 'rgba(0,255,204,0.5)'; }}
+                onMouseLeave={(e) => { if (!imagePreview) e.currentTarget.style.borderColor = 'rgba(0,255,204,0.25)'; }}
+              >
+                {imagePreview ? (
+                  <div style={{ position: 'relative', width: '100%' }}>
+                    <img
+                      src={imagePreview}
+                      alt="Exercise preview"
+                      style={{
+                        width: '100%', height: '160px', objectFit: 'cover',
+                        borderRadius: 'var(--radius-md)',
+                      }}
+                    />
+                    <div style={{
+                      position: 'absolute', bottom: '8px', right: '8px',
+                      padding: '6px 12px', background: 'rgba(0,0,0,0.7)',
+                      borderRadius: 'var(--radius-pill)', color: 'var(--cyan)',
+                      fontSize: '11px', fontFamily: 'var(--font-display)', fontWeight: 600,
+                    }}>
+                      Change Image
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                      <rect x="3" y="3" width="18" height="18" rx="3" stroke="var(--cyan)" strokeWidth="1.5" strokeOpacity="0.5"/>
+                      <circle cx="8.5" cy="8.5" r="1.5" fill="var(--cyan)" fillOpacity="0.5"/>
+                      <path d="M3 16L8 11L13 16" stroke="var(--cyan)" strokeWidth="1.5" strokeLinecap="round" strokeOpacity="0.5"/>
+                      <path d="M14 14L17 11L21 15" stroke="var(--cyan)" strokeWidth="1.5" strokeLinecap="round" strokeOpacity="0.5"/>
+                    </svg>
+                    <span style={{ fontSize: '13px', color: 'var(--cyan)', fontFamily: 'var(--font-display)', fontWeight: 600 }}>
+                      Upload from Gallery
+                    </span>
+                    <span style={{ fontSize: '11px', color: 'var(--muted)' }}>
+                      Tap to choose an image
+                    </span>
+                  </>
+                )}
+              </button>
             </div>
 
             {/* Bodyweight Toggle */}
@@ -173,6 +287,8 @@ export default function ExerciseModal({ onClose, onSave, editExercise = null, se
               </span>
               <button
                 onClick={() => { setIsBodyweight(!isBodyweight); if (!isBodyweight) setWeight(0); }}
+                aria-label="Toggle bodyweight exercise"
+                aria-pressed={isBodyweight}
                 style={{
                   width: '52px', height: '28px', borderRadius: '14px',
                   background: isBodyweight ? 'var(--cyan)' : 'rgba(255,255,255,0.08)',

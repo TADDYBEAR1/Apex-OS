@@ -90,6 +90,7 @@ export default function Stepper({ value, onChange, min = 0, max = 999, step = 1,
           }}
           onClick={handleDecrement}
           disabled={value <= min}
+          aria-label={`Decrease ${label || 'value'}`}
           onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.9)'; }}
           onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
           onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
@@ -114,6 +115,7 @@ export default function Stepper({ value, onChange, min = 0, max = 999, step = 1,
           }}
           onClick={handleIncrement}
           disabled={value >= max}
+          aria-label={`Increase ${label || 'value'}`}
           onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.9)'; }}
           onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
           onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}

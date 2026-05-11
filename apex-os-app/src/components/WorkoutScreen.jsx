@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import GlassCard from './GlassCard';
 import ExerciseModal from './ExerciseModal';
+import ProfileButton from './ProfileButton';
 import { DAYS } from '../data/sampleData';
 
-export default function WorkoutScreen({ workoutPlan, setWorkoutPlan, currentDay, setCurrentDay, onEnterFocus }) {
+export default function WorkoutScreen({ workoutPlan, setWorkoutPlan, currentDay, setCurrentDay, onEnterFocus, profile, onOpenProfile }) {
   const [showModal, setShowModal] = useState(false);
   const [editingExercise, setEditingExercise] = useState(null);
   const [addSection, setAddSection] = useState('main');
@@ -41,14 +42,24 @@ export default function WorkoutScreen({ workoutPlan, setWorkoutPlan, currentDay,
     setWorkoutPlan(updated);
   };
 
-  const allExercises = todayPlan ? [...(todayPlan.exercises.warmup||[]),...(todayPlan.exercises.main||[]),...(todayPlan.exercises.cooldown||[])] : [];
+  const allExercises = todayPlan ? sections.flatMap(section =>
+    (todayPlan.exercises[section.key] || []).map((exercise, index) => ({
+      ...exercise,
+      section: section.key,
+      sectionLabel: section.label,
+      sectionIndex: index,
+    }))
+  ) : [];
 
   return (
     <div className="screen" style={{ paddingTop: '16px' }}>
       {/* Header */}
-      <div style={{ marginBottom: '20px', animation: 'fadeInUp 0.4s ease-out' }}>
-        <h1 style={{ fontSize: '28px', fontWeight: 700, marginBottom: '4px' }}>Workout</h1>
-        <p style={{ fontSize: '14px', color: 'var(--muted)' }}>Plan your protocol</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', animation: 'fadeInUp 0.4s ease-out' }}>
+        <div>
+          <h1 style={{ fontSize: '28px', fontWeight: 700, marginBottom: '4px' }}>Workout</h1>
+          <p style={{ fontSize: '14px', color: 'var(--muted)' }}>Plan your protocol</p>
+        </div>
+        <ProfileButton profile={profile} onClick={onOpenProfile} />
       </div>
 
       {/* Day Selector */}
@@ -75,7 +86,7 @@ export default function WorkoutScreen({ workoutPlan, setWorkoutPlan, currentDay,
 
       {/* Enter Focus Mode */}
       {allExercises.length > 0 && (
-        <button onClick={() => onEnterFocus(allExercises)} className="btn-primary" style={{ width: '100%', marginBottom: '24px', animation: 'fadeInUp 0.65s ease-out', height: '56px' }}>
+        <button onClick={() => onEnterFocus({ exercises: allExercises, day: currentDay, planName: todayPlan.name })} className="btn-primary" style={{ width: '100%', marginBottom: '24px', animation: 'fadeInUp 0.65s ease-out', height: '56px' }}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M8 5L19 12L8 19V5Z" fill="#000"/></svg>
           Enter Focus Mode
         </button>
@@ -108,8 +119,8 @@ export default function WorkoutScreen({ workoutPlan, setWorkoutPlan, currentDay,
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: '4px' }}>
-                    <button onClick={() => handleEditExercise(exercise, section.key)} style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid var(--surface-border)', background: 'transparent', color: 'var(--muted)', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✎</button>
-                    <button onClick={() => handleDeleteExercise(exercise.id, section.key)} style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid var(--surface-border)', background: 'transparent', color: 'var(--orange)', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
+                    <button onClick={() => handleEditExercise(exercise, section.key)} aria-label={`Edit ${exercise.name}`} style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid var(--surface-border)', background: 'transparent', color: 'var(--muted)', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✎</button>
+                    <button onClick={() => handleDeleteExercise(exercise.id, section.key)} aria-label={`Delete ${exercise.name}`} style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid var(--surface-border)', background: 'transparent', color: 'var(--orange)', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>✕</button>
                   </div>
                 </div>
               </GlassCard>
