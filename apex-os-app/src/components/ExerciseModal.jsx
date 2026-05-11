@@ -1,4 +1,6 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
+import BottomSheetModal from './BottomSheetModal';
+import IconButton from './IconButton';
 import Stepper from './Stepper';
 import { CATEGORIES, EXERCISE_LIBRARY } from '../data/sampleData';
 
@@ -15,15 +17,6 @@ export default function ExerciseModal({ onClose, onSave, editExercise = null, se
   const [imagePreview, setImagePreview] = useState(editExercise?.image || null);
   const [showLibrary, setShowLibrary] = useState(!editExercise);
   const fileInputRef = useRef(null);
-
-  useEffect(() => {
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') onClose();
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
 
   const filtered = EXERCISE_LIBRARY.filter(
     (e) => activeCategory === 'All' || e.category === activeCategory
@@ -77,20 +70,13 @@ export default function ExerciseModal({ onClose, onSave, editExercise = null, se
   };
 
   return (
-    <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="exercise-modal-title">
-        <div className="modal-handle" />
-
+    <BottomSheetModal onClose={onClose} titleId="exercise-modal-title">
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h2 id="exercise-modal-title" style={{ fontFamily: 'var(--font-display)', fontSize: '22px', fontWeight: 700 }}>
             {editExercise ? 'Edit Exercise' : 'Add Exercise'}
           </h2>
-          <button onClick={onClose} aria-label="Close exercise modal" style={{
-            width: '36px', height: '36px', borderRadius: '50%', border: '1px solid var(--surface-border)',
-            background: 'rgba(255,255,255,0.03)', color: 'var(--muted)', fontSize: '18px', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>✕</button>
+          <IconButton label="Close exercise modal" onClick={onClose} size={36}>✕</IconButton>
         </div>
 
         {showLibrary ? (
@@ -327,7 +313,6 @@ export default function ExerciseModal({ onClose, onSave, editExercise = null, se
             </div>
           </>
         )}
-      </div>
-    </div>
+    </BottomSheetModal>
   );
 }

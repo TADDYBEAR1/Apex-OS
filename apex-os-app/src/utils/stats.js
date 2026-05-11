@@ -100,7 +100,76 @@ export function buildHeatmapFromWorkoutHistory(history = [], weeks = 4, referenc
   };
 }
 
+export function formatDuration(seconds = 0) {
+  const mins = Math.floor(seconds / 60);
+  const hrs = Math.floor(mins / 60);
+  const remainingMins = mins % 60;
+
+  if (hrs > 0) return `${hrs}h ${remainingMins}m`;
+  return `${mins}m`;
+}
+
+export function calculateWorkoutVolume(completedSets = []) {
+  return completedSets.reduce((total, set) => {
+    const reps = Number(set.actualReps) || 0;
+    const weight = Number(set.actualWeight) || 0;
+    return total + reps * weight;
+  }, 0);
+}
+
+export function summarizeWorkoutSession(session = {}) {
+  const completedSets = session.completedSets || [];
+  const volume = calculateWorkoutVolume(completedSets);
+  const exercises = new Map();
+
+  completedSets.forEach((set) => {
+    const key = set.exerciseName || set.exerciseId || 'Exercise';
+    const existing = exercises.get(key) || {
+      name: key,
+      section: set.section || 'main',
+      sets: 0,
+      reps: 0,
+      volume: 0,
+      bestWeight: 0,
+      bestReps: 0,
+      isBodyweight: Boolean(set.isBodyweight),
+    };
+
+    const reps = Number(set.actualReps) || 0;
+    const weight = Number(set.actualWeight) || 0;
+    existing.sets += 1;
+    existing.reps += reps;
+    existing.volume += reps * weight;
+    existing.bestWeight = Math.max(existing.bestWeight, weight);
+    existing.bestReps = Math.max(existing.bestReps, reps);
+    exercises.set(key, existing);
+  });
+
+  const topLifts = [...exercises.values()]
+    .filter(item => item.bestWeight > 0)
+    .sort((a, b) => b.volume - a.volume)
+    .slice(0, 3);
+
+  return {
+    completedSetCount: completedSets.length,
+    plannedSetCount: session.plannedSetCount || session.totalSets || completedSets.length,
+    volume,
+    exercises: [...exercises.values()],
+    topLifts,
+  };
+}
+
 // ─── Benchmark Trend Analysis ────────────────────────────────
+export function normalizeBenchmarkName(value = '') {
+  return value
+    .toLowerCase()
+    .replace(/1rm|max|benchmark|barbell|dumbbell|db|bb|weighted/g, '')
+    .replace(/pull-ups/g, 'pull ups')
+    .replace(/push-ups/g, 'push ups')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
 export function formatBenchmarkValue(value, unit) {
   if (unit === 'TIME') {
     const mins = Math.floor(value / 60);
@@ -108,6 +177,14 @@ export function formatBenchmarkValue(value, unit) {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   }
   return value;
+}
+
+export function estimateOneRepMax(weight, reps) {
+  const numericWeight = Number(weight) || 0;
+  const numericReps = Number(reps) || 0;
+  if (numericWeight <= 0 || numericReps <= 0) return 0;
+
+  return Math.round((numericWeight * (1 + numericReps / 30)) * 10) / 10;
 }
 
 export function computeBenchmarkTrend(history, unit) {
@@ -182,6 +259,116 @@ export function analyzeBenchmarkTrends(benchmarks) {
   }
 
   return trends;
+}
+
+function createBenchmarkEntry(benchmark, value, completedAt, source) {
+  const date = completedAt.slice(0, 10);
+  const history = benchmark.history || [];
+  const lastEntry = history[history.length - 1];
+  const isDuplicate = lastEntry && lastEntry.date === date && Number(lastEntry.value) === Number(value);
+  if (isDuplicate) return { benchmark, detected: null };
+
+  const newHistory = [...history, { value, date, source }];
+  const trend = computeBenchmarkTrend(newHistory, benchmark.unit);
+  return {
+    benchmark: {
+      ...benchmark,
+      value: benchmark.unit === 'TIME' ? formatBenchmarkValue(value, 'TIME') : value,
+      history: newHistory,
+      trend: trend.text,
+      positive: trend.positive,
+    },
+    detected: {
+      label: benchmark.label,
+      value,
+      unit: benchmark.unit,
+      date,
+      previousValue: lastEntry?.value ?? null,
+    },
+  };
+}
+
+export function getCompletedSetBenchmarkCandidates(completedSets = []) {
+  const bestByExercise = new Map();
+
+  completedSets.forEach((set) => {
+    if ((set.section || 'main') !== 'main') return;
+
+    const reps = Number(set.actualReps) || 0;
+    const weight = Number(set.actualWeight) || 0;
+    if (reps <= 0) return;
+
+    const isBodyweight = Boolean(set.isBodyweight);
+    const value = isBodyweight ? reps : estimateOneRepMax(weight, reps);
+    if (value <= 0) return;
+
+    const exerciseName = set.exerciseName || 'Exercise';
+    const normalizedName = normalizeBenchmarkName(exerciseName);
+    const unit = isBodyweight ? 'REPS' : 'KG';
+    const existing = bestByExercise.get(normalizedName);
+
+    if (!existing || value > existing.value) {
+      bestByExercise.set(normalizedName, {
+        exerciseId: set.exerciseId,
+        exerciseName,
+        normalizedName,
+        value,
+        unit,
+        sourceSet: set,
+      });
+    }
+  });
+
+  return [...bestByExercise.values()];
+}
+
+export function applyWorkoutPersonalRecords(benchmarks = [], completedSets = [], completedAt = new Date().toISOString()) {
+  const candidates = getCompletedSetBenchmarkCandidates(completedSets);
+  const updated = benchmarks.map(benchmark => ({ ...benchmark, history: [...(benchmark.history || [])] }));
+  const detected = [];
+
+  candidates.forEach((candidate) => {
+    const existingIndex = updated.findIndex((benchmark) => {
+      if (benchmark.unit !== candidate.unit) return false;
+      if (benchmark.exerciseId && candidate.exerciseId && benchmark.exerciseId === candidate.exerciseId) return true;
+
+      const benchmarkName = normalizeBenchmarkName(benchmark.label);
+      return benchmarkName === candidate.normalizedName ||
+        benchmarkName.includes(candidate.normalizedName) ||
+        candidate.normalizedName.includes(benchmarkName);
+    });
+
+    const targetIndex = existingIndex >= 0 ? existingIndex : updated.length;
+    const benchmark = existingIndex >= 0
+      ? updated[existingIndex]
+      : {
+          label: candidate.unit === 'REPS' ? `Max ${candidate.exerciseName}` : `${candidate.exerciseName} 1RM`,
+          value: candidate.value,
+          unit: candidate.unit,
+          trend: 'New Benchmark',
+          positive: true,
+          exerciseId: candidate.exerciseId,
+          history: [],
+        };
+
+    const currentBest = Math.max(0, ...(benchmark.history || []).map(entry => Number(entry.value) || 0));
+    if (candidate.value <= currentBest) {
+      if (existingIndex < 0) updated.push(benchmark);
+      return;
+    }
+
+    const result = createBenchmarkEntry(
+      { ...benchmark, exerciseId: benchmark.exerciseId || candidate.exerciseId },
+      candidate.value,
+      completedAt,
+      { type: 'workout', exerciseName: candidate.exerciseName }
+    );
+
+    updated[targetIndex] = result.benchmark;
+    if (result.detected) detected.push(result.detected);
+  });
+
+  return { benchmarks: updated, detected };
 }
 
 // ─── Fuel / Diet Compliance ──────────────────────────────────

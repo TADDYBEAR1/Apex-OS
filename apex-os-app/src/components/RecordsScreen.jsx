@@ -1,6 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
+import BottomSheetModal from './BottomSheetModal';
 import GlassCard from './GlassCard';
 import ProfileButton from './ProfileButton';
+import SegmentedControl from './SegmentedControl';
+import WorkoutHistoryList from './WorkoutHistoryList';
 import { RECORDS_DATA, HEATMAP_DAY_LABELS, EXERCISE_LIBRARY } from '../data/sampleData';
 import { buildHeatmapFromWorkoutHistory, calculateStats, computeBenchmarkTrend, formatBenchmarkValue, generateInsight } from '../utils/stats';
 import Stepper from './Stepper';
@@ -29,7 +32,8 @@ const generateHistoryPath = (history, width, height, padding = 4) => {
   return { linePath, areaPath, points };
 };
 
-export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, workoutHistory, profile, onOpenProfile }) {
+export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, workoutHistory, onUpdateWorkoutSession, onDeleteWorkoutSession, profile, onOpenProfile }) {
+  const [activeView, setActiveView] = useState('history');
   const [showAddBenchmark, setShowAddBenchmark] = useState(false);
   const [selectedLibraryId, setSelectedLibraryId] = useState(null);
   const [newBenchmarkValue, setNewBenchmarkValue] = useState(0);
@@ -39,17 +43,6 @@ export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, wo
   // Record new entry for existing benchmark
   const [recordingIndex, setRecordingIndex] = useState(null);
   const [recordValue, setRecordValue] = useState(0);
-
-  useEffect(() => {
-    if (!showAddBenchmark) return undefined;
-
-    const handleKeyDown = (event) => {
-      if (event.key === 'Escape') setShowAddBenchmark(false);
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showAddBenchmark]);
 
   const { workCapacity } = RECORDS_DATA;
   const heatmap = buildHeatmapFromWorkoutHistory(workoutHistory, 4);
@@ -140,6 +133,30 @@ export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, wo
           </div>
         </div>
       </GlassCard>
+
+      <SegmentedControl
+        value={activeView}
+        onChange={setActiveView}
+        options={[{ key: 'history', label: 'History' }, { key: 'benchmarks', label: 'Benchmarks' }]}
+        style={{ marginBottom: '24px' }}
+      />
+
+      {activeView === 'history' ? (
+        <div style={{ animation: 'fadeInUp 0.5s ease-out' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 700 }}>Past Workouts</h2>
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '11px', color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+              {workoutHistory.length} sessions
+            </span>
+          </div>
+          <WorkoutHistoryList
+            sessions={workoutHistory}
+            onUpdateSession={onUpdateWorkoutSession}
+            onDeleteSession={onDeleteWorkoutSession}
+          />
+        </div>
+      ) : (
+        <>
 
       {/* Training Frequency — GitHub-style heatmap */}
       <div style={{ marginBottom: '24px', animation: 'fadeInUp 0.6s ease-out' }}>
@@ -334,16 +351,8 @@ export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, wo
 
       {/* Add Benchmark Modal */}
       {showAddBenchmark && (
-        <div style={{
-          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(30px)',
-          WebkitBackdropFilter: 'blur(30px)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          animation: 'fadeIn 0.3s ease-out', padding: '20px'
-        }}>
-          <div role="dialog" aria-modal="true" aria-labelledby="benchmark-modal-title" style={{
-            width: '100%', maxWidth: '100%', maxHeight: '80vh', overflowY: 'auto', background: 'var(--surface)', border: '1px solid var(--surface-border)',
-            borderRadius: 'var(--radius-lg)', padding: '24px env(safe-area-inset-right, 24px) calc(24px + env(safe-area-inset-bottom, 0px)) env(safe-area-inset-left, 24px)', display: 'flex', flexDirection: 'column', gap: '24px'
-          }}>
-            <h2 id="benchmark-modal-title" style={{ fontSize: '20px', fontWeight: 700, fontFamily: 'var(--font-display)', textAlign: 'center' }}>Create Benchmark</h2>
+        <BottomSheetModal title="Create Benchmark" titleId="benchmark-modal-title" onClose={() => setShowAddBenchmark(false)} align="center">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
             {!selectedLibraryId ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -457,7 +466,7 @@ export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, wo
               <button onClick={() => setShowAddBenchmark(false)} className="btn-ghost" style={{ marginTop: 'auto' }}>Cancel</button>
             )}
           </div>
-        </div>
+        </BottomSheetModal>
       )}
 
       {/* Work Capacity */}
@@ -472,6 +481,8 @@ export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, wo
           <span style={{ fontSize: '13px', color: 'var(--cyan)' }}>{workCapacity.status}</span>
         </div>
       </GlassCard>
+        </>
+      )}
     </div>
   );
 }

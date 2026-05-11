@@ -37,6 +37,9 @@ export default function FocusMode({ exercises, onExit }) {
   const createSetLog = () => ({
     exerciseId: exercise.id,
     exerciseName: exercise.name,
+    category: exercise.category || 'Other',
+    isBodyweight: Boolean(exercise.isBodyweight),
+    unit: exercise.isBodyweight ? 'REPS' : 'KG',
     section: exercise.section || 'main',
     setNumber: currentSet,
     targetReps: exercise.reps,

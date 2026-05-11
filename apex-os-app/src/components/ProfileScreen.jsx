@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import GlassCard from './GlassCard';
+import IconButton from './IconButton';
 
 export default function ProfileScreen({ onClose, profile, setProfile }) {
   const [editingField, setEditingField] = useState(null);
@@ -42,6 +43,10 @@ export default function ProfileScreen({ onClose, profile, setProfile }) {
       zIndex: 200, overflow: 'auto', animation: 'fadeIn 0.3s ease-out',
     }}>
       <div style={{
+        width: '100%',
+        maxWidth: '480px',
+        minHeight: '100vh',
+        margin: '0 auto',
         padding: 'env(safe-area-inset-top, 24px) 20px calc(100px + env(safe-area-inset-bottom, 24px)) 20px',
       }}>
         {/* Header */}
@@ -50,12 +55,7 @@ export default function ProfileScreen({ onClose, profile, setProfile }) {
             <span style={{ fontFamily: 'var(--font-display)', fontSize: '12px', fontWeight: 700, letterSpacing: '0.12em', color: 'var(--cyan)' }}>APEX OS</span>
             <h1 style={{ fontSize: '28px', fontWeight: 700 }}>Profile</h1>
           </div>
-          <button onClick={onClose} aria-label="Close profile" style={{
-            width: '40px', height: '40px', borderRadius: '50%',
-            border: '1px solid var(--surface-border)', background: 'transparent',
-            color: 'var(--muted)', fontSize: '18px', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>✕</button>
+          <IconButton label="Close profile" onClick={onClose} size={40}>✕</IconButton>
         </div>
 
         {/* Profile Photo */}
@@ -65,7 +65,7 @@ export default function ProfileScreen({ onClose, profile, setProfile }) {
             onClick={() => fileInputRef.current?.click()}
             aria-label={profile.photo ? 'Change profile photo' : 'Add profile photo'}
             style={{
-              width: '120px', height: '120px', borderRadius: '50%',
+              width: 'clamp(104px, 28vw, 120px)', height: 'clamp(104px, 28vw, 120px)', borderRadius: '50%',
               border: '3px solid var(--cyan)', background: profile.photo ? 'transparent' : 'linear-gradient(135deg, var(--cyan), #00AA88)',
               cursor: 'pointer', overflow: 'hidden', display: 'flex',
               alignItems: 'center', justifyContent: 'center',
@@ -115,12 +115,7 @@ export default function ProfileScreen({ onClose, profile, setProfile }) {
                       }}
                     />
                   </div>
-                  <button onClick={saveEdit} style={{
-                    width: '36px', height: '36px', borderRadius: '50%',
-                    background: 'var(--cyan)', border: 'none', color: '#000',
-                    fontSize: '16px', cursor: 'pointer', display: 'flex',
-                    alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                  }}>✓</button>
+                  <IconButton label={`Save ${field.label}`} onClick={saveEdit} size={36} tone="primary" style={{ background: 'var(--cyan)', color: '#000', border: 'none' }}>✓</IconButton>
                 </div>
               ) : (
                 <div

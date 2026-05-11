@@ -8,6 +8,7 @@ import ProfileScreen from './components/ProfileScreen';
 import BottomNav from './components/BottomNav';
 import { DEFAULT_WORKOUT_PLAN, NUTRITION_DATA, RECORDS_DATA, WORKOUT_HISTORY } from './data/sampleData';
 import { DEFAULT_PROFILE, loadAppState, saveAppState } from './utils/storage';
+import { applyWorkoutPersonalRecords } from './utils/stats';
 import './index.css';
 
 import WorkoutCompleteOverlay from './components/WorkoutCompleteOverlay';
@@ -57,19 +58,27 @@ export default function App() {
     if (workoutStartTime) {
       const durationSecs = Math.floor((Date.now() - workoutStartTime) / 1000);
       setLastWorkoutDuration(durationSecs);
-      if ((summary.completedSets?.length || 0) > 0 || summary.completed) {
+      const completedSets = summary.completedSets || [];
+      if (completedSets.length > 0) {
         const completedAt = new Date().toISOString();
+        const prResult = applyWorkoutPersonalRecords(benchmarks, completedSets, completedAt);
+        if (prResult.detected.length > 0) {
+          setBenchmarks(prResult.benchmarks);
+        }
         setWorkoutHistory(prev => [
           ...prev,
           {
             id: `workout-${Date.now()}`,
             date: completedAt.slice(0, 10),
+            startedAt: focusSession?.startedAt ? new Date(focusSession.startedAt).toISOString() : null,
             completedAt,
             day: focusSession?.day ?? currentDay,
             planName: focusSession?.planName || 'Workout',
             durationSeconds: durationSecs,
-            totalSets: summary.totalSets || summary.completedSets?.length || 0,
-            completedSets: summary.completedSets || [],
+            totalSets: summary.totalSets || completedSets.length,
+            plannedSetCount: summary.totalSets || completedSets.length,
+            completedSets,
+            detectedPrs: prResult.detected,
           },
         ]);
       }
@@ -88,6 +97,16 @@ export default function App() {
   };
 
   const handleOpenProfile = () => setShowProfile(true);
+
+  const handleUpdateWorkoutHistorySession = (sessionId, updatedSession) => {
+    setWorkoutHistory(prev => prev.map(session =>
+      session.id === sessionId ? { ...session, ...updatedSession } : session
+    ));
+  };
+
+  const handleDeleteWorkoutHistorySession = (sessionId) => {
+    setWorkoutHistory(prev => prev.filter(session => session.id !== sessionId));
+  };
 
   // Focus Mode is a full-screen takeover
   if (focusSession) {
@@ -131,6 +150,8 @@ export default function App() {
             benchmarks={benchmarks}
             setBenchmarks={setBenchmarks}
             workoutHistory={workoutHistory}
+            onUpdateWorkoutSession={handleUpdateWorkoutHistorySession}
+            onDeleteWorkoutSession={handleDeleteWorkoutHistorySession}
             profile={profile}
             onOpenProfile={handleOpenProfile}
           />
