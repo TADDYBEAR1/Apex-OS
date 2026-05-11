@@ -70,8 +70,8 @@ body {
 
 #root {
   width: 100%;
-  max-width: 100%;
-  margin: 0;
+  max-width: 480px;
+  margin: 0 auto;
   min-height: 100vh;
   position: relative;
   overflow: hidden;
@@ -153,6 +153,21 @@ h1, h2, h3, h4 {
 
 .glass-interactive:active {
   transform: scale(0.98);
+}
+
+.glass-button {
+  display: block;
+  width: 100%;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+button:focus-visible,
+.glass-button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
 }
 
 /* ── Glow Effects ──────────────────────────────────────────── */
@@ -332,7 +347,7 @@ h1, h2, h3, h4 {
 
 .modal-sheet {
   width: 100%;
-  max-width: 100%;
+  max-width: 480px;
   max-height: 92vh;
   background: var(--surface);
   border-top-left-radius: var(--radius-lg);
@@ -350,6 +365,18 @@ h1, h2, h3, h4 {
   background: rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-pill);
   margin: 0 auto 20px;
+}
+
+/* ── Hide Number Input Spinners ────────────────────────────── */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 /* ── Utilities ─────────────────────────────────────────────── */
@@ -376,3 +403,14 @@ h1, h2, h3, h4 {
 .tracking { letter-spacing: 0.1em; }
 .relative { position: relative; }
 .overflow-hidden { overflow: hidden; }
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

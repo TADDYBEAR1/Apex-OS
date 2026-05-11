@@ -11,6 +11,7 @@ export default function FocusMode({ exercises, onExit }) {
   // Track actual performance for the current set
   const [actualReps, setActualReps] = useState(0);
   const [actualWeight, setActualWeight] = useState(0);
+  const [completedSets, setCompletedSets] = useState([]);
 
   const exercise = exercises[currentIndex];
 
@@ -24,16 +25,42 @@ export default function FocusMode({ exercises, onExit }) {
   if (!exercise) return null;
 
   const totalCount = exercises.length;
+  const totalSets = exercises.reduce((sum, item) => sum + (item.sets || 0), 0);
 
   const getSection = () => {
-    // Determine section from index position
-    if (currentIndex < 2) return 'Warm-up';
-    if (currentIndex >= totalCount - 1) return 'Cooldown';
-    return 'Main Workout';
+    if (!exercise.sectionLabel) return 'Main Workout';
+    return exercise.sectionLabel
+      .toLowerCase()
+      .replace(/(^|\s|-)\S/g, char => char.toUpperCase());
+  };
+
+  const createSetLog = () => ({
+    exerciseId: exercise.id,
+    exerciseName: exercise.name,
+    category: exercise.category || 'Other',
+    isBodyweight: Boolean(exercise.isBodyweight),
+    unit: exercise.isBodyweight ? 'REPS' : 'KG',
+    section: exercise.section || 'main',
+    setNumber: currentSet,
+    targetReps: exercise.reps,
+    targetWeight: exercise.isBodyweight ? 0 : exercise.weight,
+    actualReps,
+    actualWeight: exercise.isBodyweight ? 0 : actualWeight,
+    completedAt: new Date().toISOString(),
+  });
+
+  const finishWorkout = (summary) => {
+    onExit({
+      totalSets,
+      completedSets,
+      ...summary,
+    });
   };
 
   const handleCompleteSet = () => {
-    // Log the set (actualReps, actualWeight) here if saving to a backend
+    const nextCompletedSets = [...completedSets, createSetLog()];
+    setCompletedSets(nextCompletedSets);
+
     if (currentSet < exercise.sets) {
       if (exercise.rest > 0) {
         setShowRest(true);
@@ -45,17 +72,21 @@ export default function FocusMode({ exercises, onExit }) {
       if (exercise.rest > 0 && currentIndex < totalCount - 1) {
         setShowRest(true);
       } else {
-        advanceNextExercise();
+        advanceNextExercise(nextCompletedSets);
       }
     }
   };
 
-  const advanceNextExercise = () => {
+  const advanceNextExercise = (nextCompletedSets = completedSets) => {
     if (currentIndex < totalCount - 1) {
       setCurrentIndex(currentIndex + 1);
       setCurrentSet(1);
     } else {
-      onExit();
+      onExit({
+        completed: true,
+        totalSets,
+        completedSets: nextCompletedSets,
+      });
     }
   };
 
@@ -103,7 +134,7 @@ export default function FocusMode({ exercises, onExit }) {
             fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '13px',
             letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer',
           }}>Skip</button>
-          <button onClick={onExit} style={{
+          <button onClick={() => finishWorkout({ completed: false })} style={{
             background: 'none', border: 'none', color: 'var(--text-secondary)',
             fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '13px',
             letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer',
@@ -125,7 +156,7 @@ export default function FocusMode({ exercises, onExit }) {
           Set {currentSet} of {exercise.sets}
         </span>
         <span style={{ fontSize: '13px', color: 'var(--muted)' }}>
-           {' '}· {currentIndex + 1}/{totalCount} Exercises
+           {' '}· {getSection()} · {currentIndex + 1}/{totalCount} Exercises
         </span>
       </div>
 
@@ -203,7 +234,7 @@ export default function FocusMode({ exercises, onExit }) {
       {/* Swipe to Complete */}
       <div style={{ padding: '16px 20px 32px', flexShrink: 0 }}>
         <SwipeToComplete onComplete={handleCompleteSet} label="SWIPE TO FINISH SET" />
-        <button onClick={onExit} style={{
+        <button onClick={() => finishWorkout({ completed: false })} style={{
           display: 'block', margin: '12px auto 0', background: 'none', border: 'none',
           color: 'var(--muted)', fontSize: '13px', fontFamily: 'var(--font-display)',
           fontWeight: 500, cursor: 'pointer', letterSpacing: '0.04em',

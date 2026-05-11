@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import GlassCard from './GlassCard';
-import { HEATMAP_DATA, QUICK_LOG_DEFAULTS } from '../data/sampleData';
-import { calculateStats } from '../utils/stats';
+import ProfileButton from './ProfileButton';
+import { HEATMAP_DAY_LABELS } from '../data/sampleData';
+import { buildHeatmapFromWorkoutHistory, calculateStats } from '../utils/stats';
 
-export default function HomeScreen({ workoutPlan, currentDay, onNavigate, systemState }) {
-  const [quickLog, setQuickLog] = useState({ ...QUICK_LOG_DEFAULTS });
+export default function HomeScreen({ workoutPlan, currentDay, onNavigate, profile, onOpenProfile, workoutHistory }) {
   const [heatmapRange, setHeatmapRange] = useState('30d');
   const todayPlan = workoutPlan[currentDay];
   const totalEx = todayPlan ? (todayPlan.exercises.warmup?.length||0)+(todayPlan.exercises.main?.length||0)+(todayPlan.exercises.cooldown?.length||0) : 0;
@@ -12,10 +12,14 @@ export default function HomeScreen({ workoutPlan, currentDay, onNavigate, system
   const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-  const stats = calculateStats(HEATMAP_DATA);
-  const weekProgress = Math.round((stats.weeklySessions / 5) * 100);
+  const heatmap = buildHeatmapFromWorkoutHistory(workoutHistory, heatmapRange === '90d' ? 13 : 4);
+  const stats = calculateStats(heatmap.cells, { latestDayIndex: heatmap.latestDayIndex });
+  const weekProgress = Math.min(Math.round((stats.weeklySessions / 5) * 100), 100);
 
-  const incrementLog = (k) => setQuickLog((p) => ({ ...p, [k]: p[k] + 1 }));
+  const cellColor = (val) =>
+    val === 0 ? 'rgba(255,255,255,0.04)' :
+    val === 1 ? 'rgba(0,255,204,0.2)' :
+    val === 2 ? 'rgba(0,255,204,0.5)' : 'var(--cyan)';
 
   return (
     <div className="screen" style={{ paddingTop: '16px' }}>
@@ -25,7 +29,7 @@ export default function HomeScreen({ workoutPlan, currentDay, onNavigate, system
           <h1 style={{ fontSize:'28px', fontWeight:700, marginBottom:'2px' }}>Hello<span style={{ color:'var(--cyan)' }}>.</span></h1>
           <p style={{ fontSize:'14px', color:'var(--muted)' }}>{dayNames[now.getDay()]}, {months[now.getMonth()]} {now.getDate()}</p>
         </div>
-        <div style={{ width:'44px', height:'44px', borderRadius:'50%', background:'linear-gradient(135deg, var(--cyan), #00AA88)', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'var(--font-display)', fontWeight:700, fontSize:'16px', color:'#000', boxShadow:'var(--cyan-glow-sm)' }}>AO</div>
+        <ProfileButton profile={profile} onClick={onOpenProfile} />
       </div>
 
       {/* Stats Row */}
@@ -82,7 +86,7 @@ export default function HomeScreen({ workoutPlan, currentDay, onNavigate, system
         </GlassCard>
       )}
 
-      {/* Heatmap */}
+      {/* GitHub-style Contribution Heatmap */}
       <GlassCard style={{ padding:'20px', animation:'fadeInUp 0.9s ease-out' }}>
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'20px' }}>
           <div>
@@ -92,51 +96,50 @@ export default function HomeScreen({ workoutPlan, currentDay, onNavigate, system
           <div style={{ display:'flex', background:'rgba(255,255,255,0.03)', borderRadius:'var(--radius-pill)', padding:'4px' }}>
             {['30d','90d'].map((r) => (
               <button key={r} onClick={() => setHeatmapRange(r)} style={{
-                padding:'6px 16px',
-                borderRadius:'var(--radius-pill)',
-                border:'none',
-                background:heatmapRange===r?'var(--cyan)':'transparent',
-                color:heatmapRange===r?'#000':'var(--muted)',
-                fontFamily:'var(--font-display)',
-                fontWeight:700,
-                fontSize:'12px',
-                cursor:'pointer',
-                transition:'all 0.2s ease'
-              }}>
-                {r}
-              </button>
+                padding:'6px 16px', borderRadius:'var(--radius-pill)', border:'none',
+                background: heatmapRange===r ? 'var(--cyan)' : 'transparent',
+                color: heatmapRange===r ? '#000' : 'var(--muted)',
+                fontFamily:'var(--font-display)', fontWeight:700, fontSize:'12px',
+                cursor:'pointer', transition:'all 0.2s ease'
+              }}>{r}</button>
             ))}
           </div>
         </div>
+
+        {/* Week column headers */}
+        <div style={{ display:'grid', gridTemplateColumns:`36px repeat(${heatmap.weekLabels.length}, 1fr)`, gap:'6px', marginBottom:'6px' }}>
+          <div />
+          {heatmap.weekLabels.map(w => (
+            <div key={w} style={{ textAlign:'center', fontSize:'11px', color:'var(--muted)', fontFamily:'var(--font-display)', fontWeight:600 }}>{w}</div>
+          ))}
+        </div>
+
+        {/* Heatmap grid: 7 rows (days) × 4 columns (weeks) */}
         <div style={{ display:'flex', flexDirection:'column', gap:'6px' }}>
-          {HEATMAP_DATA.map((row, ri) => (
-            <div key={ri} style={{ display:'flex', gap:'6px' }}>
+          {heatmap.cells.map((row, ri) => (
+            <div key={ri} style={{ display:'grid', gridTemplateColumns:`36px repeat(${heatmap.weekLabels.length}, 1fr)`, gap:'6px', alignItems:'center' }}>
+              {/* Day label */}
+              <span style={{ fontSize:'11px', color:'var(--muted)', fontFamily:'var(--font-display)', fontWeight:500 }}>
+                {HEATMAP_DAY_LABELS[ri]}
+              </span>
               {row.map((cell, ci) => (
                 <div key={ci} style={{
-                  flex:1,
-                  aspectRatio:'1/1',
-                  borderRadius:'4px',
-                  background: cell === 0 ? 'rgba(255,255,255,0.04)' :
-                              cell === 1 ? 'rgba(0,255,204,0.2)' :
-                              cell === 2 ? 'rgba(0,255,204,0.5)' :
-                              'var(--cyan)'
-                }}/>
+                  aspectRatio:'1/1', borderRadius:'6px',
+                  background: cellColor(cell),
+                  boxShadow: cell === 3 ? '0 0 6px rgba(0,255,204,0.3)' : 'none',
+                  transition: 'all 0.3s ease',
+                  maxHeight: '40px',
+                }} />
               ))}
             </div>
           ))}
         </div>
+
+        {/* Legend */}
         <div style={{ display:'flex', alignItems:'center', justifyContent:'flex-end', gap:'6px', marginTop:'16px', fontSize:'11px', color:'var(--muted)' }}>
           <span>Less</span>
           {[0,1,2,3].map((l) => (
-            <div key={l} style={{
-              width:'12px',
-              height:'12px',
-              borderRadius:'3px',
-              background: l === 0 ? 'rgba(255,255,255,0.04)' :
-                          l === 1 ? 'rgba(0,255,204,0.2)' :
-                          l === 2 ? 'rgba(0,255,204,0.5)' :
-                          'var(--cyan)'
-            }}/>
+            <div key={l} style={{ width:'12px', height:'12px', borderRadius:'3px', background: cellColor(l) }} />
           ))}
           <span style={{ color:'var(--cyan)' }}>More</span>
         </div>
