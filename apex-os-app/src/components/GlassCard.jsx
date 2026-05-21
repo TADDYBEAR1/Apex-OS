@@ -8,7 +8,7 @@ export default function GlassCard({ children, className = '', onClick, style, gl
       type={onClick ? 'button' : undefined}
       className={`glass ${onClick ? 'glass-interactive glass-button' : ''} ${glow ? 'glow-cyan' : ''} ${className}`}
       onClick={onClick}
-      style={{ padding: '16px', ...style }}
+      style={{ ...style }}
     >
       {children}
     </Component>

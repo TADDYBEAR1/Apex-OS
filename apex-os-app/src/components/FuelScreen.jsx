@@ -184,8 +184,8 @@ export default function FuelScreen({ nutrition, setNutrition, profile, onOpenPro
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', animation: 'fadeInUp 0.4s ease-out' }}>
         <div>
-          <h1 style={{ fontSize: '28px', fontWeight: 700, marginBottom: '4px' }}>Fuel</h1>
-          <p style={{ fontSize: '14px', color: 'var(--muted)' }}>Daily Macro Tracking & Provisioning</p>
+          <h1 style={{ fontSize: '40px', fontWeight: 300, marginBottom: '-4px', letterSpacing: '-0.04em' }}>Fuel<span style={{ color:'var(--cyan)', textShadow: '0 0 10px rgba(0,229,255,0.5)' }}>.</span></h1>
+          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 300 }}>Daily Macro Tracking & Provisioning</p>
         </div>
         <ProfileButton profile={profile} onClick={onOpenProfile} />
       </div>
@@ -215,7 +215,7 @@ export default function FuelScreen({ nutrition, setNutrition, profile, onOpenPro
           <GlassCard style={{ padding: '24px', marginBottom: '20px', animation: 'fadeInUp 0.6s ease-out' }}>
             <span className="label-sm" style={{ marginBottom: '8px', display: 'block' }}>DAILY TARGET</span>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '2px' }}>
-              <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '48px', lineHeight: 1 }}>{totals.calories.toLocaleString()}</span>
+              <span style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '64px', lineHeight: 1, letterSpacing: '-0.02em' }}>{totals.calories.toLocaleString()}</span>
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '16px', color: 'var(--cyan)' }}>{calPercent}% OF {nutrition.calorieGoal.toLocaleString()} KCAL</span>

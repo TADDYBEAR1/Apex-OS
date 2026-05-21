@@ -158,7 +158,7 @@ export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, wo
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
             <span style={{ fontFamily: 'var(--font-display)', fontSize: '12px', fontWeight: 700, letterSpacing: '0.12em', color: 'var(--cyan)' }}>APEX OS</span>
           </div>
-          <h1 style={{ fontSize: '28px', fontWeight: 700 }}>Records Hub</h1>
+          <h1 style={{ fontSize: '40px', fontWeight: 300, letterSpacing: '-0.04em' }}>Records<span style={{ color:'var(--cyan)', textShadow: '0 0 10px rgba(0,229,255,0.5)' }}>.</span></h1>
         </div>
         <ProfileButton profile={profile} onClick={onOpenProfile} />
       </div>
@@ -220,10 +220,10 @@ export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, wo
                 <span style={{ fontSize:'10px', color:'var(--muted)', fontFamily:'var(--font-display)', fontWeight:500 }}>{HEATMAP_DAY_LABELS[ri]}</span>
                 {row.map((cell, ci) => (
                   <div key={ci} style={{
-                    aspectRatio:'1/1', borderRadius:'5px', maxHeight:'32px',
-                    background: cell === 0 ? 'rgba(255,255,255,0.04)' : cell === 1 ? 'rgba(0,255,204,0.2)' : cell === 2 ? 'rgba(0,255,204,0.5)' : 'var(--cyan)',
-                    boxShadow: cell === 3 ? '0 0 6px rgba(0,255,204,0.3)' : 'none',
-                    transition: 'all 0.3s ease',
+                    aspectRatio:'1/1', borderRadius:'4px', maxHeight:'32px',
+                    background: cell === 0 ? 'rgba(255,255,255,0.03)' : cell === 1 ? 'rgba(0,229,255,0.2)' : cell === 2 ? 'rgba(0,229,255,0.5)' : 'var(--cyan)',
+                    boxShadow: cell === 3 ? '0 0 8px rgba(0,229,255,0.4)' : 'none',
+                    transition: 'all 0.4s ease',
                   }} />
                 ))}
               </div>
@@ -583,8 +583,8 @@ export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, wo
       <GlassCard style={{ padding: '20px', marginBottom: '12px', animation: 'fadeInUp 1s ease-out' }}>
         <span className="label-sm" style={{ marginBottom: '6px', display: 'block' }}>WORK CAPACITY</span>
         <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px', marginBottom: '6px' }}>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '48px', lineHeight: 1 }}>{workCapacity.value}</span>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '18px', color: 'var(--muted)' }}>{workCapacity.unit}</span>
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '64px', lineHeight: 1, letterSpacing: '-0.02em' }}>{workCapacity.value}</span>
+          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '18px', color: 'var(--muted)' }}>{workCapacity.unit}</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
           <span style={{ color: 'var(--cyan)', fontSize: '13px' }}>↗</span>
