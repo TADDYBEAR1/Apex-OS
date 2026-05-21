@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import GlassCard from './GlassCard';
 import ProfileButton from './ProfileButton';
 import { HEATMAP_DAY_LABELS } from '../data/sampleData';
-import { buildHeatmapFromWorkoutHistory, calculateStats } from '../utils/stats';
+import { buildHeatmapFromWorkoutHistory, calculateHistoryStats } from '../utils/stats';
 
 export default function HomeScreen({ workoutPlan, currentDay, onNavigate, profile, onOpenProfile, workoutHistory }) {
   const [heatmapRange, setHeatmapRange] = useState('30d');
@@ -11,9 +11,11 @@ export default function HomeScreen({ workoutPlan, currentDay, onNavigate, profil
   const now = new Date();
   const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const rangeDays = heatmapRange === '90d' ? 90 : 30;
+  const rangeWeeks = heatmapRange === '90d' ? 13 : 5;
 
-  const heatmap = buildHeatmapFromWorkoutHistory(workoutHistory, heatmapRange === '90d' ? 13 : 4);
-  const stats = calculateStats(heatmap.cells, { latestDayIndex: heatmap.latestDayIndex });
+  const heatmap = buildHeatmapFromWorkoutHistory(workoutHistory, rangeWeeks, now, { rangeDays });
+  const stats = calculateHistoryStats(workoutHistory, rangeDays, now);
   const weekProgress = Math.min(Math.round((stats.weeklySessions / 5) * 100), 100);
 
   const cellColor = (val) =>
@@ -50,7 +52,7 @@ export default function HomeScreen({ workoutPlan, currentDay, onNavigate, profil
         <GlassCard style={{ padding:'14px', display:'flex', flexDirection:'column', gap:'8px' }}>
           <span className="label-sm" style={{ fontSize:'9px' }}>TOTAL SESSIONS</span>
           <span style={{ fontFamily:'var(--font-display)', fontWeight:700, fontSize:'28px' }}>{stats.totalSessions}</span>
-          <span style={{ fontSize:'11px', color:'var(--muted)' }}>Logged all-time</span>
+          <span style={{ fontSize:'11px', color:'var(--muted)' }}>In selected range</span>
         </GlassCard>
       </div>
 

@@ -16,6 +16,7 @@ export default function FuelScreen({ nutrition, setNutrition, profile, onOpenPro
   const [newGroceryName, setNewGroceryName] = useState('');
   const [newGroceryQty, setNewGroceryQty] = useState('');
   const [showEditTargets, setShowEditTargets] = useState(false);
+  const [editingMealItem, setEditingMealItem] = useState(null);
 
   // Custom Food Form State
   const [customFoodName, setCustomFoodName] = useState('');
@@ -67,6 +68,81 @@ export default function FuelScreen({ nutrition, setNutrition, profile, onOpenPro
     setNutrition(prev => ({
       ...prev,
       groceryList: prev.groceryList.filter(item => item.id !== id),
+    }));
+  };
+
+  const resetMealForm = () => {
+    setCustomFoodName('');
+    setCustomCals('');
+    setCustomPro('');
+    setCustomCarbs('');
+    setCustomFat('');
+    setEditingMealItem(null);
+  };
+
+  const openAddFood = (mealKey) => {
+    resetMealForm();
+    setAddMealType(mealKey);
+    setShowAddFood(true);
+  };
+
+  const openEditFood = (mealKey, food) => {
+    setAddMealType(mealKey);
+    setEditingMealItem({ mealKey, id: food.id });
+    setCustomFoodName(food.name);
+    setCustomCals(String(food.calories || 0));
+    setCustomPro(String(food.protein || 0));
+    setCustomCarbs(String(food.carbs || 0));
+    setCustomFat(String(food.fat || 0));
+    setShowAddFood(true);
+  };
+
+  const saveMealItem = () => {
+    if (customFoodName.trim() === '') return;
+
+    const mealData = {
+      name: customFoodName.trim(),
+      calories: parseInt(customCals) || 0,
+      protein: parseInt(customPro) || 0,
+      carbs: parseInt(customCarbs) || 0,
+      fat: parseInt(customFat) || 0,
+    };
+
+    setNutrition(prev => {
+      const currentMealItems = prev.meals[addMealType] || [];
+      const nextMeals = { ...prev.meals };
+
+      if (editingMealItem) {
+        nextMeals[editingMealItem.mealKey] = (prev.meals[editingMealItem.mealKey] || []).map(item =>
+          item.id === editingMealItem.id ? { ...item, ...mealData } : item
+        );
+      } else {
+        nextMeals[addMealType] = [
+          ...currentMealItems,
+          {
+            id: `mf-${Date.now()}`,
+            ...mealData,
+            checked: false,
+          },
+        ];
+      }
+
+      return { ...prev, meals: nextMeals };
+    });
+
+    setShowAddFood(false);
+    resetMealForm();
+  };
+
+  const deleteMealItem = (mealKey, id, name) => {
+    if (!window.confirm(`Delete ${name}?`)) return;
+
+    setNutrition(prev => ({
+      ...prev,
+      meals: {
+        ...prev.meals,
+        [mealKey]: (prev.meals[mealKey] || []).filter(item => item.id !== id),
+      },
     }));
   };
 
@@ -172,7 +248,7 @@ export default function FuelScreen({ nutrition, setNutrition, profile, onOpenPro
                   <span style={{ fontSize: '16px' }}>{meal.icon}</span>
                   <h3 style={{ fontSize: '16px', fontWeight: 700 }}>{meal.label}</h3>
                 </div>
-                <IconButton label={`Add food to ${meal.label}`} tone="primary" onClick={() => { setAddMealType(meal.key); setShowAddFood(true); }}>+</IconButton>
+                <IconButton label={`Add food to ${meal.label}`} tone="primary" onClick={() => openAddFood(meal.key)}>+</IconButton>
               </div>
               {(nutrition.meals[meal.key] || []).map((food) => (
                 <CheckboxRow
@@ -182,6 +258,31 @@ export default function FuelScreen({ nutrition, setNutrition, profile, onOpenPro
                   meta={`${food.calories} kcal`}
                   subtitle={`P: ${food.protein}g · C: ${food.carbs}g · F: ${food.fat}g`}
                   onToggle={() => toggleMealItem(meal.key, food.id)}
+                  action={(
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <IconButton
+                        label={`Edit ${food.name}`}
+                        size={28}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEditFood(meal.key, food);
+                        }}
+                      >
+                        ✎
+                      </IconButton>
+                      <IconButton
+                        label={`Delete ${food.name}`}
+                        tone="danger"
+                        size={28}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteMealItem(meal.key, food.id, food.name);
+                        }}
+                      >
+                        ✕
+                      </IconButton>
+                    </div>
+                  )}
                 />
               ))}
               {(!nutrition.meals[meal.key] || nutrition.meals[meal.key].length === 0) && (
@@ -231,7 +332,7 @@ export default function FuelScreen({ nutrition, setNutrition, profile, onOpenPro
 
       {/* Add Custom Food Modal */}
       {showAddFood && (
-        <BottomSheetModal title={`Add Custom Meal to ${addMealType}`} titleId="add-food-title" onClose={() => setShowAddFood(false)}>
+        <BottomSheetModal title={`${editingMealItem ? 'Edit' : 'Add'} Meal in ${addMealType}`} titleId="add-food-title" onClose={() => { setShowAddFood(false); resetMealForm(); }}>
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '13px', color: 'var(--muted)', textTransform: 'uppercase' }}>Meal Name</label>
               <input value={customFoodName} onChange={(e) => setCustomFoodName(e.target.value)} placeholder="e.g. Avocado Toast" style={{ width: '100%', padding: '14px 16px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--surface-border)', borderRadius: 'var(--radius-md)', color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: '15px', outline: 'none' }} />
@@ -245,32 +346,8 @@ export default function FuelScreen({ nutrition, setNutrition, profile, onOpenPro
             </div>
 
             <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-              <button onClick={() => setShowAddFood(false)} className="btn-ghost" style={{ flex: 1 }}>Cancel</button>
-              <button onClick={() => {
-                if (customFoodName.trim() === '') return;
-                const newFood = {
-                  id: `mf-${Date.now()}`,
-                  name: customFoodName,
-                  calories: parseInt(customCals) || 0,
-                  protein: parseInt(customPro) || 0,
-                  carbs: parseInt(customCarbs) || 0,
-                  fat: parseInt(customFat) || 0,
-                  checked: false
-                };
-                setNutrition(prev => ({
-                  ...prev,
-                  meals: {
-                    ...prev.meals,
-                    [addMealType]: [...(prev.meals[addMealType]||[]), newFood]
-                  }
-                }));
-                setShowAddFood(false);
-                setCustomFoodName('');
-                setCustomCals('');
-                setCustomPro('');
-                setCustomCarbs('');
-                setCustomFat('');
-              }} className="btn-primary" style={{ flex: 2 }}>Save Meal</button>
+              <button onClick={() => { setShowAddFood(false); resetMealForm(); }} className="btn-ghost" style={{ flex: 1 }}>Cancel</button>
+              <button onClick={saveMealItem} className="btn-primary" style={{ flex: 2 }}>{editingMealItem ? 'Save Changes' : 'Save Meal'}</button>
             </div>
         </BottomSheetModal>
       )}

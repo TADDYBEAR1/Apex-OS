@@ -6,27 +6,34 @@ import RecordsScreen from './components/RecordsScreen';
 import FuelScreen from './components/FuelScreen';
 import ProfileScreen from './components/ProfileScreen';
 import BottomNav from './components/BottomNav';
+import VisualShowcase, { VISUAL_SHOWCASE_SLUGS } from './components/VisualShowcase';
 import { DEFAULT_WORKOUT_PLAN, NUTRITION_DATA, RECORDS_DATA, WORKOUT_HISTORY } from './data/sampleData';
-import { DEFAULT_PROFILE, loadAppState, saveAppState } from './utils/storage';
+import { DEFAULT_PROFILE, getLocalDateKey, loadAppState, normalizeDailyAppState, resetMealChecks, saveAppState } from './utils/storage';
 import { applyWorkoutPersonalRecords } from './utils/stats';
 import './index.css';
 
 import WorkoutCompleteOverlay from './components/WorkoutCompleteOverlay';
 
-export default function App() {
-  const initialState = useMemo(() => loadAppState({
-    workoutPlan: DEFAULT_WORKOUT_PLAN,
-    nutrition: NUTRITION_DATA,
-    profile: DEFAULT_PROFILE,
-    benchmarks: RECORDS_DATA.benchmarks,
-    workoutHistory: WORKOUT_HISTORY,
-  }), []);
+function CoreApp() {
+  const initialState = useMemo(() => {
+    const todayKey = getLocalDateKey();
+    return normalizeDailyAppState(loadAppState({
+      workoutPlan: DEFAULT_WORKOUT_PLAN,
+      nutrition: NUTRITION_DATA,
+      profile: DEFAULT_PROFILE,
+      benchmarks: RECORDS_DATA.benchmarks,
+      workoutHistory: WORKOUT_HISTORY,
+      lastMealResetDate: todayKey,
+    }), todayKey);
+  }, []);
 
   const [activeTab, setActiveTab] = useState('home');
   const [workoutPlan, setWorkoutPlan] = useState(initialState.workoutPlan);
   const [currentDay, setCurrentDay] = useState(new Date().getDay());
+  const [todayKey, setTodayKey] = useState(getLocalDateKey());
   const [focusSession, setFocusSession] = useState(null);
   const [nutrition, setNutrition] = useState(initialState.nutrition);
+  const [lastMealResetDate, setLastMealResetDate] = useState(initialState.lastMealResetDate);
   const [showProfile, setShowProfile] = useState(false);
   const [profile, setProfile] = useState(initialState.profile);
   const [benchmarks, setBenchmarks] = useState(initialState.benchmarks);
@@ -44,8 +51,25 @@ export default function App() {
       profile,
       benchmarks,
       workoutHistory,
+      lastMealResetDate,
     });
-  }, [workoutPlan, nutrition, profile, benchmarks, workoutHistory]);
+  }, [workoutPlan, nutrition, profile, benchmarks, workoutHistory, lastMealResetDate]);
+
+  useEffect(() => {
+    const syncCalendarDay = () => {
+      const nextTodayKey = getLocalDateKey();
+      if (nextTodayKey === todayKey) return;
+
+      setTodayKey(nextTodayKey);
+      setCurrentDay(new Date().getDay());
+      setNutrition(prev => resetMealChecks(prev));
+      setLastMealResetDate(nextTodayKey);
+    };
+
+    syncCalendarDay();
+    const timerId = window.setInterval(syncCalendarDay, 60 * 1000);
+    return () => window.clearInterval(timerId);
+  }, [todayKey]);
 
   const handleEnterFocus = ({ exercises, day, planName }) => {
     const startedAt = Date.now();
@@ -168,4 +192,15 @@ export default function App() {
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
     </>
   );
+}
+
+export default function App() {
+  const params = new URLSearchParams(window.location.search);
+  const visual = params.get('visual');
+
+  if (VISUAL_SHOWCASE_SLUGS.includes(visual)) {
+    return <VisualShowcase visual={visual} capture={params.get('capture') === '1'} />;
+  }
+
+  return <CoreApp />;
 }

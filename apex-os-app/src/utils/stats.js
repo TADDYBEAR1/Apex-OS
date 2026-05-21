@@ -58,15 +58,95 @@ export function calculateStats(heatmapData, options = {}) {
   };
 }
 
+function getStartOfLocalDay(date = new Date()) {
+  const day = new Date(date);
+  day.setHours(0, 0, 0, 0);
+  return day;
+}
+
+function parseSessionDate(rawDate) {
+  if (!rawDate) return null;
+  const value = String(rawDate);
+
+  if (!value.includes('T')) {
+    const [year, month, day] = value.slice(0, 10).split('-').map(Number);
+    if (!year || !month || !day) return null;
+    return new Date(year, month - 1, day);
+  }
+
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function formatLocalDateKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+export function calculateHistoryStats(history = [], rangeDays = 30, referenceDate = new Date()) {
+  const safeRangeDays = Math.max(1, Number(rangeDays) || 30);
+  const ref = getStartOfLocalDay(referenceDate);
+  const rangeStart = new Date(ref);
+  rangeStart.setDate(ref.getDate() - safeRangeDays + 1);
+
+  const activeDays = new Set();
+  let sessionCount = 0;
+
+  history.forEach((session) => {
+    const sessionDate = parseSessionDate(session.completedAt || session.date);
+    if (!sessionDate) return;
+
+    const completedDay = getStartOfLocalDay(sessionDate);
+    if (completedDay < rangeStart || completedDay > ref) return;
+
+    activeDays.add(formatLocalDateKey(completedDay));
+    sessionCount += 1;
+  });
+
+  const latestDayIndex = getHeatmapDayIndex(ref);
+  const currentWeekStart = new Date(ref);
+  currentWeekStart.setDate(ref.getDate() - latestDayIndex);
+
+  let weeklySessions = 0;
+  activeDays.forEach((dateKey) => {
+    const [year, month, day] = dateKey.split('-').map(Number);
+    const activeDate = new Date(year, month - 1, day);
+    if (activeDate >= currentWeekStart && activeDate <= ref) {
+      weeklySessions += 1;
+    }
+  });
+
+  let currentStreak = 0;
+  const cursor = new Date(ref);
+  while (cursor >= rangeStart) {
+    if (!activeDays.has(formatLocalDateKey(cursor))) break;
+    currentStreak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  return {
+    totalSessions: sessionCount,
+    currentStreak,
+    consistency: Math.round((activeDays.size / safeRangeDays) * 100),
+    activeDays: activeDays.size,
+    totalDays: safeRangeDays,
+    weeklySessions,
+  };
+}
+
 export function getHeatmapDayIndex(date) {
   const jsDay = date.getDay();
   return jsDay === 0 ? 6 : jsDay - 1;
 }
 
-export function buildHeatmapFromWorkoutHistory(history = [], weeks = 4, referenceDate = new Date()) {
+export function buildHeatmapFromWorkoutHistory(history = [], weeks = 4, referenceDate = new Date(), options = {}) {
   const cells = Array.from({ length: 7 }, () => Array(weeks).fill(0));
-  const ref = new Date(referenceDate);
-  ref.setHours(0, 0, 0, 0);
+  const ref = getStartOfLocalDay(referenceDate);
+  const rangeDays = options.rangeDays ? Math.max(1, Number(options.rangeDays)) : null;
+  const rangeStart = rangeDays ? new Date(ref) : null;
+  if (rangeStart) rangeStart.setDate(ref.getDate() - rangeDays + 1);
 
   const latestDayIndex = getHeatmapDayIndex(ref);
   const currentWeekStart = new Date(ref);
@@ -74,11 +154,12 @@ export function buildHeatmapFromWorkoutHistory(history = [], weeks = 4, referenc
 
   history.forEach((session) => {
     const rawDate = session.completedAt || session.date;
-    if (!rawDate) return;
+    const parsedDate = parseSessionDate(rawDate);
+    if (!parsedDate) return;
 
-    const completedDate = new Date(rawDate);
-    if (Number.isNaN(completedDate.getTime())) return;
-    completedDate.setHours(0, 0, 0, 0);
+    const completedDate = getStartOfLocalDay(parsedDate);
+    if (completedDate > ref) return;
+    if (rangeStart && completedDate < rangeStart) return;
 
     const sessionDayIndex = getHeatmapDayIndex(completedDate);
     const sessionWeekStart = new Date(completedDate);

@@ -3,6 +3,7 @@ import {
   analyzeFuelCompliance,
   applyWorkoutPersonalRecords,
   buildHeatmapFromWorkoutHistory,
+  calculateHistoryStats,
   calculateFuelTotals,
   calculateStats,
   computeBenchmarkTrend,
@@ -39,6 +40,23 @@ describe('stats utilities', () => {
 
     expect(heatmap.cells[0][3]).toBe(2);
     expect(heatmap.latestDayIndex).toBe(0);
+  });
+
+  it('calculates training consistency over an exact day range', () => {
+    const stats = calculateHistoryStats(
+      [
+        { completedAt: '2026-05-12T10:00:00.000Z' },
+        { completedAt: '2026-05-01T10:00:00.000Z' },
+        { completedAt: '2026-04-12T10:00:00.000Z' },
+      ],
+      30,
+      new Date('2026-05-12T12:00:00.000Z')
+    );
+
+    expect(stats.totalDays).toBe(30);
+    expect(stats.activeDays).toBe(2);
+    expect(stats.totalSessions).toBe(2);
+    expect(stats.consistency).toBe(7);
   });
 
   it('calculates fuel totals from checked meals only', () => {

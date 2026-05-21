@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import BottomSheetModal from './BottomSheetModal';
 import GlassCard from './GlassCard';
+import IconButton from './IconButton';
 import ProfileButton from './ProfileButton';
 import SegmentedControl from './SegmentedControl';
 import WorkoutHistoryList from './WorkoutHistoryList';
@@ -43,6 +44,16 @@ export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, wo
   // Record new entry for existing benchmark
   const [recordingIndex, setRecordingIndex] = useState(null);
   const [recordValue, setRecordValue] = useState(0);
+  const [expandedBenchmarkKeys, setExpandedBenchmarkKeys] = useState(() => new Set());
+
+  const toggleBenchmarkDetails = (benchmarkKey) => {
+    setExpandedBenchmarkKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(benchmarkKey)) next.delete(benchmarkKey);
+      else next.add(benchmarkKey);
+      return next;
+    });
+  };
 
   const { workCapacity } = RECORDS_DATA;
   const heatmap = buildHeatmapFromWorkoutHistory(workoutHistory, 4);
@@ -106,6 +117,37 @@ export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, wo
     setBenchmarks(updated);
     setRecordingIndex(null);
     setRecordValue(0);
+  };
+
+  const handleDeleteBenchmarkHistoryEntry = (benchmarkIndex, entryIndex) => {
+    const benchmark = benchmarks[benchmarkIndex];
+    const entry = benchmark?.history?.[entryIndex];
+    if (!benchmark || !entry) return;
+    if (!window.confirm(`Delete ${benchmark.label} entry from ${entry.date}?`)) return;
+
+    const updated = [...benchmarks];
+    const nextHistory = benchmark.history.filter((_, index) => index !== entryIndex);
+    const nextBenchmark = { ...benchmark, history: nextHistory };
+
+    if (nextHistory.length > 0) {
+      const latestEntry = nextHistory[nextHistory.length - 1];
+      const trend = nextHistory.length >= 2
+        ? computeBenchmarkTrend(nextHistory, benchmark.unit)
+        : { text: '1 entry recorded', positive: true };
+
+      nextBenchmark.value = benchmark.unit === 'TIME'
+        ? formatBenchmarkValue(latestEntry.value, 'TIME')
+        : latestEntry.value;
+      nextBenchmark.trend = trend.text;
+      nextBenchmark.positive = trend.positive;
+    } else {
+      nextBenchmark.value = 0;
+      nextBenchmark.trend = 'No history recorded';
+      nextBenchmark.positive = true;
+    }
+
+    updated[benchmarkIndex] = nextBenchmark;
+    setBenchmarks(updated);
   };
 
   return (
@@ -211,10 +253,12 @@ export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, wo
 
       {benchmarks.map((record, i) => {
         const history = record.history || [];
+        const benchmarkKey = `${record.label}-${i}`;
+        const showDetails = expandedBenchmarkKeys.has(benchmarkKey);
         const { linePath, areaPath, points } = generateHistoryPath(history, 200, 80);
         const latestValue = history.length > 0
           ? formatBenchmarkValue(history[history.length - 1].value, record.unit)
-          : record.value;
+          : 'No data';
         const trend = history.length >= 2 ? computeBenchmarkTrend(history, record.unit) : { text: record.trend, positive: record.positive };
         const isPositive = trend.positive;
 
@@ -299,7 +343,39 @@ export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, wo
               </div>
             )}
 
-            {/* Sparkline Chart from Real Data */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: showDetails ? '12px' : 0 }}>
+              <span style={{ fontSize: '11px', color: 'var(--muted)' }}>
+                {history.length > 0
+                  ? `${history.length} ${history.length === 1 ? 'entry' : 'entries'} recorded`
+                  : 'No history yet'}
+              </span>
+              <button
+                type="button"
+                onClick={() => toggleBenchmarkDetails(benchmarkKey)}
+                aria-expanded={showDetails}
+                aria-label={showDetails ? `Hide ${record.label} history` : `Show ${record.label} history`}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: 'var(--radius-pill)',
+                  border: '1px solid',
+                  borderColor: showDetails ? 'rgba(255,255,255,0.12)' : 'rgba(0,255,204,0.25)',
+                  background: showDetails ? 'rgba(255,255,255,0.04)' : 'rgba(0,255,204,0.08)',
+                  color: showDetails ? 'var(--muted)' : 'var(--cyan)',
+                  fontFamily: 'var(--font-display)',
+                  fontWeight: 600,
+                  fontSize: '10px',
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  cursor: 'pointer',
+                  flexShrink: 0,
+                }}
+              >
+                {showDetails ? 'Hide' : 'Details'}
+              </button>
+            </div>
+
+            {showDetails && (
+            <>
             <div style={{ width: '100%', height: '80px', position: 'relative' }}>
               {history.length >= 2 ? (
                 <svg viewBox="0 0 200 80" style={{ width: '100%', height: '100%', overflow: 'visible' }} preserveAspectRatio="none">
@@ -338,12 +414,46 @@ export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, wo
               )}
             </div>
 
-            {/* History count */}
             {history.length > 0 && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px' }}>
-                <span style={{ fontSize: '11px', color: 'var(--muted)' }}>{history.length} {history.length === 1 ? 'entry' : 'entries'} recorded</span>
-                <span style={{ fontSize: '11px', color: 'var(--muted)' }}>{history[history.length - 1].date}</span>
+              <div style={{ marginTop: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--muted)' }}>Latest: {history[history.length - 1].date}</span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {history.map((entry, entryIndex) => (
+                    <div
+                      key={`${entry.date}-${entry.value}-${entryIndex}`}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        gap: '10px',
+                        padding: '8px 10px',
+                        borderRadius: 'var(--radius-sm)',
+                        background: 'rgba(255,255,255,0.03)',
+                        border: '1px solid rgba(255,255,255,0.05)',
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '12px', color: 'var(--text)' }}>
+                          {formatBenchmarkValue(entry.value, record.unit)} {record.unit.toLowerCase()}
+                        </div>
+                        <div style={{ fontSize: '11px', color: 'var(--muted)', marginTop: '2px' }}>{entry.date}</div>
+                      </div>
+                      <IconButton
+                        label={`Delete ${record.label} history entry from ${entry.date}`}
+                        tone="danger"
+                        size={28}
+                        onClick={() => handleDeleteBenchmarkHistoryEntry(i, entryIndex)}
+                      >
+                        ✕
+                      </IconButton>
+                    </div>
+                  ))}
+                </div>
               </div>
+            )}
+            </>
             )}
           </GlassCard>
         );
