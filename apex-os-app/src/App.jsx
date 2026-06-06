@@ -13,18 +13,27 @@ import { applyWorkoutPersonalRecords } from './utils/stats';
 import './index.css';
 
 import WorkoutCompleteOverlay from './components/WorkoutCompleteOverlay';
+import { StatusBar, Style } from '@capacitor/status-bar';
 
 function CoreApp() {
   const initialState = useMemo(() => {
     const todayKey = getLocalDateKey();
-    return normalizeDailyAppState(loadAppState({
+    const loadedState = loadAppState({
       workoutPlan: DEFAULT_WORKOUT_PLAN,
       nutrition: NUTRITION_DATA,
       profile: DEFAULT_PROFILE,
       benchmarks: RECORDS_DATA.benchmarks,
       workoutHistory: WORKOUT_HISTORY,
       lastMealResetDate: todayKey,
-    }), todayKey);
+    });
+    
+    // Force migration for V6 update
+    if (!window.localStorage.getItem('apex-v6-migrated')) {
+      loadedState.workoutPlan = DEFAULT_WORKOUT_PLAN;
+      window.localStorage.setItem('apex-v6-migrated', 'true');
+    }
+
+    return normalizeDailyAppState(loadedState, todayKey);
   }, []);
 
   const [activeTab, setActiveTab] = useState('home');
@@ -43,6 +52,18 @@ function CoreApp() {
   const [workoutStartTime, setWorkoutStartTime] = useState(null);
   const [showCompletion, setShowCompletion] = useState(false);
   const [lastWorkoutDuration, setLastWorkoutDuration] = useState(0);
+
+  useEffect(() => {
+    const initNative = async () => {
+      try {
+        await StatusBar.setStyle({ style: Style.Dark });
+        await StatusBar.setBackgroundColor({ color: '#000000' });
+      } catch (e) {
+        // web fallback
+      }
+    };
+    initNative();
+  }, []);
 
   useEffect(() => {
     saveAppState({

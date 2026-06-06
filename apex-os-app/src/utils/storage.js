@@ -26,7 +26,7 @@ export function resetMealChecks(nutrition) {
     ])
   );
 
-  return { ...nutrition, meals };
+  return { ...nutrition, meals, water: { ...(nutrition.water || {}), current: 0 } };
 }
 
 export function normalizeDailyAppState(state, todayKey = getLocalDateKey()) {

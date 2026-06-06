@@ -8,6 +8,7 @@ import WorkoutHistoryList from './WorkoutHistoryList';
 import { RECORDS_DATA, HEATMAP_DAY_LABELS, EXERCISE_LIBRARY } from '../data/sampleData';
 import { buildHeatmapFromWorkoutHistory, calculateStats, computeBenchmarkTrend, formatBenchmarkValue, generateInsight } from '../utils/stats';
 import Stepper from './Stepper';
+import HoverGraph from './HoverGraph';
 
 // Generate SVG path from real history data
 const generateHistoryPath = (history, width, height, padding = 4) => {
@@ -155,9 +156,6 @@ export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, wo
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', animation: 'fadeInUp 0.4s ease-out' }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '12px', fontWeight: 700, letterSpacing: '0.12em', color: 'var(--cyan)' }}>APEX OS</span>
-          </div>
           <h1 style={{ fontSize: '40px', fontWeight: 300, letterSpacing: '-0.04em' }}>Records<span style={{ color:'var(--cyan)', textShadow: '0 0 10px rgba(0,229,255,0.5)' }}>.</span></h1>
         </div>
         <ProfileButton profile={profile} onClick={onOpenProfile} />
@@ -255,7 +253,6 @@ export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, wo
         const history = record.history || [];
         const benchmarkKey = `${record.label}-${i}`;
         const showDetails = expandedBenchmarkKeys.has(benchmarkKey);
-        const { linePath, areaPath, points } = generateHistoryPath(history, 200, 80);
         const latestValue = history.length > 0
           ? formatBenchmarkValue(history[history.length - 1].value, record.unit)
           : 'No data';
@@ -377,41 +374,7 @@ export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, wo
             {showDetails && (
             <>
             <div style={{ width: '100%', height: '80px', position: 'relative' }}>
-              {history.length >= 2 ? (
-                <svg viewBox="0 0 200 80" style={{ width: '100%', height: '100%', overflow: 'visible' }} preserveAspectRatio="none">
-                  <defs>
-                    <linearGradient id={`grad-${i}`} x1="0" x2="0" y1="0" y2="1">
-                      <stop offset="0%" stopColor={isPositive ? 'var(--cyan)' : 'var(--orange)'} stopOpacity="0.4" />
-                      <stop offset="100%" stopColor={isPositive ? 'var(--cyan)' : 'var(--orange)'} stopOpacity="0" />
-                    </linearGradient>
-                  </defs>
-                  <path d={areaPath} fill={`url(#grad-${i})`} />
-                  <path
-                    d={linePath}
-                    fill="none"
-                    stroke={isPositive ? 'var(--cyan)' : 'var(--orange)'}
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  {/* Data points */}
-                  {points.map((pt, pi) => (
-                    <circle
-                      key={pi}
-                      cx={pt[0]}
-                      cy={pt[1]}
-                      r={pi === points.length - 1 ? 4 : 2.5}
-                      fill={pi === points.length - 1 ? (isPositive ? 'var(--cyan)' : 'var(--orange)') : 'var(--surface)'}
-                      stroke={isPositive ? 'var(--cyan)' : 'var(--orange)'}
-                      strokeWidth="1.5"
-                    />
-                  ))}
-                </svg>
-              ) : (
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--muted)', fontSize: '13px', fontFamily: 'var(--font-display)' }}>
-                  Record more entries to see your trend graph
-                </div>
-              )}
+              <HoverGraph data={history} unit={record.unit} isPositive={isPositive} />
             </div>
 
             {history.length > 0 && (

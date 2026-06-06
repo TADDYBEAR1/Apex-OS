@@ -360,7 +360,7 @@ function MetricCard({ label, value, detail, accent = 'primary' }) {
 }
 
 function MicroHeatmap() {
-  const cells = [3, 0, 1, 2, 0, 3, 1, 0, 2, 2, 0, 3, 1, 0, 2, 0, 3, 2, 1, 0, 3, 1, 0, 2, 3, 0, 1, 2];
+  const cells = [3, 0, 1, 2, 0, 3, 1, 0, 2, 2, 0, 3, 1, 0, 2, 0, 3, 2, 1, 0, 3];
   return (
     <div className="vs-heatmap" aria-label="Training activity heatmap">
       {cells.map((value, index) => (

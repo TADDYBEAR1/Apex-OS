@@ -98,7 +98,7 @@ describe('stats utilities', () => {
   });
 
   it('estimates weighted one-rep max from reps and load', () => {
-    expect(estimateOneRepMax(100, 5)).toBe(116.7);
+    expect(estimateOneRepMax(100, 5)).toBe(115.2);
   });
 
   it('extracts best weighted and bodyweight PR candidates from main sets only', () => {
@@ -111,7 +111,7 @@ describe('stats utilities', () => {
 
     expect(candidates).toHaveLength(2);
     expect(candidates.find(c => c.exerciseName === 'Pull Ups').value).toBe(13);
-    expect(candidates.find(c => c.exerciseName === 'Barbell Back Squat').value).toBe(121);
+    expect(candidates.find(c => c.exerciseName === 'Barbell Back Squat').value).toBe(119.1);
   });
 
   it('appends detected PRs to matching benchmark history', () => {
@@ -137,7 +137,7 @@ describe('stats utilities', () => {
     );
 
     expect(result.detected).toHaveLength(1);
-    expect(result.benchmarks[0].history.at(-1)).toMatchObject({ value: 126.5, date: '2026-05-11' });
+    expect(result.benchmarks[0].history.at(-1)).toMatchObject({ value: 124.5, date: '2026-05-11' });
   });
 
   it('prevents duplicate same-day same-value PR entries', () => {

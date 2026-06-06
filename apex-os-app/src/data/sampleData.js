@@ -6,100 +6,121 @@ export const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 export const CATEGORIES = ['All', 'Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Core'];
 
 export const EXERCISE_LIBRARY = [
-  { id: 'e1', name: 'Arm Swings', category: 'Shoulders', image: null, defaultSets: 2, defaultReps: 20, defaultWeight: 0, defaultRest: 30, isBodyweight: true },
-  { id: 'e2', name: 'Hip Circles', category: 'Core', image: null, defaultSets: 2, defaultReps: 15, defaultWeight: 0, defaultRest: 30, isBodyweight: true },
-  { id: 'e3', name: 'Barbell Back Squat', category: 'Legs', image: null, defaultSets: 5, defaultReps: 5, defaultWeight: 100, defaultRest: 180, isBodyweight: false },
-  { id: 'e4', name: 'Incline Dumbbell Press', category: 'Chest', image: null, defaultSets: 3, defaultReps: 10, defaultWeight: 34, defaultRest: 90, isBodyweight: false },
-  { id: 'e5', name: 'Bent Over Row', category: 'Back', image: null, defaultSets: 4, defaultReps: 8, defaultWeight: 60, defaultRest: 90, isBodyweight: false },
-  { id: 'e6', name: 'Lateral Raises', category: 'Shoulders', image: null, defaultSets: 3, defaultReps: 15, defaultWeight: 10, defaultRest: 60, isBodyweight: false },
-  { id: 'e7', name: 'Foam Rolling', category: 'Core', image: null, defaultSets: 1, defaultReps: 10, defaultWeight: 0, defaultRest: 0, isBodyweight: true },
-  { id: 'e8', name: 'Tricep Dips', category: 'Arms', image: null, defaultSets: 3, defaultReps: 12, defaultWeight: 0, defaultRest: 60, isBodyweight: true },
-  { id: 'e9', name: 'Bicep Curls', category: 'Arms', image: null, defaultSets: 3, defaultReps: 12, defaultWeight: 14, defaultRest: 60, isBodyweight: false },
-  { id: 'e10', name: 'Deadlift', category: 'Legs', image: null, defaultSets: 5, defaultReps: 3, defaultWeight: 140, defaultRest: 180, isBodyweight: false },
-  { id: 'e11', name: 'Pull Ups', category: 'Back', image: null, defaultSets: 4, defaultReps: 8, defaultWeight: 0, defaultRest: 90, isBodyweight: true },
-  { id: 'e12', name: 'Plank Hold', category: 'Core', image: null, defaultSets: 3, defaultReps: 60, defaultWeight: 0, defaultRest: 30, isBodyweight: true },
+  // Apex Activation Block
+  { id: 'v6_1', name: 'Knee Isometrics', category: 'Legs', image: null, defaultSets: 2, defaultReps: 45, defaultWeight: 0, defaultRest: 30, isBodyweight: true },
+  { id: 'v6_2', name: 'Contralateral Bird-Dog', category: 'Core', image: null, defaultSets: 2, defaultReps: 10, defaultWeight: 0, defaultRest: 30, isBodyweight: true },
+  { id: 'v6_3', name: 'Chest-Supported Y-T-W', category: 'Shoulders', image: null, defaultSets: 2, defaultReps: 10, defaultWeight: 5, defaultRest: 60, isBodyweight: false },
+  { id: 'v6_4', name: 'Banded Face Pulls', category: 'Shoulders', image: null, defaultSets: 2, defaultReps: 20, defaultWeight: 0, defaultRest: 45, isBodyweight: true },
+  
+  // The Heavy Trunk
+  { id: 'v6_5', name: 'Contralateral Heavy Bulgarian Split Squat', category: 'Legs', image: null, defaultSets: 3, defaultReps: 10, defaultWeight: 24, defaultRest: 120, isBodyweight: false },
+  { id: 'v6_6', name: 'Chest-Supported DB Row', category: 'Back', image: null, defaultSets: 4, defaultReps: 10, defaultWeight: 32, defaultRest: 90, isBodyweight: false },
+  { id: 'v6_7', name: 'Flat DB Bench Press', category: 'Chest', image: null, defaultSets: 3, defaultReps: 10, defaultWeight: 40, defaultRest: 120, isBodyweight: false },
+  { id: 'v6_8', name: 'Single Leg DB RDL', category: 'Legs', image: null, defaultSets: 3, defaultReps: 8, defaultWeight: 24, defaultRest: 90, isBodyweight: false },
+  { id: 'v6_9', name: 'Heavy Suitcase Carries', category: 'Core', image: null, defaultSets: 3, defaultReps: 30, defaultWeight: 24, defaultRest: 90, isBodyweight: false },
+  { id: 'v6_10', name: 'Side Plank', category: 'Core', image: null, defaultSets: 2, defaultReps: 45, defaultWeight: 0, defaultRest: 60, isBodyweight: true },
+
+  // Parasympathetic Reset
+  { id: 'v6_11', name: 'Towel Toe Curls', category: 'Legs', image: null, defaultSets: 3, defaultReps: 15, defaultWeight: 0, defaultRest: 30, isBodyweight: true },
+  { id: 'v6_12', name: 'Bear Crawl (Slow)', category: 'Core', image: null, defaultSets: 3, defaultReps: 10, defaultWeight: 0, defaultRest: 60, isBodyweight: true },
+  { id: 'v6_13', name: 'Zone 2 Volume Run', category: 'Legs', image: null, defaultSets: 1, defaultReps: 45, defaultWeight: 0, defaultRest: 0, isBodyweight: true },
+
+  // The Yoke Block & PFMT
+  { id: 'v6_14', name: 'Seated Heavy Overhead Hold', category: 'Shoulders', image: null, defaultSets: 1, defaultReps: 240, defaultWeight: 20, defaultRest: 0, isBodyweight: false },
+  { id: 'v6_15', name: 'Solid-Ground Cross-Body Catch', category: 'Core', image: null, defaultSets: 3, defaultReps: 60, defaultWeight: 0, defaultRest: 60, isBodyweight: true },
+  { id: 'v6_16', name: 'The Pallof Press', category: 'Core', image: null, defaultSets: 3, defaultReps: 10, defaultWeight: 10, defaultRest: 60, isBodyweight: false },
+  { id: 'v6_17', name: 'PFMT Kegel Routine', category: 'Core', image: null, defaultSets: 3, defaultReps: 10, defaultWeight: 0, defaultRest: 10, isBodyweight: true },
 ];
 
 export const DEFAULT_WORKOUT_PLAN = {
-  0: { name: 'Recovery Flow', exercises: {
-    warmup: [
-      { ...EXERCISE_LIBRARY[0], id: 'w0-e1', sets: 2, reps: 20, weight: 0, rest: 30, note: 'Open the shoulders before recovery work.', isBodyweight: true },
-      { ...EXERCISE_LIBRARY[1], id: 'w0-e2', sets: 2, reps: 15, weight: 0, rest: 30, note: 'Loosen up the hip flexors.', isBodyweight: true },
-    ],
+  0: { name: 'The Yoke Block', exercises: {
+    warmup: [],
     main: [
-      { ...EXERCISE_LIBRARY[6], id: 'w0-e3', sets: 1, reps: 10, weight: 0, rest: 0, note: 'Focus on tight areas from the week.', isBodyweight: true },
-      { ...EXERCISE_LIBRARY[11], id: 'w0-e4', sets: 3, reps: 60, weight: 0, rest: 30, note: 'Core stability and breathing.', isBodyweight: true },
+      { ...EXERCISE_LIBRARY[13], id: 'w0-e1', sets: 1, reps: 240, weight: 20, rest: 0, note: '4 minutes continuous holding. 100% suffering diverted to traps.', isBodyweight: false },
+      { ...EXERCISE_LIBRARY[14], id: 'w0-e2', sets: 3, reps: 60, weight: 0, rest: 60, note: '60 seconds per leg. Barefoot catch.', isBodyweight: true },
+      { ...EXERCISE_LIBRARY[15], id: 'w0-e3', sets: 3, reps: 10, weight: 10, rest: 60, note: '3-second hold per rep. Best anti-rotation exercise.', isBodyweight: false },
     ],
     cooldown: [
-      { ...EXERCISE_LIBRARY[1], id: 'w0-e5', name: 'Static Stretch', sets: 1, reps: 10, weight: 0, rest: 0, note: 'Hold each stretch 30 seconds.', isBodyweight: true },
+      { ...EXERCISE_LIBRARY[16], id: 'w0-c1', sets: 3, reps: 10, weight: 0, rest: 10, note: '10 sec hold, 10 sec rest. 10 reps per pos (stand/sit/lie).', isBodyweight: true },
     ],
   }},
-  1: { name: 'Upper Body Push', exercises: {
+  1: { name: 'Kosher Kravi', exercises: {
     warmup: [
-      { ...EXERCISE_LIBRARY[0], id: 'w1-e1', sets: 2, reps: 20, weight: 0, rest: 30, note: 'Get blood flowing to the shoulders.', isBodyweight: true },
+      { ...EXERCISE_LIBRARY[0], id: 'w1-e1', sets: 2, reps: 45, weight: 0, rest: 30, note: 'Knee Isometrics (60-deg angle)', isBodyweight: true },
+      { ...EXERCISE_LIBRARY[1], id: 'w1-e2', sets: 2, reps: 10, weight: 0, rest: 30, note: 'Contralateral Bird-Dog (per side)', isBodyweight: true },
+      { ...EXERCISE_LIBRARY[2], id: 'w1-e3', sets: 2, reps: 10, weight: 5, rest: 30, note: 'Chest-Supported Y-T-W (10 per letter)', isBodyweight: false },
     ],
-    main: [
-      { ...EXERCISE_LIBRARY[3], id: 'w1-e2', sets: 3, reps: 10, weight: 34, rest: 90, note: 'Control the negative and keep elbows stacked.', isBodyweight: false },
-      { ...EXERCISE_LIBRARY[5], id: 'w1-e3', sets: 3, reps: 15, weight: 10, rest: 60, note: 'Slight bend in elbows, slow eccentric.', isBodyweight: false },
-      { ...EXERCISE_LIBRARY[7], id: 'w1-e4', sets: 3, reps: 12, weight: 0, rest: 60, note: 'Full range of motion, lock out at top.', isBodyweight: true },
-    ],
+    main: [],
     cooldown: [
-      { ...EXERCISE_LIBRARY[6], id: 'w1-e5', name: 'Upper Body Stretch', sets: 1, reps: 5, weight: 0, rest: 0, note: 'Focus on chest and shoulders.', isBodyweight: true },
+      { ...EXERCISE_LIBRARY[16], id: 'w1-c1', sets: 3, reps: 10, weight: 0, rest: 10, note: '10 sec hold, 10 sec rest. 10 reps per pos (stand/sit/lie).', isBodyweight: true },
     ],
   }},
-  2: { name: 'Lower Body Power', exercises: {
+  2: { name: 'Heavy Trunk', exercises: {
     warmup: [
-      { ...EXERCISE_LIBRARY[1], id: 'w2-e1', sets: 2, reps: 15, weight: 0, rest: 30, note: 'Activate the glutes and hips.', isBodyweight: true },
+      { ...EXERCISE_LIBRARY[0], id: 'w2-e1', sets: 2, reps: 45, weight: 0, rest: 30, note: 'Knee Isometrics (60-deg angle)', isBodyweight: true },
+      { ...EXERCISE_LIBRARY[1], id: 'w2-e2', sets: 2, reps: 10, weight: 0, rest: 30, note: 'Contralateral Bird-Dog (per side)', isBodyweight: true },
+      { ...EXERCISE_LIBRARY[2], id: 'w2-e3', sets: 2, reps: 10, weight: 5, rest: 30, note: 'Chest-Supported Y-T-W (10 per letter)', isBodyweight: false },
+      { ...EXERCISE_LIBRARY[3], id: 'w2-e4', sets: 2, reps: 20, weight: 0, rest: 45, note: 'Banded Face Pulls. Lock the shoulder joint.', isBodyweight: true },
     ],
     main: [
-      { ...EXERCISE_LIBRARY[2], id: 'w2-e2', sets: 5, reps: 5, weight: 100, rest: 180, note: 'Brace hard. Drive through the heels.', isBodyweight: false },
-      { ...EXERCISE_LIBRARY[9], id: 'w2-e3', sets: 5, reps: 3, weight: 140, rest: 180, note: 'Hinge at the hips. Flat back.', isBodyweight: false },
+      { ...EXERCISE_LIBRARY[4], id: 'w2-e5', sets: 3, reps: 10, weight: 24, rest: 120, note: 'Anti-rotation on obliques. 1 dumbbell only.', isBodyweight: false },
+      { ...EXERCISE_LIBRARY[5], id: 'w2-e6', sets: 4, reps: 10, weight: 32, rest: 90, note: 'Zero spinal shear force.', isBodyweight: false },
+      { ...EXERCISE_LIBRARY[6], id: 'w2-e7', sets: 3, reps: 10, weight: 40, rest: 120, note: 'Pure push power. Flat bench.', isBodyweight: false },
+      { ...EXERCISE_LIBRARY[7], id: 'w2-e8', sets: 3, reps: 8, weight: 24, rest: 90, note: 'Shock absorption training for dunes.', isBodyweight: false },
+      { ...EXERCISE_LIBRARY[8], id: 'w2-e9', sets: 3, reps: 30, weight: 24, rest: 90, note: '30 meters per side.', isBodyweight: false },
+      { ...EXERCISE_LIBRARY[9], id: 'w2-e10', sets: 2, reps: 45, weight: 0, rest: 60, note: '45 seconds per side. Replaces crunches.', isBodyweight: true },
     ],
     cooldown: [
-      { ...EXERCISE_LIBRARY[6], id: 'w2-e4', name: 'Leg Foam Roll', sets: 1, reps: 10, weight: 0, rest: 0, note: 'Quads, hamstrings, calves.', isBodyweight: true },
+      { ...EXERCISE_LIBRARY[16], id: 'w2-c1', sets: 3, reps: 10, weight: 0, rest: 10, note: '10 sec hold, 10 sec rest. 10 reps per pos (stand/sit/lie).', isBodyweight: true },
     ],
   }},
-  3: { name: 'Pull & Back', exercises: {
+  3: { name: 'Kosher Kravi', exercises: {
     warmup: [
-      { ...EXERCISE_LIBRARY[0], id: 'w3-e1', sets: 2, reps: 20, weight: 0, rest: 30, note: 'Warm up the rotator cuff.', isBodyweight: true },
+      { ...EXERCISE_LIBRARY[0], id: 'w3-e1', sets: 2, reps: 45, weight: 0, rest: 30, note: 'Knee Isometrics (60-deg angle)', isBodyweight: true },
+      { ...EXERCISE_LIBRARY[1], id: 'w3-e2', sets: 2, reps: 10, weight: 0, rest: 30, note: 'Contralateral Bird-Dog (per side)', isBodyweight: true },
+      { ...EXERCISE_LIBRARY[2], id: 'w3-e3', sets: 2, reps: 10, weight: 5, rest: 30, note: 'Chest-Supported Y-T-W (10 per letter)', isBodyweight: false },
     ],
-    main: [
-      { ...EXERCISE_LIBRARY[4], id: 'w3-e2', sets: 4, reps: 8, weight: 60, rest: 90, note: 'Pull to the navel. Squeeze the lats.', isBodyweight: false },
-      { ...EXERCISE_LIBRARY[10], id: 'w3-e3', sets: 4, reps: 8, weight: 0, rest: 90, note: 'Dead hang start. Chin over bar.', isBodyweight: true },
-      { ...EXERCISE_LIBRARY[8], id: 'w3-e4', sets: 3, reps: 12, weight: 14, rest: 60, note: 'No swinging. Control the weight.', isBodyweight: false },
-    ],
+    main: [],
     cooldown: [
-      { ...EXERCISE_LIBRARY[6], id: 'w3-e5', name: 'Back Stretch', sets: 1, reps: 8, weight: 0, rest: 0, note: 'Cat-cow and child pose.', isBodyweight: true },
+      { ...EXERCISE_LIBRARY[16], id: 'w3-c1', sets: 3, reps: 10, weight: 0, rest: 10, note: '10 sec hold, 10 sec rest. 10 reps per pos (stand/sit/lie).', isBodyweight: true },
     ],
   }},
-  4: { name: 'Upper Body Push', exercises: {
+  4: { name: 'Heavy Trunk', exercises: {
     warmup: [
-      { ...EXERCISE_LIBRARY[0], id: 'w4-e1', sets: 2, reps: 20, weight: 0, rest: 30, note: 'Dynamic shoulder warm-up.', isBodyweight: true },
+      { ...EXERCISE_LIBRARY[0], id: 'w4-e1', sets: 2, reps: 45, weight: 0, rest: 30, note: 'Knee Isometrics (60-deg angle)', isBodyweight: true },
+      { ...EXERCISE_LIBRARY[1], id: 'w4-e2', sets: 2, reps: 10, weight: 0, rest: 30, note: 'Contralateral Bird-Dog (per side)', isBodyweight: true },
+      { ...EXERCISE_LIBRARY[2], id: 'w4-e3', sets: 2, reps: 10, weight: 5, rest: 30, note: 'Chest-Supported Y-T-W (10 per letter)', isBodyweight: false },
+      { ...EXERCISE_LIBRARY[3], id: 'w4-e4', sets: 2, reps: 20, weight: 0, rest: 45, note: 'Banded Face Pulls. Lock the shoulder joint.', isBodyweight: true },
     ],
     main: [
-      { ...EXERCISE_LIBRARY[3], id: 'w4-e2', sets: 4, reps: 8, weight: 36, rest: 90, note: 'Progressive overload from Monday.', isBodyweight: false },
-      { ...EXERCISE_LIBRARY[5], id: 'w4-e3', sets: 4, reps: 12, weight: 12, rest: 60, note: 'Light and controlled.', isBodyweight: false },
+      { ...EXERCISE_LIBRARY[4], id: 'w4-e5', sets: 3, reps: 10, weight: 24, rest: 120, note: 'Anti-rotation on obliques. 1 dumbbell only.', isBodyweight: false },
+      { ...EXERCISE_LIBRARY[5], id: 'w4-e6', sets: 4, reps: 10, weight: 32, rest: 90, note: 'Zero spinal shear force.', isBodyweight: false },
+      { ...EXERCISE_LIBRARY[6], id: 'w4-e7', sets: 3, reps: 10, weight: 40, rest: 120, note: 'Pure push power. Flat bench.', isBodyweight: false },
+      { ...EXERCISE_LIBRARY[7], id: 'w4-e8', sets: 3, reps: 8, weight: 24, rest: 90, note: 'Shock absorption training for dunes.', isBodyweight: false },
+      { ...EXERCISE_LIBRARY[8], id: 'w4-e9', sets: 3, reps: 30, weight: 24, rest: 90, note: '30 meters per side.', isBodyweight: false },
+      { ...EXERCISE_LIBRARY[9], id: 'w4-e10', sets: 2, reps: 45, weight: 0, rest: 60, note: '45 seconds per side. Replaces crunches.', isBodyweight: true },
     ],
     cooldown: [
-      { ...EXERCISE_LIBRARY[6], id: 'w4-e5', name: 'Cooldown Stretch', sets: 1, reps: 10, weight: 0, rest: 0, note: 'Full body wind down.', isBodyweight: true },
+      { ...EXERCISE_LIBRARY[16], id: 'w4-c1', sets: 3, reps: 10, weight: 0, rest: 10, note: '10 sec hold, 10 sec rest. 10 reps per pos (stand/sit/lie).', isBodyweight: true },
     ],
   }},
-  5: { name: 'Heavy Legs', exercises: {
-    warmup: [
-      { ...EXERCISE_LIBRARY[1], id: 'w5-e1', sets: 3, reps: 15, weight: 0, rest: 30, note: 'Extra warm-up for heavy day.', isBodyweight: true },
-    ],
+  5: { name: 'Parasympathetic Reset', exercises: {
+    warmup: [],
     main: [
-      { ...EXERCISE_LIBRARY[2], id: 'w5-e2', sets: 5, reps: 3, weight: 120, rest: 240, note: 'Max effort triples. Belt up.', isBodyweight: false },
-      { ...EXERCISE_LIBRARY[9], id: 'w5-e3', sets: 3, reps: 5, weight: 160, rest: 180, note: 'Top set. Mixed grip allowed.', isBodyweight: false },
+      { ...EXERCISE_LIBRARY[10], id: 'w5-e1', sets: 3, reps: 15, weight: 0, rest: 30, note: 'Strengthen foot arch. Primary shock absorber.', isBodyweight: true },
+      { ...EXERCISE_LIBRARY[11], id: 'w5-e2', sets: 3, reps: 10, weight: 0, rest: 60, note: '10m forward, 10m backward. Cross-brain sync.', isBodyweight: true },
+      { ...EXERCISE_LIBRARY[12], id: 'w5-e3', sets: 1, reps: 45, weight: 0, rest: 0, note: '40-50 min flat run. HR 135-145. Mitochondrial density.', isBodyweight: true },
     ],
     cooldown: [
-      { ...EXERCISE_LIBRARY[11], id: 'w5-e4', sets: 3, reps: 45, weight: 0, rest: 30, note: 'Core stability finisher.', isBodyweight: true },
+      { ...EXERCISE_LIBRARY[16], id: 'w5-c1', sets: 3, reps: 10, weight: 0, rest: 10, note: '10 sec hold, 10 sec rest. 10 reps per pos (stand/sit/lie).', isBodyweight: true },
     ],
   }},
   6: { name: 'Rest Day', exercises: {
     warmup: [],
     main: [],
-    cooldown: [],
+    cooldown: [
+      { ...EXERCISE_LIBRARY[16], id: 'w6-c1', sets: 3, reps: 10, weight: 0, rest: 10, note: '10 sec hold, 10 sec rest. 10 reps per pos (stand/sit/lie).', isBodyweight: true },
+    ],
   }},
 };
 
@@ -126,6 +147,7 @@ export const NUTRITION_DATA = {
   protein: { current: 152, target: 200 },
   carbs: { current: 168, target: 250 },
   fats: { current: 55, target: 70 },
+  water: { current: 1250, target: 3000 },
   meals: {
     breakfast: [
       { id: 'm1', name: 'Protein Oats', calories: 420, protein: 35, carbs: 55, fat: 8, checked: true },

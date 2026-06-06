@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import GlassCard from './GlassCard';
 import ExerciseModal from './ExerciseModal';
 import ProfileButton from './ProfileButton';
-import { DAYS } from '../data/sampleData';
+import { DAYS, DEFAULT_WORKOUT_PLAN } from '../data/sampleData';
 
 export default function WorkoutScreen({ workoutPlan, setWorkoutPlan, currentDay, setCurrentDay, onEnterFocus, profile, onOpenProfile }) {
   const [showModal, setShowModal] = useState(false);
   const [editingExercise, setEditingExercise] = useState(null);
   const [addSection, setAddSection] = useState('main');
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [tempName, setTempName] = useState('');
   const todayPlan = workoutPlan[currentDay];
   const sections = [
     { key: 'warmup', label: 'WARM-UP', color: '#52525b' },
@@ -17,6 +19,20 @@ export default function WorkoutScreen({ workoutPlan, setWorkoutPlan, currentDay,
 
   const handleAddExercise = (section) => { setAddSection(section); setEditingExercise(null); setShowModal(true); };
   const handleEditExercise = (exercise, section) => { setAddSection(section); setEditingExercise(exercise); setShowModal(true); };
+
+  const handleEditNameClick = () => {
+    setTempName(todayPlan.name);
+    setIsEditingName(true);
+  };
+
+  const handleSaveName = () => {
+    if (tempName.trim()) {
+      const updated = { ...workoutPlan };
+      updated[currentDay] = { ...updated[currentDay], name: tempName };
+      setWorkoutPlan(updated);
+    }
+    setIsEditingName(false);
+  };
 
   const handleSaveExercise = (exercise) => {
     const updated = { ...workoutPlan };
@@ -51,8 +67,14 @@ export default function WorkoutScreen({ workoutPlan, setWorkoutPlan, currentDay,
     }))
   ) : [];
 
+  const handleResetPlan = () => {
+    if (window.confirm("Reset your entire week to the default Apex V6 protocol? Any custom edits will be lost.")) {
+      setWorkoutPlan(DEFAULT_WORKOUT_PLAN);
+    }
+  };
+
   return (
-    <div className="screen" style={{ paddingTop: '24px' }}>
+    <div className="screen" style={{ paddingTop: '24px', paddingBottom: '100px' }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '40px', animation: 'fadeInUp 0.4s ease-out' }}>
         <div>
@@ -81,7 +103,30 @@ export default function WorkoutScreen({ workoutPlan, setWorkoutPlan, currentDay,
       {todayPlan && (
         <div style={{ marginBottom: '32px', animation: 'fadeInUp 0.6s ease-out' }}>
           <span className="label-sm" style={{ color: 'var(--text-secondary)' }}>TODAY'S PLAN</span>
-          <h2 style={{ fontSize: '32px', fontWeight: 300, color: 'var(--text)', letterSpacing: '-0.02em', marginTop: '4px' }}>{todayPlan.name}</h2>
+          {isEditingName ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px', marginBottom: '8px' }}>
+              <input 
+                autoFocus
+                value={tempName}
+                onChange={e => setTempName(e.target.value)}
+                onBlur={handleSaveName}
+                onKeyDown={e => e.key === 'Enter' && handleSaveName()}
+                style={{
+                  fontSize: '32px', fontWeight: 300, color: 'var(--text)', 
+                  letterSpacing: '-0.02em', background: 'transparent', border: 'none', 
+                  borderBottom: '1px solid var(--cyan)', outline: 'none', width: '100%',
+                  fontFamily: 'var(--font-display)'
+                }}
+              />
+            </div>
+          ) : (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px', marginBottom: '8px' }}>
+              <h2 style={{ fontSize: '32px', fontWeight: 300, color: 'var(--text)', letterSpacing: '-0.02em', margin: 0 }}>{todayPlan.name}</h2>
+              <button onClick={handleEditNameClick} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center' }} onMouseEnter={e => e.currentTarget.style.color = 'var(--text)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--muted)'}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              </button>
+            </div>
+          )}
           <span style={{ fontSize: '13px', color: 'var(--muted)', fontWeight: 300 }}>{allExercises.length} exercises</span>
         </div>
       )}
@@ -117,6 +162,11 @@ export default function WorkoutScreen({ workoutPlan, setWorkoutPlan, currentDay,
                         {!exercise.isBodyweight && exercise.weight > 0 && ` · ${exercise.weight}kg`}
                         {exercise.rest > 0 && ` · ${exercise.rest}s rest`}
                       </div>
+                      {exercise.note && (
+                        <div style={{ fontSize: '12px', color: 'var(--cyan)', marginTop: '6px', fontWeight: 400, opacity: 0.8 }}>
+                          ↳ {exercise.note}
+                        </div>
+                      )}
                     </div>
                     <div style={{ display: 'flex', gap: '12px' }}>
                       <button onClick={() => handleEditExercise(exercise, section.key)} style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', transition: 'color 0.3s ease' }} onMouseEnter={e => e.currentTarget.style.color = 'var(--text)'} onMouseLeave={e => e.currentTarget.style.color = 'var(--muted)'}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" strokeLinecap="round" strokeLinejoin="round"/></svg></button>
@@ -134,6 +184,12 @@ export default function WorkoutScreen({ workoutPlan, setWorkoutPlan, currentDay,
           </div>
         );
       })}
+
+      <div style={{ marginTop: '40px', paddingBottom: '20px' }}>
+        <button onClick={handleResetPlan} className="glass-interactive" style={{ width: '100%', padding: '16px', background: 'transparent', border: '1px solid var(--red)', color: 'var(--red)', borderRadius: 'var(--radius-pill)', fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '13px', cursor: 'pointer', transition: 'all 0.3s ease' }}>
+          RESET TO APEX V6 PROTOCOL
+        </button>
+      </div>
 
       {showModal && (
         <ExerciseModal

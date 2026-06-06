@@ -1,4 +1,5 @@
 import React from 'react';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
 const icons = {
   home: (active) => (
@@ -39,11 +40,11 @@ export default function BottomNav({ activeTab, onTabChange }) {
   return (
     <nav aria-label="Primary" style={{
       position: 'fixed',
-      bottom: 'env(safe-area-inset-bottom, 24px)',
+      bottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)',
       left: '50%',
       transform: 'translateX(-50%)',
-      width: 'calc(100% - 48px)',
-      maxWidth: '400px',
+      width: 'calc(100% - 64px)',
+      maxWidth: '356px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-around',
@@ -61,7 +62,12 @@ export default function BottomNav({ activeTab, onTabChange }) {
         return (
           <button
             key={tab.key}
-            onClick={() => onTabChange(tab.key)}
+            onClick={() => {
+              if (!isActive) {
+                try { void Haptics.impact({ style: ImpactStyle.Light }).catch(() => {}); } catch (e) {}
+              }
+              onTabChange(tab.key);
+            }}
             aria-current={isActive ? 'page' : undefined}
             aria-label={tab.label}
             style={{
@@ -102,4 +108,3 @@ export default function BottomNav({ activeTab, onTabChange }) {
     </nav>
   );
 }
-

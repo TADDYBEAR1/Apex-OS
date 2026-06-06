@@ -187,17 +187,15 @@ export default function FocusMode({ exercises, onExit }) {
               min={0}
               max={100}
             />
-            {!exercise.isBodyweight && (
-              <Stepper
-                label="Weight Load"
-                value={actualWeight}
-                onChange={setActualWeight}
-                min={0}
-                max={500}
-                step={2.5}
-                unit="kg"
-              />
-            )}
+            <Stepper
+              label={exercise.isBodyweight ? "Added Weight" : "Weight Load"}
+              value={actualWeight}
+              onChange={setActualWeight}
+              min={0}
+              max={500}
+              step={2.5}
+              unit="kg"
+            />
         </div>
 
         {/* Coaching Note */}

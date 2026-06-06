@@ -38,10 +38,13 @@ export function calculateStats(heatmapData, options = {}) {
   for (let week = numWeeks - 1; week >= 0 && !streakBroken; week--) {
     const startDay = week === numWeeks - 1 ? latestDayIndex : numDays - 1;
     for (let day = startDay; day >= 0 && !streakBroken; day--) {
+      const isToday = (week === numWeeks - 1 && day === latestDayIndex);
       if (heatmapData[day]?.[week] > 0) {
         currentStreak++;
       } else {
-        streakBroken = true;
+        if (!isToday) {
+          streakBroken = true;
+        }
       }
     }
   }
@@ -182,19 +185,22 @@ export function buildHeatmapFromWorkoutHistory(history = [], weeks = 4, referenc
 }
 
 export function formatDuration(seconds = 0) {
-  const mins = Math.floor(seconds / 60);
-  const hrs = Math.floor(mins / 60);
-  const remainingMins = mins % 60;
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const remainingSecs = seconds % 60;
 
-  if (hrs > 0) return `${hrs}h ${remainingMins}m`;
-  return `${mins}m`;
+  if (hrs > 0) return `${hrs}h ${mins}m`;
+  if (mins > 0) return `${mins}m ${remainingSecs}s`;
+  return `${remainingSecs}s`;
 }
 
 export function calculateWorkoutVolume(completedSets = []) {
   return completedSets.reduce((total, set) => {
     const reps = Number(set.actualReps) || 0;
     const weight = Number(set.actualWeight) || 0;
-    return total + reps * weight;
+    const isBodyweight = Boolean(set.isBodyweight);
+    const volumeMultiplier = isBodyweight ? Math.max(1, weight) : weight;
+    return total + reps * volumeMultiplier;
   }, 0);
 }
 
@@ -218,9 +224,12 @@ export function summarizeWorkoutSession(session = {}) {
 
     const reps = Number(set.actualReps) || 0;
     const weight = Number(set.actualWeight) || 0;
+    const isBodyweight = Boolean(set.isBodyweight);
+    const volumeMultiplier = isBodyweight ? Math.max(1, weight) : weight;
+    
     existing.sets += 1;
     existing.reps += reps;
-    existing.volume += reps * weight;
+    existing.volume += reps * volumeMultiplier;
     existing.bestWeight = Math.max(existing.bestWeight, weight);
     existing.bestReps = Math.max(existing.bestReps, reps);
     exercises.set(key, existing);
@@ -264,33 +273,76 @@ export function estimateOneRepMax(weight, reps) {
   const numericWeight = Number(weight) || 0;
   const numericReps = Number(reps) || 0;
   if (numericWeight <= 0 || numericReps <= 0) return 0;
+  if (numericReps === 1) return numericWeight;
 
-  return Math.round((numericWeight * (1 + numericReps / 30)) * 10) / 10;
+  // Epley is universally safer for high reps
+  const epley = numericWeight * (1 + numericReps / 30);
+  
+  if (numericReps > 10) {
+    // For high reps, Brzycki and Wathan break down. Rely solely on Epley.
+    return Math.round(epley * 10) / 10;
+  }
+
+  // Elite Composite 1RM calculation (Average of Epley, Brzycki, and Wathan)
+  const brzycki = numericWeight * (36 / (37 - numericReps));
+  const wathan = numericWeight * 100 / (48.8 + 53.8 * Math.exp(-0.075 * numericReps));
+  
+  const composite = (epley + brzycki + wathan) / 3;
+  return Math.round(composite * 10) / 10;
 }
 
 export function computeBenchmarkTrend(history, unit) {
   if (!history || history.length < 2) {
-    return {
-      text: 'New Benchmark',
-      positive: true,
-      status: 'new',
-      percentChange: 0,
-      recentDelta: 0,
-    };
+    return { text: 'New Benchmark', positive: true, status: 'new', percentChange: 0, recentDelta: 0 };
   }
 
-  const first = history[0].value;
-  const last = history[history.length - 1].value;
-  const prev = history[history.length - 2].value;
-  const recentDelta = last - prev;
-  const isTimeBenchmark = unit === 'TIME';
+  // True Linear Regression (Line of Best Fit - Time Aware)
+  const n = history.length;
+  let sumX = 0, sumY = 0, sumXY = 0, sumXX = 0;
+  const values = history.map(h => Number(h.value));
+  
+  const firstDate = new Date(history[0].date).getTime();
+  const daysElapsed = history.map(h => {
+    const ts = new Date(h.date).getTime();
+    return (ts - firstDate) / (1000 * 60 * 60 * 24);
+  });
+  
+  for (let i = 0; i < n; i++) {
+    const x = daysElapsed[i];
+    sumX += x;
+    sumY += values[i];
+    sumXY += x * values[i];
+    sumXX += x * x;
+  }
+  
+  const denominator = (n * sumXX - sumX * sumX);
+  const slope = denominator === 0 ? 0 : (n * sumXY - sumX * sumY) / denominator;
+  
+  const first = values[0];
+  const last = values[n - 1];
+  const recentDelta = last - values[n - 2];
   const percentChange = first !== 0 ? ((last - first) / Math.abs(first)) * 100 : 0;
+  const isTimeBenchmark = unit === 'TIME';
 
+  // Determine status based on the regression slope rather than just start/end
+  const avgValue = sumY / n;
+  
+  // Calculate the total change across the entire timeline predicted by the line of best fit
+  const totalExpectedChange = slope * daysElapsed[n - 1];
+  
+  const trendPercentChange = avgValue !== 0 ? (totalExpectedChange / avgValue) * 100 : 0;
+
+  // If the trend line shows less than a 1% shift over the whole timeline, we call it stagnant
+  // Handle edge case where daysElapsed is 0 (all entries on same day)
+  const isStagnant = daysElapsed[n - 1] === 0 ? true : Math.abs(trendPercentChange) < 1.0;
+  
   let status;
-  if (isTimeBenchmark) {
-    status = percentChange < -1 ? 'improving' : percentChange > 1 ? 'declining' : 'stagnant';
+  if (isStagnant) {
+    status = 'stagnant';
+  } else if (isTimeBenchmark) {
+    status = slope < 0 ? 'improving' : 'declining';
   } else {
-    status = percentChange > 1 ? 'improving' : percentChange < -1 ? 'declining' : 'stagnant';
+    status = slope > 0 ? 'improving' : 'declining';
   }
 
   if (isTimeBenchmark) {
@@ -303,18 +355,19 @@ export function computeBenchmarkTrend(history, unit) {
       positive: recentDelta <= 0,
       status,
       percentChange,
+      trendPercentChange,
       recentDelta,
     };
   }
 
   const suffix = unit === 'REPS' ? ' reps' : ` ${unit.toLowerCase()}`;
   if (recentDelta > 0) {
-    return { text: `↑ +${recentDelta}${suffix}`, positive: true, status, percentChange, recentDelta };
+    return { text: `↑ +${recentDelta}${suffix}`, positive: true, status, percentChange, trendPercentChange, recentDelta };
   }
   if (recentDelta < 0) {
-    return { text: `↓ ${recentDelta}${suffix}`, positive: false, status, percentChange, recentDelta };
+    return { text: `↓ ${recentDelta}${suffix}`, positive: false, status, percentChange, trendPercentChange, recentDelta };
   }
-  return { text: 'No change', positive: true, status, percentChange, recentDelta };
+  return { text: 'No change', positive: true, status, percentChange, trendPercentChange, recentDelta };
 }
 
 export function analyzeBenchmarkTrends(benchmarks) {
@@ -331,7 +384,7 @@ export function analyzeBenchmarkTrends(benchmarks) {
 
     trends.push({
       label: b.label,
-      change: Math.abs(trend.percentChange).toFixed(1),
+      change: Math.abs(trend.trendPercentChange !== undefined ? trend.trendPercentChange : trend.percentChange).toFixed(1),
       recentDelta: trend.recentDelta,
       status: trend.status,
       unit: b.unit,
@@ -380,12 +433,22 @@ export function getCompletedSetBenchmarkCandidates(completedSets = []) {
     if (reps <= 0) return;
 
     const isBodyweight = Boolean(set.isBodyweight);
-    const value = isBodyweight ? reps : estimateOneRepMax(weight, reps);
+    const isWeightedBodyweight = isBodyweight && weight > 0;
+    
+    let value, unit;
+    
+    if (isBodyweight && !isWeightedBodyweight) {
+      value = reps;
+      unit = 'REPS';
+    } else {
+      value = estimateOneRepMax(weight, reps);
+      unit = 'KG';
+    }
+
     if (value <= 0) return;
 
     const exerciseName = set.exerciseName || 'Exercise';
     const normalizedName = normalizeBenchmarkName(exerciseName);
-    const unit = isBodyweight ? 'REPS' : 'KG';
     const existing = bestByExercise.get(normalizedName);
 
     if (!existing || value > existing.value) {
