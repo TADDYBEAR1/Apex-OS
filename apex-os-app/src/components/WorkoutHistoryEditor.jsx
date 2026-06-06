@@ -129,15 +129,13 @@ export default function WorkoutHistoryEditor({ session, onClose, onSave }) {
                           value={set.actualReps || 0}
                           onChange={(value) => updateSet(set.index, { actualReps: value })}
                         />
-                        {!set.isBodyweight && (
-                          <MiniNumberField
-                            label="Weight"
-                            value={set.actualWeight || 0}
-                            step={2.5}
-                            onChange={(value) => updateSet(set.index, { actualWeight: value })}
-                            unit="kg"
-                          />
-                        )}
+                        <MiniNumberField
+                          label={set.isBodyweight ? "Added Weight" : "Weight"}
+                          value={set.actualWeight || 0}
+                          step={2.5}
+                          onChange={(value) => updateSet(set.index, { actualWeight: value })}
+                          unit="kg"
+                        />
                       </div>
                     </div>
                   ))}

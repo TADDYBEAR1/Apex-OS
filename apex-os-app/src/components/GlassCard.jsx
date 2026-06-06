@@ -1,16 +1,14 @@
 import React from 'react';
+import ParallaxCard from './ParallaxCard';
 
 export default function GlassCard({ children, className = '', onClick, style, glow }) {
-  const Component = onClick ? 'button' : 'div';
-
   return (
-    <Component
-      type={onClick ? 'button' : undefined}
-      className={`glass ${onClick ? 'glass-interactive glass-button' : ''} ${glow ? 'glow-cyan' : ''} ${className}`}
+    <ParallaxCard
       onClick={onClick}
-      style={{ padding: '16px', ...style }}
+      className={`glass ${onClick ? 'glass-interactive glass-button' : ''} ${glow ? 'glow-cyan' : ''} ${className}`}
+      style={{ ...style }}
     >
       {children}
-    </Component>
+    </ParallaxCard>
   );
 }

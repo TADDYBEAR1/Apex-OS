@@ -12,8 +12,11 @@ export default function WorkoutCompleteOverlay({ onDismiss, durationSeconds }) {
   const formatDuration = (secs) => {
     const hrs = Math.floor(secs / 3600);
     const mins = Math.floor((secs % 3600) / 60);
+    const remainingSecs = secs % 60;
+    
     if (hrs > 0) return `${hrs}h ${mins}m`;
-    return `${mins}m`;
+    if (mins === 0) return `${remainingSecs}s`;
+    return `${mins}m ${remainingSecs}s`;
   };
 
   return (

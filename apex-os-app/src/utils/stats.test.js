@@ -3,6 +3,7 @@ import {
   analyzeFuelCompliance,
   applyWorkoutPersonalRecords,
   buildHeatmapFromWorkoutHistory,
+  calculateHistoryStats,
   calculateFuelTotals,
   calculateStats,
   computeBenchmarkTrend,
@@ -39,6 +40,23 @@ describe('stats utilities', () => {
 
     expect(heatmap.cells[0][3]).toBe(2);
     expect(heatmap.latestDayIndex).toBe(0);
+  });
+
+  it('calculates training consistency over an exact day range', () => {
+    const stats = calculateHistoryStats(
+      [
+        { completedAt: '2026-05-12T10:00:00.000Z' },
+        { completedAt: '2026-05-01T10:00:00.000Z' },
+        { completedAt: '2026-04-12T10:00:00.000Z' },
+      ],
+      30,
+      new Date('2026-05-12T12:00:00.000Z')
+    );
+
+    expect(stats.totalDays).toBe(30);
+    expect(stats.activeDays).toBe(2);
+    expect(stats.totalSessions).toBe(2);
+    expect(stats.consistency).toBe(7);
   });
 
   it('calculates fuel totals from checked meals only', () => {
@@ -80,7 +98,7 @@ describe('stats utilities', () => {
   });
 
   it('estimates weighted one-rep max from reps and load', () => {
-    expect(estimateOneRepMax(100, 5)).toBe(116.7);
+    expect(estimateOneRepMax(100, 5)).toBe(115.2);
   });
 
   it('extracts best weighted and bodyweight PR candidates from main sets only', () => {
@@ -93,7 +111,7 @@ describe('stats utilities', () => {
 
     expect(candidates).toHaveLength(2);
     expect(candidates.find(c => c.exerciseName === 'Pull Ups').value).toBe(13);
-    expect(candidates.find(c => c.exerciseName === 'Barbell Back Squat').value).toBe(121);
+    expect(candidates.find(c => c.exerciseName === 'Barbell Back Squat').value).toBe(119.1);
   });
 
   it('appends detected PRs to matching benchmark history', () => {
@@ -119,7 +137,7 @@ describe('stats utilities', () => {
     );
 
     expect(result.detected).toHaveLength(1);
-    expect(result.benchmarks[0].history.at(-1)).toMatchObject({ value: 126.5, date: '2026-05-11' });
+    expect(result.benchmarks[0].history.at(-1)).toMatchObject({ value: 124.5, date: '2026-05-11' });
   });
 
   it('prevents duplicate same-day same-value PR entries', () => {

@@ -14,8 +14,11 @@ export default function FuelScreen({ nutrition, setNutrition, profile, onOpenPro
   const [addMealType, setAddMealType] = useState('breakfast');
   const [showAddGrocery, setShowAddGrocery] = useState(false);
   const [newGroceryName, setNewGroceryName] = useState('');
-  const [newGroceryQty, setNewGroceryQty] = useState('');
+  const [newGroceryQty, setNewGroceryQty] = useState(1);
+  const [newGroceryUnit, setNewGroceryUnit] = useState('units');
+  const [showUnitDropdown, setShowUnitDropdown] = useState(false);
   const [showEditTargets, setShowEditTargets] = useState(false);
+  const [editingMealItem, setEditingMealItem] = useState(null);
 
   // Custom Food Form State
   const [customFoodName, setCustomFoodName] = useState('');
@@ -29,10 +32,16 @@ export default function FuelScreen({ nutrition, setNutrition, profile, onOpenPro
   const [editProtein, setEditProtein] = useState(nutrition.protein.target);
   const [editCarbs, setEditCarbs] = useState(nutrition.carbs.target);
   const [editFats, setEditFats] = useState(nutrition.fats.target);
+  const [editWater, setEditWater] = useState(nutrition.water?.target || 3000);
 
   const totals = calculateFuelTotals(nutrition);
   const remaining = nutrition.calorieGoal - totals.calories;
+  const isSurplus = remaining < 0;
   const calPercent = Math.round((totals.calories / nutrition.calorieGoal) * 100);
+  const calPercentNormalized = Math.min((totals.calories / nutrition.calorieGoal) * 100, 100);
+  const strokeDasharray = 283;
+  const strokeDashoffset = strokeDasharray - (strokeDasharray * calPercentNormalized) / 100;
+  const ringColor = isSurplus ? 'var(--orange)' : 'var(--cyan)';
 
   const toggleMealItem = (mealKey, id) => {
     setNutrition(prev => {
@@ -50,7 +59,7 @@ export default function FuelScreen({ nutrition, setNutrition, profile, onOpenPro
       Object.keys(prev.meals).forEach(key => {
         newMeals[key] = prev.meals[key].map(m => ({ ...m, checked: false }));
       });
-      return { ...prev, meals: newMeals };
+      return { ...prev, meals: newMeals, water: { ...(prev.water || {}), current: 0 } };
     });
   };
 
@@ -70,6 +79,81 @@ export default function FuelScreen({ nutrition, setNutrition, profile, onOpenPro
     }));
   };
 
+  const resetMealForm = () => {
+    setCustomFoodName('');
+    setCustomCals('');
+    setCustomPro('');
+    setCustomCarbs('');
+    setCustomFat('');
+    setEditingMealItem(null);
+  };
+
+  const openAddFood = (mealKey) => {
+    resetMealForm();
+    setAddMealType(mealKey);
+    setShowAddFood(true);
+  };
+
+  const openEditFood = (mealKey, food) => {
+    setAddMealType(mealKey);
+    setEditingMealItem({ mealKey, id: food.id });
+    setCustomFoodName(food.name);
+    setCustomCals(String(food.calories || 0));
+    setCustomPro(String(food.protein || 0));
+    setCustomCarbs(String(food.carbs || 0));
+    setCustomFat(String(food.fat || 0));
+    setShowAddFood(true);
+  };
+
+  const saveMealItem = () => {
+    if (customFoodName.trim() === '') return;
+
+    const mealData = {
+      name: customFoodName.trim(),
+      calories: parseInt(customCals) || 0,
+      protein: parseInt(customPro) || 0,
+      carbs: parseInt(customCarbs) || 0,
+      fat: parseInt(customFat) || 0,
+    };
+
+    setNutrition(prev => {
+      const currentMealItems = prev.meals[addMealType] || [];
+      const nextMeals = { ...prev.meals };
+
+      if (editingMealItem) {
+        nextMeals[editingMealItem.mealKey] = (prev.meals[editingMealItem.mealKey] || []).map(item =>
+          item.id === editingMealItem.id ? { ...item, ...mealData } : item
+        );
+      } else {
+        nextMeals[addMealType] = [
+          ...currentMealItems,
+          {
+            id: `mf-${Date.now()}`,
+            ...mealData,
+            checked: false,
+          },
+        ];
+      }
+
+      return { ...prev, meals: nextMeals };
+    });
+
+    setShowAddFood(false);
+    resetMealForm();
+  };
+
+  const deleteMealItem = (mealKey, id, name) => {
+    if (!window.confirm(`Delete ${name}?`)) return;
+
+    setNutrition(prev => ({
+      ...prev,
+      meals: {
+        ...prev.meals,
+        [mealKey]: (prev.meals[mealKey] || []).filter(item => item.id !== id),
+      },
+    }));
+  };
+
   const clearCheckedGroceries = () => {
     setNutrition(prev => ({
       ...prev,
@@ -84,6 +168,7 @@ export default function FuelScreen({ nutrition, setNutrition, profile, onOpenPro
       protein: { ...prev.protein, target: editProtein },
       carbs: { ...prev.carbs, target: editCarbs },
       fats: { ...prev.fats, target: editFats },
+      water: { ...(prev.water || {}), target: editWater },
     }));
     setShowEditTargets(false);
   };
@@ -108,8 +193,8 @@ export default function FuelScreen({ nutrition, setNutrition, profile, onOpenPro
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', animation: 'fadeInUp 0.4s ease-out' }}>
         <div>
-          <h1 style={{ fontSize: '28px', fontWeight: 700, marginBottom: '4px' }}>Fuel</h1>
-          <p style={{ fontSize: '14px', color: 'var(--muted)' }}>Daily Macro Tracking & Provisioning</p>
+          <h1 style={{ fontSize: '40px', fontWeight: 300, marginBottom: '-4px', letterSpacing: '-0.04em' }}>Fuel<span style={{ color:'var(--cyan)', textShadow: '0 0 10px rgba(0,229,255,0.5)' }}>.</span></h1>
+          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 300 }}>Daily Macro Tracking & Provisioning</p>
         </div>
         <ProfileButton profile={profile} onClick={onOpenProfile} />
       </div>
@@ -130,6 +215,7 @@ export default function FuelScreen({ nutrition, setNutrition, profile, onOpenPro
               setEditProtein(nutrition.protein.target);
               setEditCarbs(nutrition.carbs.target);
               setEditFats(nutrition.fats.target);
+              setEditWater(nutrition.water?.target || 3000);
               setShowEditTargets(true);
             }} style={{ padding: '6px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(0,255,204,0.2)', borderRadius: 'var(--radius-pill)', color: 'var(--cyan)', fontSize: '11px', fontFamily: 'var(--font-display)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', cursor: 'pointer' }}>Edit Targets</button>
             <button onClick={handleResetMeals} style={{ padding: '6px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--surface-border)', borderRadius: 'var(--radius-pill)', color: 'var(--muted)', fontSize: '11px', fontFamily: 'var(--font-display)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', cursor: 'pointer' }}>Reset Today</button>
@@ -137,31 +223,77 @@ export default function FuelScreen({ nutrition, setNutrition, profile, onOpenPro
 
           {/* Calorie Card */}
           <GlassCard style={{ padding: '24px', marginBottom: '20px', animation: 'fadeInUp 0.6s ease-out' }}>
-            <span className="label-sm" style={{ marginBottom: '8px', display: 'block' }}>DAILY TARGET</span>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px', marginBottom: '2px' }}>
-              <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '48px', lineHeight: 1 }}>{totals.calories.toLocaleString()}</span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '16px', color: 'var(--cyan)' }}>{calPercent}% OF {nutrition.calorieGoal.toLocaleString()} KCAL</span>
-              <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '12px', letterSpacing: '0.08em', color: remaining > 0 ? 'var(--cyan)' : 'var(--orange)' }}>{remaining > 0 ? `${remaining} REMAINING` : 'IN SURPLUS'}</span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <span className="label-sm" style={{ marginBottom: '8px' }}>DAILY TARGET</span>
+                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '56px', lineHeight: 1, letterSpacing: '-0.02em', color: isSurplus ? 'var(--orange)' : 'var(--text)', transition: 'color 0.4s ease' }}>
+                  {totals.calories.toLocaleString()}
+                </span>
+                <div style={{ marginTop: '8px' }}>
+                  <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '16px', color: isSurplus ? 'var(--orange)' : 'var(--cyan)' }}>{calPercent}% OF {nutrition.calorieGoal.toLocaleString()} KCAL</span>
+                  <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '12px', letterSpacing: '0.08em', color: isSurplus ? 'var(--orange)' : 'var(--muted)', marginTop: '2px' }}>
+                    {isSurplus ? `${Math.abs(remaining).toLocaleString()} KCAL SURPLUS` : `${remaining.toLocaleString()} KCAL REMAINING`}
+                  </div>
+                </div>
+              </div>
+              
+              <div style={{ position: 'relative', width: '100px', height: '100px' }}>
+                <svg width="100" height="100" viewBox="0 0 100 100" style={{ transform: 'rotate(-90deg)' }}>
+                  <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="6" />
+                  <circle 
+                    cx="50" cy="50" r="45" fill="none" 
+                    stroke={ringColor} strokeWidth="6" 
+                    strokeLinecap="round" 
+                    strokeDasharray={strokeDasharray} 
+                    strokeDashoffset={strokeDashoffset} 
+                    style={{ transition: 'stroke-dashoffset 1s ease-out, stroke 0.4s ease' }}
+                  />
+                </svg>
+                <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontSize: '24px' }}>{isSurplus ? '🔥' : '⚡'}</span>
+                </div>
+              </div>
             </div>
 
             {/* Macro Bars */}
-            {macros.map((macro, i) => (
-              <div key={i} style={{ marginBottom: i < macros.length - 1 ? '12px' : 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text)' }}>{macro.label}</span>
-                  <span style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>{macro.current}g / {macro.target}g</span>
+            {macros.map((macro, i) => {
+              const isOver = macro.current > macro.target;
+              const fillWidth = Math.min((macro.current / Math.max(macro.target, 1)) * 100, 100);
+              const barColor = isOver ? 'var(--orange)' : (macro.color === 'var(--cyan)' ? 'linear-gradient(90deg, var(--cyan), #00DDAA)' : macro.color);
+              const shadowColor = isOver ? 'rgba(255,100,0,0.3)' : (macro.color === 'var(--cyan)' ? 'rgba(0,255,204,0.3)' : 'rgba(0,0,0,0.1)');
+              
+              return (
+                <div key={i} style={{ marginBottom: i < macros.length - 1 ? '16px' : 0 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                    <span style={{ fontSize: '14px', fontWeight: 500, color: isOver ? 'var(--orange)' : 'var(--text)' }}>{macro.label}</span>
+                    <span style={{ fontSize: '14px', color: isOver ? 'var(--orange)' : 'var(--text-secondary)' }}>
+                      {macro.current}g / {macro.target}g {isOver && <span style={{ fontWeight: 600 }}> (+{macro.current - macro.target}g)</span>}
+                    </span>
+                  </div>
+                  <div className="progress-track" style={{ height: '8px', background: 'rgba(255,255,255,0.05)' }}>
+                    <div className="progress-fill" style={{
+                      width: `${fillWidth}%`,
+                      background: barColor,
+                      boxShadow: `0 0 8px ${shadowColor}`,
+                      transition: 'all 0.4s ease'
+                    }} />
+                  </div>
                 </div>
-                <div className="progress-track" style={{ height: '8px' }}>
-                  <div className="progress-fill" style={{
-                    width: `${Math.min((macro.current / Math.max(macro.target, 1)) * 100, 100)}%`,
-                    background: macro.color === 'var(--cyan)' ? 'linear-gradient(90deg, var(--cyan), #00DDAA)' : macro.color,
-                    boxShadow: `0 0 8px ${macro.color === 'var(--cyan)' ? 'rgba(0,255,204,0.3)' : 'rgba(0,0,0,0.1)'}`,
-                  }} />
-                </div>
+              );
+            })}
+            
+            {/* Water Tracker */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '24px', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+              <div>
+                <span style={{ fontSize: '14px', fontWeight: 500, color: 'var(--text)', display: 'block', marginBottom: '2px' }}>Hydration</span>
+                <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{(nutrition.water?.current || 0).toLocaleString()}ml / {(nutrition.water?.target || 3000).toLocaleString()}ml</span>
               </div>
-            ))}
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <IconButton label="Drink 250ml Water" onClick={() => setNutrition(prev => ({ ...prev, water: { ...(prev.water || {}), current: (prev.water?.current || 0) + 250 } }))} tone="primary">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22a6 6 0 0 0 6-6c0-4-6-10-6-10S6 12 6 16a6 6 0 0 0 6 6z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                </IconButton>
+              </div>
+            </div>
           </GlassCard>
 
           {/* Meal Sections */}
@@ -172,7 +304,7 @@ export default function FuelScreen({ nutrition, setNutrition, profile, onOpenPro
                   <span style={{ fontSize: '16px' }}>{meal.icon}</span>
                   <h3 style={{ fontSize: '16px', fontWeight: 700 }}>{meal.label}</h3>
                 </div>
-                <IconButton label={`Add food to ${meal.label}`} tone="primary" onClick={() => { setAddMealType(meal.key); setShowAddFood(true); }}>+</IconButton>
+                <IconButton label={`Add food to ${meal.label}`} tone="primary" onClick={() => openAddFood(meal.key)}>+</IconButton>
               </div>
               {(nutrition.meals[meal.key] || []).map((food) => (
                 <CheckboxRow
@@ -182,6 +314,31 @@ export default function FuelScreen({ nutrition, setNutrition, profile, onOpenPro
                   meta={`${food.calories} kcal`}
                   subtitle={`P: ${food.protein}g · C: ${food.carbs}g · F: ${food.fat}g`}
                   onToggle={() => toggleMealItem(meal.key, food.id)}
+                  action={(
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <IconButton
+                        label={`Edit ${food.name}`}
+                        size={28}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEditFood(meal.key, food);
+                        }}
+                      >
+                        ✎
+                      </IconButton>
+                      <IconButton
+                        label={`Delete ${food.name}`}
+                        tone="danger"
+                        size={28}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteMealItem(meal.key, food.id, food.name);
+                        }}
+                      >
+                        ✕
+                      </IconButton>
+                    </div>
+                  )}
                 />
               ))}
               {(!nutrition.meals[meal.key] || nutrition.meals[meal.key].length === 0) && (
@@ -231,7 +388,7 @@ export default function FuelScreen({ nutrition, setNutrition, profile, onOpenPro
 
       {/* Add Custom Food Modal */}
       {showAddFood && (
-        <BottomSheetModal title={`Add Custom Meal to ${addMealType}`} titleId="add-food-title" onClose={() => setShowAddFood(false)}>
+        <BottomSheetModal title={`${editingMealItem ? 'Edit' : 'Add'} Meal in ${addMealType}`} titleId="add-food-title" onClose={() => { setShowAddFood(false); resetMealForm(); }}>
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '13px', color: 'var(--muted)', textTransform: 'uppercase' }}>Meal Name</label>
               <input value={customFoodName} onChange={(e) => setCustomFoodName(e.target.value)} placeholder="e.g. Avocado Toast" style={{ width: '100%', padding: '14px 16px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--surface-border)', borderRadius: 'var(--radius-md)', color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: '15px', outline: 'none' }} />
@@ -245,32 +402,8 @@ export default function FuelScreen({ nutrition, setNutrition, profile, onOpenPro
             </div>
 
             <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-              <button onClick={() => setShowAddFood(false)} className="btn-ghost" style={{ flex: 1 }}>Cancel</button>
-              <button onClick={() => {
-                if (customFoodName.trim() === '') return;
-                const newFood = {
-                  id: `mf-${Date.now()}`,
-                  name: customFoodName,
-                  calories: parseInt(customCals) || 0,
-                  protein: parseInt(customPro) || 0,
-                  carbs: parseInt(customCarbs) || 0,
-                  fat: parseInt(customFat) || 0,
-                  checked: false
-                };
-                setNutrition(prev => ({
-                  ...prev,
-                  meals: {
-                    ...prev.meals,
-                    [addMealType]: [...(prev.meals[addMealType]||[]), newFood]
-                  }
-                }));
-                setShowAddFood(false);
-                setCustomFoodName('');
-                setCustomCals('');
-                setCustomPro('');
-                setCustomCarbs('');
-                setCustomFat('');
-              }} className="btn-primary" style={{ flex: 2 }}>Save Meal</button>
+              <button onClick={() => { setShowAddFood(false); resetMealForm(); }} className="btn-ghost" style={{ flex: 1 }}>Cancel</button>
+              <button onClick={saveMealItem} className="btn-primary" style={{ flex: 2 }}>{editingMealItem ? 'Save Changes' : 'Save Meal'}</button>
             </div>
         </BottomSheetModal>
       )}
@@ -283,6 +416,7 @@ export default function FuelScreen({ nutrition, setNutrition, profile, onOpenPro
               <Stepper label="Protein Target" value={editProtein} onChange={setEditProtein} min={50} max={400} step={5} unit="g" />
               <Stepper label="Carbs Target" value={editCarbs} onChange={setEditCarbs} min={50} max={600} step={5} unit="g" />
               <Stepper label="Fats Target" value={editFats} onChange={setEditFats} min={20} max={200} step={5} unit="g" />
+              <Stepper label="Water Target" value={editWater} onChange={setEditWater} min={1000} max={6000} step={250} unit="ml" />
             </div>
 
             <div style={{ display: 'flex', gap: '12px' }}>
@@ -300,19 +434,60 @@ export default function FuelScreen({ nutrition, setNutrition, profile, onOpenPro
               <input value={newGroceryName} onChange={(e) => setNewGroceryName(e.target.value)} placeholder="e.g. Eggs" style={{ width: '100%', padding: '14px 16px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--surface-border)', borderRadius: 'var(--radius-md)', color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: '15px', outline: 'none' }} />
             </div>
 
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{ display: 'block', marginBottom: '8px', fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '13px', color: 'var(--muted)', textTransform: 'uppercase' }}>Quantity / Amount</label>
-              <input value={newGroceryQty} onChange={(e) => setNewGroceryQty(e.target.value)} placeholder="e.g. 2 Dozen" style={{ width: '100%', padding: '14px 16px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--surface-border)', borderRadius: 'var(--radius-md)', color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: '15px', outline: 'none' }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '16px' }}>
+              <Stepper label="Quantity" value={newGroceryQty} onChange={setNewGroceryQty} min={1} max={100} />
+            </div>
+
+            <div style={{ marginBottom: '24px', position: 'relative' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '13px', color: 'var(--muted)', textTransform: 'uppercase' }}>Unit Type</label>
+              
+              <div 
+                onClick={() => setShowUnitDropdown(!showUnitDropdown)}
+                style={{ width: '100%', padding: '14px 16px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--surface-border)', borderRadius: 'var(--radius-md)', color: 'var(--text)', fontFamily: 'var(--font-body)', fontSize: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer', transition: 'border-color 0.3s ease' }}
+              >
+                {newGroceryUnit}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ transform: showUnitDropdown ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s ease', color: 'var(--muted)' }}>
+                  <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+
+              {showUnitDropdown && (
+                <div style={{
+                  position: 'absolute', bottom: '100%', left: 0, right: 0, marginBottom: '8px',
+                  background: 'var(--bg)', border: '1px solid var(--surface-border)', borderRadius: 'var(--radius-md)',
+                  maxHeight: '200px', overflowY: 'auto', zIndex: 50,
+                  boxShadow: '0 -10px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05)',
+                  display: 'flex', flexDirection: 'column',
+                  animation: 'fadeInUp 0.2s ease-out'
+                }}>
+                  {['units', 'lbs', 'kg', 'g', 'oz', 'tubs', 'jars', 'bags', 'boxes', 'bunches', 'scoops'].map(u => (
+                    <button
+                      key={u}
+                      onClick={() => { setNewGroceryUnit(u); setShowUnitDropdown(false); }}
+                      style={{
+                        padding: '12px 16px', background: 'transparent', border: 'none', color: newGroceryUnit === u ? 'var(--cyan)' : 'var(--text)',
+                        textAlign: 'left', fontFamily: 'var(--font-body)', fontSize: '15px', cursor: 'pointer',
+                        borderBottom: '1px solid rgba(255,255,255,0.02)', transition: 'background 0.2s ease'
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                      onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                    >
+                      {u}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div style={{ display: 'flex', gap: '12px' }}>
               <button onClick={() => setShowAddGrocery(false)} className="btn-ghost" style={{ flex: 1 }}>Cancel</button>
               <button onClick={() => {
                 if (newGroceryName.trim() === '') return;
-                const newItem = { id: `g-${Date.now()}`, name: newGroceryName, qty: newGroceryQty || '1 unit', category: 'General', checked: false };
+                const newItem = { id: `g-${Date.now()}`, name: newGroceryName, qty: `${newGroceryQty} ${newGroceryUnit}`, category: 'General', checked: false };
                 setNutrition(prev => ({ ...prev, groceryList: [...prev.groceryList, newItem] }));
                 setNewGroceryName('');
-                setNewGroceryQty('');
+                setNewGroceryQty(1);
+                setNewGroceryUnit('units');
                 setShowAddGrocery(false);
               }} className="btn-primary" style={{ flex: 2 }}>Add Item</button>
             </div>

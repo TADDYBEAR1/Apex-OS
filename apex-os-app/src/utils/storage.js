@@ -9,6 +9,36 @@ export const DEFAULT_PROFILE = {
   photo: null,
 };
 
+export function getLocalDateKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+export function resetMealChecks(nutrition) {
+  if (!nutrition?.meals) return nutrition;
+
+  const meals = Object.fromEntries(
+    Object.entries(nutrition.meals).map(([mealKey, items]) => [
+      mealKey,
+      (items || []).map(item => ({ ...item, checked: false })),
+    ])
+  );
+
+  return { ...nutrition, meals, water: { ...(nutrition.water || {}), current: 0 } };
+}
+
+export function normalizeDailyAppState(state, todayKey = getLocalDateKey()) {
+  const shouldResetMeals = state.lastMealResetDate && state.lastMealResetDate !== todayKey;
+
+  return {
+    ...state,
+    nutrition: shouldResetMeals ? resetMealChecks(state.nutrition) : state.nutrition,
+    lastMealResetDate: todayKey,
+  };
+}
+
 export function loadAppState(defaultState) {
   if (typeof window === 'undefined') return defaultState;
 

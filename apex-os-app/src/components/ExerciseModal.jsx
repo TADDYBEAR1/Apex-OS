@@ -301,6 +301,26 @@ export default function ExerciseModal({ onClose, onSave, editExercise = null, se
               <Stepper label="Rest" value={rest} onChange={setRest} min={0} max={600} step={15} unit="s" />
             </div>
 
+            {/* Note Field */}
+            <div style={{ marginBottom: '20px' }}>
+              <span className="label-sm" style={{ display: 'block', marginBottom: '8px' }}>Coaching Note</span>
+              <textarea
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                placeholder="e.g. Focus on the eccentric movement..."
+                rows={3}
+                style={{
+                  width: '100%', padding: '14px 16px',
+                  background: 'rgba(255,255,255,0.03)', border: '1px solid var(--surface-border)',
+                  borderRadius: 'var(--radius-md)', color: 'var(--text)',
+                  fontFamily: 'var(--font-body)', fontSize: '14px', outline: 'none',
+                  transition: 'border-color 0.2s', resize: 'none'
+                }}
+                onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(0,255,204,0.3)'; }}
+                onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--surface-border)'; }}
+              />
+            </div>
+
 
             {/* Actions */}
             <div style={{ display: 'flex', gap: '12px' }}>

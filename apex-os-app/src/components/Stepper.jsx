@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Haptics, ImpactStyle } from '@capacitor/haptics';
 
 const styles = {
   container: {
@@ -73,6 +74,11 @@ export default function Stepper({ value, onChange, min = 0, max = 999, step = 1,
   const triggerPulse = () => {
     setAnimClass('pulse-value');
     setTimeout(() => setAnimClass(''), 200);
+    try {
+      void Haptics.impact({ style: ImpactStyle.Light }).catch(() => {});
+    } catch (e) {
+      // web fallback
+    }
   };
 
   return (
