@@ -9,6 +9,7 @@ import { RECORDS_DATA, HEATMAP_DAY_LABELS, EXERCISE_LIBRARY } from '../data/samp
 import { buildHeatmapFromWorkoutHistory, calculateStats, computeBenchmarkTrend, formatBenchmarkValue, generateInsight } from '../utils/stats';
 import Stepper from './Stepper';
 import HoverGraph from './HoverGraph';
+import TrendsPanel from './TrendsPanel';
 
 // Generate SVG path from real history data
 const generateHistoryPath = (history, width, height, padding = 4) => {
@@ -34,7 +35,7 @@ const generateHistoryPath = (history, width, height, padding = 4) => {
   return { linePath, areaPath, points };
 };
 
-export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, workoutHistory, onUpdateWorkoutSession, onDeleteWorkoutSession, profile, onOpenProfile }) {
+export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, workoutHistory, onUpdateWorkoutSession, onDeleteWorkoutSession, profile, onOpenProfile, checkins = {}, weightLog = [] }) {
   const [activeView, setActiveView] = useState('history');
   const [showAddBenchmark, setShowAddBenchmark] = useState(false);
   const [selectedLibraryId, setSelectedLibraryId] = useState(null);
@@ -173,6 +174,11 @@ export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, wo
           </div>
         </div>
       </GlassCard>
+
+      {/* Trends — the armor dashboard */}
+      <div style={{ animation: 'fadeInUp 0.55s ease-out' }}>
+        <TrendsPanel checkins={checkins} workoutHistory={workoutHistory} weightLog={weightLog} />
+      </div>
 
       <SegmentedControl
         value={activeView}

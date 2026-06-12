@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import GlassCard from './GlassCard';
 import ExerciseModal from './ExerciseModal';
 import ProfileButton from './ProfileButton';
-import { DAYS, DEFAULT_WORKOUT_PLAN } from '../data/sampleData';
+import { DAYS } from '../data/sampleData';
+import { parsePlanMarkdown, mergeParsedPlan } from '../utils/planParser';
+import AppDialog from './AppDialog';
+import { exportPlanToMarkdown } from '../utils/planExporter';
+import { getLocalDateKey } from '../utils/storage';
 
-export default function WorkoutScreen({ workoutPlan, setWorkoutPlan, currentDay, setCurrentDay, onEnterFocus, profile, onOpenProfile }) {
+export default function WorkoutScreen({ workoutPlan, setWorkoutPlan, currentDay, setCurrentDay, onEnterFocus, profile, onOpenProfile, planLibrary = [], onSavePlan, onLoadPlan, onDeletePlan }) {
   const [showModal, setShowModal] = useState(false);
   const [editingExercise, setEditingExercise] = useState(null);
   const [addSection, setAddSection] = useState('main');
@@ -67,14 +71,91 @@ export default function WorkoutScreen({ workoutPlan, setWorkoutPlan, currentDay,
     }))
   ) : [];
 
-  const handleResetPlan = () => {
-    if (window.confirm("Reset your entire week to the default Apex V6 protocol? Any custom edits will be lost.")) {
-      setWorkoutPlan(DEFAULT_WORKOUT_PLAN);
+  // Import a full training week from a structured Markdown file (see plans/)
+  const importInputRef = useRef(null);
+  const [planDialog, setPlanDialog] = useState(null);
+  const handleImportPlanFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const parsed = parsePlanMarkdown(text);
+      if (parsed.dayCount === 0) {
+        setPlanDialog({
+          title: 'No Training Days Found',
+          message: 'Format: "## Sunday — Workout Name" headings with\n"- Exercise | 3x10 | 24kg | rest 90" lines.\nSee plans/apex-plan-example.md in the project.',
+          confirmText: 'GOT IT',
+          tone: 'warning',
+        });
+        return;
+      }
+      let summary = `${parsed.dayCount} training day(s) · ${parsed.exerciseCount} exercises.\n` +
+        'Days in the file will REPLACE those days. Other days stay untouched.';
+      if (parsed.warnings.length) {
+        summary += `\n\n⚠ ${parsed.warnings.length} warning(s):\n` + parsed.warnings.slice(0, 4).join('\n');
+        if (parsed.warnings.length > 4) summary += `\n…and ${parsed.warnings.length - 4} more`;
+      }
+      setPlanDialog({
+        title: `Import "${parsed.planName || file.name}"?`,
+        message: summary,
+        confirmText: 'IMPORT',
+        cancelText: 'CANCEL',
+        onConfirm: () => setWorkoutPlan(prev => mergeParsedPlan(prev, parsed)),
+      });
+    } catch (err) {
+      setPlanDialog({
+        title: 'Import Failed',
+        message: 'Could not read plan file: ' + err.message,
+        confirmText: 'GOT IT',
+        tone: 'danger',
+      });
+    } finally {
+      e.target.value = '';
     }
+  };
+
+  const handleExportPlan = () => {
+    const md = exportPlanToMarkdown(workoutPlan, `Apex Plan · ${getLocalDateKey()}`);
+    const blob = new Blob([md], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `apex-plan-${getLocalDateKey()}.md`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleSaveSnapshot = () => {
+    onSavePlan?.();
+    setPlanDialog({
+      title: 'Plan Saved',
+      message: 'Current week stored in the Plan Library below. Up to 12 snapshots are kept.',
+      confirmText: 'GOT IT',
+    });
+  };
+
+  const handleLoadSnapshot = (entry) => {
+    setPlanDialog({
+      title: `Load "${entry.name}"?`,
+      message: 'The current week will be replaced by this snapshot.\nTip: save the current plan first if you want a way back.',
+      confirmText: 'LOAD',
+      cancelText: 'CANCEL',
+      tone: 'warning',
+      onConfirm: () => onLoadPlan?.(entry.id),
+    });
   };
 
   return (
     <div className="screen" style={{ paddingTop: '24px', paddingBottom: '100px' }}>
+      {planDialog && (
+        <AppDialog
+          {...planDialog}
+          onConfirm={() => { const fn = planDialog.onConfirm; setPlanDialog(null); fn?.(); }}
+          onCancel={() => setPlanDialog(null)}
+        />
+      )}
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '40px', animation: 'fadeInUp 0.4s ease-out' }}>
         <div>
@@ -186,9 +267,41 @@ export default function WorkoutScreen({ workoutPlan, setWorkoutPlan, currentDay,
       })}
 
       <div style={{ marginTop: '40px', paddingBottom: '20px' }}>
-        <button onClick={handleResetPlan} className="glass-interactive" style={{ width: '100%', padding: '16px', background: 'transparent', border: '1px solid var(--red)', color: 'var(--red)', borderRadius: 'var(--radius-pill)', fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '13px', cursor: 'pointer', transition: 'all 0.3s ease' }}>
-          RESET TO APEX V6 PROTOCOL
+        <input type="file" ref={importInputRef} accept=".md,text/markdown,text/plain" onChange={handleImportPlanFile} style={{ display: 'none' }} />
+        <button onClick={() => importInputRef.current?.click()} className="glass-interactive" style={{ width: '100%', padding: '16px', background: 'transparent', border: '1px solid rgba(0,229,255,0.4)', color: 'var(--cyan)', borderRadius: 'var(--radius-pill)', fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '13px', cursor: 'pointer', transition: 'all 0.3s ease' }}>
+          📥 IMPORT PLAN FROM .MD FILE
         </button>
+        <p style={{ fontSize: '11px', color: 'var(--muted)', textAlign: 'center', marginTop: '10px' }}>
+          Format guide & example: plans/apex-plan-example.md
+        </p>
+
+        {/* Plan Library */}
+        <div style={{ display: 'flex', gap: '10px', marginTop: '14px' }}>
+          <button onClick={handleSaveSnapshot} className="glass-interactive" style={{ flex: 1, padding: '13px', background: 'transparent', border: '1px solid var(--surface-border)', color: 'var(--text-secondary)', borderRadius: 'var(--radius-pill)', fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '12px', cursor: 'pointer' }}>
+            💾 SAVE SNAPSHOT
+          </button>
+          <button onClick={handleExportPlan} className="glass-interactive" style={{ flex: 1, padding: '13px', background: 'transparent', border: '1px solid var(--surface-border)', color: 'var(--text-secondary)', borderRadius: 'var(--radius-pill)', fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '12px', cursor: 'pointer' }}>
+            📤 EXPORT .MD
+          </button>
+        </div>
+
+        {planLibrary.length > 0 && (
+          <div style={{ marginTop: '18px' }}>
+            <span className="label-sm" style={{ display: 'block', marginBottom: '10px' }}>PLAN LIBRARY</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {planLibrary.map(entry => (
+                <div key={entry.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 14px', background: 'var(--surface)', border: '1px solid var(--surface-border)', borderRadius: 'var(--radius-md)' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '13px', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.name}</span>
+                    <span style={{ fontSize: '11px', color: 'var(--muted)' }}>{entry.savedAt.slice(0, 10)}</span>
+                  </div>
+                  <button onClick={() => handleLoadSnapshot(entry)} style={{ padding: '8px 14px', background: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.3)', borderRadius: 'var(--radius-pill)', color: 'var(--cyan)', cursor: 'pointer', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '11px' }}>LOAD</button>
+                  <button onClick={() => onDeletePlan?.(entry.id)} aria-label={`Delete ${entry.name}`} style={{ padding: '8px 10px', background: 'transparent', border: '1px solid var(--surface-border)', borderRadius: 'var(--radius-pill)', color: 'var(--muted)', cursor: 'pointer', fontSize: '11px' }}>✕</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {showModal && (

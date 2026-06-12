@@ -3,7 +3,10 @@ import { DEFAULT_WORKOUT_PLAN, NUTRITION_DATA, RECORDS_DATA, WORKOUT_HISTORY } f
 import { calculateHistoryStats } from '../utils/stats';
 import './VisualShowcase.css';
 
-export const VISUAL_SHOWCASE_SLUGS = ['neon-forge', 'frosted-atlas', 'solar-carbon', 'prism-reactor'];
+import { VISUAL_SHOWCASE_SLUGS } from './visualShowcaseSlugs';
+
+// Re-exported for backwards compatibility with existing imports.
+export { VISUAL_SHOWCASE_SLUGS };
 
 const STAGES = [
   { key: 'hub', label: 'Hub', duration: 6000 },

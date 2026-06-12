@@ -1,31 +1,84 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+
+async function vibrate(style = 'MEDIUM') {
+  try {
+    const { Haptics, ImpactStyle } = await import('@capacitor/haptics');
+    await Haptics.impact({ style: ImpactStyle[style] || ImpactStyle.Medium });
+  } catch {
+    // Web fallback
+    try { navigator.vibrate?.(style === 'HEAVY' ? 200 : 60); } catch { /* noop */ }
+  }
+}
 
 export default function RestTimer({ duration = 90, onComplete, onSkip }) {
+  // Timestamp-based countdown: survives screen-off / background throttling,
+  // unlike a naive setInterval counter that freezes when the WebView sleeps.
+  const [totalDuration, setTotalDuration] = useState(duration);
   const [remaining, setRemaining] = useState(duration);
-  const intervalRef = useRef(null);
+  const endTimeRef = useRef(Date.now() + duration * 1000);
+  const completedRef = useRef(false);
+
+  const computeRemaining = useCallback(() => (
+    Math.max(0, Math.ceil((endTimeRef.current - Date.now()) / 1000))
+  ), []);
 
   useEffect(() => {
+    endTimeRef.current = Date.now() + duration * 1000;
+    completedRef.current = false;
+    setTotalDuration(duration);
     setRemaining(duration);
-    intervalRef.current = setInterval(() => {
-      setRemaining((prev) => {
-        if (prev <= 1) {
-          clearInterval(intervalRef.current);
-          setTimeout(() => onComplete?.(), 300);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(intervalRef.current);
   }, [duration]);
+
+  useEffect(() => {
+    const tick = () => {
+      const next = computeRemaining();
+      setRemaining(next);
+      if (next === 3 || next === 2 || next === 1) vibrate('MEDIUM');
+      if (next <= 0 && !completedRef.current) {
+        completedRef.current = true;
+        vibrate('HEAVY');
+        setTimeout(() => onComplete?.(), 300);
+      }
+    };
+
+    const intervalId = setInterval(tick, 250);
+    // Re-sync immediately when returning from background / screen-off.
+    const onVisible = () => { if (!document.hidden) tick(); };
+    document.addEventListener('visibilitychange', onVisible);
+
+    return () => {
+      clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', onVisible);
+    };
+  }, [computeRemaining, onComplete]);
+
+  const adjust = (seconds) => {
+    if (completedRef.current) return;
+    endTimeRef.current = Math.max(Date.now() + 1000, endTimeRef.current + seconds * 1000);
+    setTotalDuration(prev => Math.max(1, prev + seconds));
+    setRemaining(computeRemaining());
+  };
 
   const minutes = Math.floor(remaining / 60);
   const seconds = remaining % 60;
-  const progress = ((duration - remaining) / duration) * 100;
+  const progress = totalDuration > 0 ? ((totalDuration - remaining) / totalDuration) * 100 : 100;
 
   const radius = 100;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
+
+  const adjustButtonStyle = {
+    padding: '12px 18px',
+    background: 'var(--surface)',
+    border: '1px solid var(--surface-border)',
+    borderRadius: 'var(--radius-pill)',
+    color: 'var(--text-secondary)',
+    fontFamily: 'var(--font-display)',
+    fontWeight: 600,
+    fontSize: '14px',
+    letterSpacing: '0.05em',
+    cursor: 'pointer',
+  };
 
   return (
     <div style={{
@@ -39,7 +92,7 @@ export default function RestTimer({ duration = 90, onComplete, onSkip }) {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      gap: '40px',
+      gap: '32px',
       animation: 'fadeIn 0.3s ease-out',
     }}>
       {/* Label */}
@@ -68,7 +121,7 @@ export default function RestTimer({ duration = 90, onComplete, onSkip }) {
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
-            style={{ transition: 'stroke-dashoffset 1s linear', filter: 'drop-shadow(0 0 8px rgba(0,255,204,0.4))' }}
+            style={{ transition: 'stroke-dashoffset 0.25s linear', filter: 'drop-shadow(0 0 8px rgba(0,255,204,0.4))' }}
           />
           <defs>
             <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -99,12 +152,15 @@ export default function RestTimer({ duration = 90, onComplete, onSkip }) {
         </div>
       </div>
 
+      {/* +/- 15s Adjust */}
+      <div style={{ display: 'flex', gap: '14px' }}>
+        <button onClick={() => adjust(-15)} style={adjustButtonStyle} aria-label="Shorten rest by 15 seconds">−15s</button>
+        <button onClick={() => adjust(15)} style={adjustButtonStyle} aria-label="Extend rest by 15 seconds">+15s</button>
+      </div>
+
       {/* Skip Button */}
       <button
-        onClick={() => {
-          clearInterval(intervalRef.current);
-          onSkip?.();
-        }}
+        onClick={() => onSkip?.()}
         style={{
           padding: '14px 40px',
           background: 'var(--surface)',

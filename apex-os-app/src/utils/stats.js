@@ -1,3 +1,5 @@
+import { getLocalDateKey } from './storage';
+
 export function calculateStats(heatmapData, options = {}) {
   // heatmapData: 7 rows (Mon-Sun) × N columns (weeks)
   // 0 = no workout, >0 = workout intensity
@@ -396,7 +398,9 @@ export function analyzeBenchmarkTrends(benchmarks) {
 }
 
 function createBenchmarkEntry(benchmark, value, completedAt, source) {
-  const date = completedAt.slice(0, 10);
+  // Local calendar date — slicing the ISO string is UTC and shifts
+  // post-midnight sessions to the previous day in UTC+ timezones.
+  const date = getLocalDateKey(new Date(completedAt));
   const history = benchmark.history || [];
   const lastEntry = history[history.length - 1];
   const isDuplicate = lastEntry && lastEntry.date === date && Number(lastEntry.value) === Number(value);

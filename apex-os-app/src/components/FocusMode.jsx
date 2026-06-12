@@ -1,12 +1,59 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import SwipeToComplete from './SwipeToComplete';
+import AppDialog from './AppDialog';
 import RestTimer from './RestTimer';
 import Stepper from './Stepper';
+import { getProgressionHint } from '../utils/progression';
 
-export default function FocusMode({ exercises, onExit }) {
+function formatElapsed(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+export default function FocusMode({ exercises, onExit, startedAt, workoutHistory = [], todayCheckin = null, onApplyProgression }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentSet, setCurrentSet] = useState(1);
   const [showRest, setShowRest] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState(null);
+
+  // Live session clock — timestamp-based, survives background throttling.
+  const [elapsed, setElapsed] = useState(0);
+  useEffect(() => {
+    if (!startedAt) return undefined;
+    const tick = () => setElapsed(Math.max(0, Math.floor((Date.now() - startedAt) / 1000)));
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [startedAt]);
+
+  // Keep the screen awake for the whole workout (Web Wake Lock API — supported
+  // by the Android WebView). Re-acquired when returning from background.
+  useEffect(() => {
+    let wakeLock = null;
+    let released = false;
+
+    const acquire = async () => {
+      try {
+        if (!released && navigator.wakeLock?.request) {
+          wakeLock = await navigator.wakeLock.request('screen');
+        }
+      } catch {
+        // Not supported / denied — workout continues without it.
+      }
+    };
+
+    const onVisible = () => { if (!document.hidden) acquire(); };
+
+    acquire();
+    document.addEventListener('visibilitychange', onVisible);
+
+    return () => {
+      released = true;
+      document.removeEventListener('visibilitychange', onVisible);
+      try { wakeLock?.release(); } catch { /* noop */ }
+    };
+  }, []);
 
   // Track actual performance for the current set
   const [actualReps, setActualReps] = useState(0);
@@ -14,6 +61,12 @@ export default function FocusMode({ exercises, onExit }) {
   const [completedSets, setCompletedSets] = useState([]);
 
   const exercise = exercises[currentIndex];
+
+  // Double-progression coach: based on the last two logged sessions of this exercise.
+  const progressionHint = useMemo(
+    () => getProgressionHint(workoutHistory, exercise),
+    [workoutHistory, exercise]
+  );
 
   useEffect(() => {
     if (exercise) {
@@ -50,11 +103,32 @@ export default function FocusMode({ exercises, onExit }) {
   });
 
   const finishWorkout = (summary) => {
-    onExit({
-      totalSets,
-      completedSets,
-      ...summary,
-    });
+    const isEarlyExit = completedSets.length < totalSets;
+    const doExit = () => onExit({ totalSets, completedSets, ...summary });
+
+    if (isEarlyExit && completedSets.length > 0) {
+      setConfirmDialog({
+        title: 'Finish Early?',
+        message: `${completedSets.length}/${totalSets} sets completed will be logged.`,
+        confirmText: 'FINISH & LOG',
+        cancelText: 'KEEP GOING',
+        tone: 'warning',
+        onConfirm: doExit,
+      });
+      return;
+    }
+    if (isEarlyExit && completedSets.length === 0) {
+      setConfirmDialog({
+        title: 'Exit Focus Mode?',
+        message: 'Nothing has been logged yet.',
+        confirmText: 'EXIT',
+        cancelText: 'STAY',
+        tone: 'danger',
+        onConfirm: doExit,
+      });
+      return;
+    }
+    doExit();
   };
 
   const handleCompleteSet = () => {
@@ -107,6 +181,14 @@ export default function FocusMode({ exercises, onExit }) {
      }
   };
 
+  const dialogElement = confirmDialog ? (
+    <AppDialog
+      {...confirmDialog}
+      onConfirm={() => { const fn = confirmDialog.onConfirm; setConfirmDialog(null); fn?.(); }}
+      onCancel={() => setConfirmDialog(null)}
+    />
+  ) : null;
+
   return (
     <div style={{
       position: 'fixed', inset: 0, background: 'var(--bg)', zIndex: 90,
@@ -117,6 +199,7 @@ export default function FocusMode({ exercises, onExit }) {
       paddingRight: 'env(safe-area-inset-right, 0px)',
       animation: 'fadeIn 0.3s ease-out', overflow: 'auto',
     }}>
+      {dialogElement}
       {/* Top Bar */}
       <div style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -128,6 +211,11 @@ export default function FocusMode({ exercises, onExit }) {
           letterSpacing: '0.08em', textTransform: 'uppercase', cursor: 'pointer',
           display: 'flex', alignItems: 'center', gap: '4px',
         }}>← Previous</button>
+        <span style={{
+          fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '14px',
+          letterSpacing: '0.08em', color: 'var(--cyan)',
+          textShadow: '0 0 8px rgba(0,255,204,0.3)',
+        }} aria-label="Session time">⏱ {formatElapsed(elapsed)}</span>
         <div style={{ display: 'flex', gap: '12px' }}>
           <button onClick={handleSkip} style={{
             background: 'none', border: 'none', color: 'var(--muted)',
@@ -177,6 +265,60 @@ export default function FocusMode({ exercises, onExit }) {
             </svg>
           )}
         </div>
+
+        {/* Traffic-light gate — the morning check-in lives inside the session */}
+        {todayCheckin && todayCheckin.light !== 'green' && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '10px',
+            background: todayCheckin.light === 'red' ? 'rgba(255,92,92,0.1)' : 'rgba(255,213,79,0.08)',
+            border: `1px solid ${todayCheckin.light === 'red' ? 'rgba(255,92,92,0.4)' : 'rgba(255,213,79,0.35)'}`,
+            borderRadius: 'var(--radius-md)', padding: '10px 14px', marginBottom: '16px',
+          }}>
+            <span style={{ fontSize: '16px' }}>{todayCheckin.light === 'red' ? '🔴' : '🟡'}</span>
+            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+              {todayCheckin.light === 'red'
+                ? 'RED GATE — recovery work only. No impact, no heavy loading, pain stays ≤2/10.'
+                : 'YELLOW — keep volume, cut intensity on sensitive areas. If pain climbs mid-set, stop the exercise.'}
+            </span>
+          </div>
+        )}
+
+        {/* Progression Coach */}
+        {progressionHint && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: '10px',
+            background: progressionHint.level === 'up' ? 'rgba(0,255,204,0.08)' : 'rgba(255,213,79,0.07)',
+            border: `1px solid ${progressionHint.level === 'up' ? 'rgba(0,255,204,0.35)' : 'rgba(255,213,79,0.3)'}`,
+            borderRadius: 'var(--radius-md)', padding: '12px 16px', marginBottom: '20px',
+          }}>
+            <span style={{ fontSize: '18px' }}>{progressionHint.level === 'up' ? '📈' : '🎯'}</span>
+            <div>
+              <span style={{
+                fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '11px',
+                letterSpacing: '0.1em', textTransform: 'uppercase',
+                color: progressionHint.level === 'up' ? 'var(--cyan)' : '#FFD54F',
+                display: 'block', marginBottom: '2px',
+              }}>PROGRESSION COACH</span>
+              <span style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.4 }}>
+                {progressionHint.message}
+              </span>
+            </div>
+            {progressionHint.patch && onApplyProgression && (
+              <button
+                onClick={() => onApplyProgression(exercise, progressionHint.patch)}
+                style={{
+                  marginLeft: 'auto', flexShrink: 0, padding: '8px 14px',
+                  background: 'var(--cyan)', color: '#000', border: 'none',
+                  borderRadius: 'var(--radius-pill)', cursor: 'pointer',
+                  fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '11px',
+                  letterSpacing: '0.08em',
+                }}
+              >
+                APPLY
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Set Data Entry (Steppers) */}
         <div style={{ marginBottom: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
