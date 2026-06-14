@@ -7,7 +7,7 @@ export default function ProfileButton({ profile, onClick }) {
       aria-label="Open profile"
       style={{
         width: '44px', height: '44px', borderRadius: '50%',
-        background: profile.photo ? 'transparent' : 'linear-gradient(135deg, var(--cyan), #00AA88)',
+        background: profile.photo ? 'transparent' : 'linear-gradient(135deg, var(--cyan), #5BB0F0)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '16px',
         color: '#000', boxShadow: 'var(--cyan-glow-sm)',

@@ -1,0 +1,28 @@
+<!-- @dsCard group="Spacing" viewport="700x180" name="Elevation & glass" subtitle="Float shadow, glass blur, inner highlight" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { background: #000; padding: 28px; background-image: radial-gradient(circle at 30% 20%, rgba(127,200,255,0.06), transparent 40%); }
+  .row { display: flex; gap: 20px; }
+  .card { flex: 1; height: 110px; border-radius: var(--radius-lg); display: flex; align-items: flex-end; padding: 14px; }
+  .name { font-family: var(--font-display); font-weight: 600; font-size: 12px; color: #fff; }
+  .sub { font-family: var(--font-body); font-size: 10px; color: var(--text-secondary); display: block; }
+</style>
+</head>
+<body>
+<div class="row">
+  <div class="card" style="background:rgba(255,255,255,0.02); border:1px solid var(--surface-border); box-shadow: var(--shadow-float);">
+    <div><span class="name">Float</span><span class="sub">--shadow-float</span></div>
+  </div>
+  <div class="card" style="background:rgba(255,255,255,0.02); border:1px solid var(--surface-border-light); backdrop-filter: var(--blur); box-shadow: var(--shadow-inset);">
+    <div><span class="name">Glass · blur 20</span><span class="sub">--blur + --shadow-inset</span></div>
+  </div>
+  <div class="card" style="background:#000; border:1px solid rgba(127,200,255,0.3); box-shadow: var(--cyan-glow);">
+    <div><span class="name" style="color:var(--cyan)">Cyan glow</span><span class="sub">--cyan-glow</span></div>
+  </div>
+</div>
+</body>
+</html>

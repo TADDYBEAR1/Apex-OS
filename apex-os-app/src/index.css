@@ -2,33 +2,59 @@
    APEX OS — Hyper-Minimalist Spatial UI
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* ── Design Tokens ─────────────────────────────────────────── */
+/* ============================================================
+   APEX OS — "Arctic Aurora" Design System
+   Deep glacial canvas · frosted glass · iridescent ice accents
+   over a living aurora field.
+   ============================================================ */
 :root {
-  --bg: #000000;
-  --surface: transparent;
-  --surface-glass: rgba(255, 255, 255, 0.01);
-  --surface-hover: rgba(255, 255, 255, 0.03);
-  --surface-border: rgba(255, 255, 255, 0.08);
-  --surface-border-light: rgba(255, 255, 255, 0.2);
+  /* ── Canvas & Surfaces ─────────────────────────────── */
+  --bg: #070A10;
+  --bg-deep: #04060B;
+  --surface: rgba(255, 255, 255, 0.06);
+  --surface-glass: rgba(255, 255, 255, 0.04);
+  --surface-hover: rgba(255, 255, 255, 0.10);
+  --surface-raised: rgba(255, 255, 255, 0.08);
+  --surface-border: rgba(255, 255, 255, 0.12);
+  --surface-border-top: rgba(255, 255, 255, 0.22);
+  --surface-border-light: rgba(255, 255, 255, 0.28);
 
-  --cyan: #00e5ff;
-  --cyan-dim: rgba(0, 229, 255, 0.1);
-  --cyan-glow: 0 0 15px rgba(0, 229, 255, 0.4), 0 0 30px rgba(0, 229, 255, 0.1);
-  --cyan-glow-sm: 0 0 8px rgba(0, 229, 255, 0.3);
+  /* ── Aurora field (background blobs) ───────────────── */
+  --aurora-1: #6FE9FF;   /* glacier cyan     */
+  --aurora-2: #8FA8FF;   /* periwinkle       */
+  --aurora-3: #C9F0FF;   /* frost white-blue */
 
-  --orange: #ff4d00;
-  --orange-dim: rgba(255, 77, 0, 0.1);
-  --orange-glow: 0 0 15px rgba(255, 77, 0, 0.3);
+  /* ── Primary — Ice blue (active, signal, success) ──── */
+  --ice-bright: #CFEFFF;
+  --ice: #7FC8FF;
+  --ice-soft: #9FB8FF;
+  --cyan: #7FC8FF;                                  /* legacy alias → ice */
+  --cyan-dim: rgba(127, 200, 255, 0.12);
+  --cyan-glow: 0 0 16px rgba(127, 200, 255, 0.45), 0 0 34px rgba(143, 168, 255, 0.18);
+  --cyan-glow-sm: 0 0 9px rgba(127, 200, 255, 0.35);
+  --ice-gradient: linear-gradient(135deg, #CFEFFF, #7FC8FF 50%, #9FB8FF);
 
-  --green: #00ff88;
-  --green-dim: rgba(0, 255, 136, 0.1);
+  /* ── Secondary — Amber (warning, heat) ─────────────── */
+  --orange: #ffb14d;
+  --orange-dim: rgba(255, 177, 77, 0.12);
+  --orange-glow: 0 0 15px rgba(255, 177, 77, 0.3);
 
+  /* ── Tertiary — Mint (go, gains) ───────────────────── */
+  --green: #7CFFD9;
+  --green-dim: rgba(124, 255, 217, 0.12);
+
+  /* ── Traffic-light / readiness palette ─────────────── */
+  --signal-go: #7CFFD9;
+  --signal-caution: #ffd54f;
+  --signal-stop: #ff8095;
+
+  /* ── Text ──────────────────────────────────────────── */
   --text: #ffffff;
-  --text-secondary: #a1a1aa;
-  --muted: #52525b;
-  --muted-dark: #27272a;
+  --text-secondary: rgba(255, 255, 255, 0.62);
+  --muted: rgba(255, 255, 255, 0.42);
+  --muted-dark: rgba(255, 255, 255, 0.18);
 
   --font-display: 'Space Grotesk', system-ui, sans-serif;
   --font-body: 'Inter', system-ui, sans-serif;
@@ -44,6 +70,7 @@
 
   --transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   --transition-spring: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ── Reset & Base ──────────────────────────────────────────── */
@@ -76,6 +103,70 @@ body {
   min-height: 100vh;
   position: relative;
   overflow: hidden;
+  background: var(--bg);
+}
+
+/* ── Aurora field — living glacial backdrop ────────────────── */
+/* Three soft blurred blobs drift slowly behind every screen,
+   fixed to the viewport so content scrolls over a calm field. */
+#root::before,
+#root::after {
+  content: '';
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(70px);
+  pointer-events: none;
+  z-index: 0;
+  will-change: transform;
+}
+#root::before {
+  width: 280px; height: 280px;
+  top: -70px; left: -50px;
+  background: var(--aurora-1);
+  opacity: 0.42;
+  animation: aurora-drift-a 22s ease-in-out infinite alternate;
+}
+#root::after {
+  width: 320px; height: 320px;
+  bottom: -90px; right: -80px;
+  background: var(--aurora-2);
+  opacity: 0.40;
+  animation: aurora-drift-b 26s ease-in-out infinite alternate;
+}
+/* third blob via a dedicated element painted by the app shell */
+.aurora-accent {
+  content: '';
+  position: fixed;
+  width: 300px; height: 300px;
+  top: 32%; left: 30%;
+  border-radius: 50%;
+  background: var(--aurora-3);
+  opacity: 0.28;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+  animation: aurora-drift-c 30s ease-in-out infinite alternate;
+}
+@keyframes aurora-drift-a {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(40px, 60px) scale(1.15); }
+}
+@keyframes aurora-drift-b {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(-50px, -40px) scale(1.1); }
+}
+@keyframes aurora-drift-c {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(30px, -50px) scale(1.2); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #root::before, #root::after, .aurora-accent { animation: none !important; }
+}
+
+/* Ensure app content floats above the aurora field */
+.screen, .glass, .glass-light {
+  position: relative;
+  z-index: 1;
 }
 
 /* ── Scrollbar ─────────────────────────────────────────────── */
@@ -123,23 +214,28 @@ h1, h2, h3, h4 {
   animation: pulse-breathe 4s infinite ease-in-out;
 }
 
-/* ── Glass Card (Hyper-Minimalist) ─────────────────────────── */
+/* ── Glass Card (Frosted Aurora panel) ─────────────────────── */
 .glass {
+  position: relative;
+  z-index: 1;
   background: var(--surface);
   border: 1px solid var(--surface-border);
+  border-top-color: var(--surface-border-top);
   border-radius: var(--radius-lg);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.12);
   transition: all var(--transition);
 }
 
 .glass:hover {
   background: var(--surface-hover);
   border-color: var(--surface-border-light);
-  backdrop-filter: var(--blur);
-  -webkit-backdrop-filter: var(--blur);
-  box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.02);
 }
 
 .glass-light {
+  position: relative;
+  z-index: 1;
   background: var(--surface-glass);
   border: 1px solid var(--surface-border);
   border-radius: var(--radius-lg);
@@ -154,8 +250,8 @@ h1, h2, h3, h4 {
 
 .glass-interactive:hover {
   background: var(--surface-hover);
-  border-color: rgba(0, 229, 255, 0.3);
-  box-shadow: 0 10px 30px -10px rgba(0, 229, 255, 0.1), inset 0 0 20px rgba(255,255,255,0.03);
+  border-color: rgba(127, 200, 255, 0.4);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), 0 0 28px -8px rgba(127, 200, 255, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.14);
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
   animation-play-state: paused;
@@ -176,7 +272,7 @@ h1, h2, h3, h4 {
 button:focus-visible,
 .glass-button:focus-visible,
 input:focus-visible {
-  outline: 1px solid var(--cyan);
+  outline: 1px solid var(--ice);
   outline-offset: 4px;
 }
 
@@ -186,7 +282,7 @@ input:focus-visible {
 }
 
 .glow-cyan-text {
-  text-shadow: 0 0 15px rgba(0, 229, 255, 0.6);
+  text-shadow: 0 0 15px rgba(127, 200, 255, 0.6);
 }
 
 /* ── Buttons ───────────────────────────────────────────────── */
@@ -216,7 +312,7 @@ input:focus-visible {
   background: rgba(255, 255, 255, 0.1);
   border-color: var(--cyan);
   color: var(--cyan);
-  box-shadow: 0 0 20px rgba(0, 229, 255, 0.15), inset 0 0 10px rgba(0, 229, 255, 0.1);
+  box-shadow: 0 0 20px rgba(127, 200, 255, 0.18), inset 0 0 10px rgba(127, 200, 255, 0.12);
 }
 
 .btn-primary:active {
@@ -287,7 +383,7 @@ input:focus-visible {
 
 @keyframes pulse-breathe {
   0%, 100% { opacity: 0.8; filter: brightness(0.9); }
-  50% { opacity: 1; filter: brightness(1.2) drop-shadow(0 0 10px rgba(0, 229, 255, 0.3)); }
+  50% { opacity: 1; filter: brightness(1.2) drop-shadow(0 0 10px rgba(127, 200, 255, 0.3)); }
 }
 
 @keyframes subtle-breathe {
@@ -334,11 +430,11 @@ input:focus-visible {
 .progress-fill {
   height: 100%;
   border-radius: var(--radius-pill);
-  background: linear-gradient(270deg, var(--cyan), #9900ff, var(--cyan));
+  background: linear-gradient(270deg, #CFEFFF, #9FB8FF, #CFEFFF);
   background-size: 200% 200%;
   animation: liquid-shift 4s ease-in-out infinite;
   transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 0 15px rgba(0, 229, 255, 0.6);
+  box-shadow: 0 0 15px rgba(127, 200, 255, 0.6);
   position: relative;
 }
 
@@ -426,7 +522,7 @@ input[type=number] {
 .gap-24 { gap: 24px; }
 .w-full { width: 100%; }
 .text-center { text-align: center; }
-.text-cyan { color: var(--cyan); text-shadow: 0 0 10px rgba(0,229,255,0.3); }
+.text-cyan { color: var(--cyan); text-shadow: 0 0 10px rgba(127,200,255,0.3); }
 .text-orange { color: var(--orange); }
 .text-muted { color: var(--text-secondary); }
 .text-sm { font-size: 13px; font-weight: 300; }

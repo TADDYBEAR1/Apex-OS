@@ -36,7 +36,7 @@ export default function AppDialog({
         width: '100%', maxWidth: '360px',
         background: 'var(--surface)', border: `1px solid ${accent}40`,
         borderRadius: 'var(--radius-lg)', padding: '24px',
-        boxShadow: `0 0 50px ${tone === 'default' ? 'rgba(0,229,255,0.08)' : 'rgba(0,0,0,0.5)'}`,
+        boxShadow: `0 0 50px ${tone === 'default' ? 'rgba(127, 200, 255,0.08)' : 'rgba(0,0,0,0.5)'}`,
       }}>
         <span style={{
           fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '12px',

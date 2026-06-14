@@ -92,8 +92,8 @@ export default function SwipeToComplete({ onComplete, label = 'SWIPE TO COMPLETE
         bottom: 0,
         width: `${dragX + THUMB_SIZE + 4}px`,
         background: isCompleted
-          ? 'linear-gradient(90deg, rgba(0,255,204,0.3), rgba(0,255,204,0.15))'
-          : 'linear-gradient(90deg, rgba(0,255,204,0.12), rgba(0,255,204,0.04))',
+          ? 'linear-gradient(90deg, rgba(127, 200, 255,0.3), rgba(127, 200, 255,0.15))'
+          : 'linear-gradient(90deg, rgba(127, 200, 255,0.12), rgba(127, 200, 255,0.04))',
         borderRadius: 'var(--radius-pill)',
         transition: isDragging ? 'none' : 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
       }} />
@@ -136,13 +136,13 @@ export default function SwipeToComplete({ onComplete, label = 'SWIPE TO COMPLETE
           borderRadius: '50%',
           background: isCompleted
             ? 'var(--cyan)'
-            : 'linear-gradient(135deg, var(--cyan), #00DDAA)',
+            : 'linear-gradient(135deg, var(--cyan), #7FC8FF)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           boxShadow: isCompleted
-            ? '0 0 30px rgba(0,255,204,0.6), 0 0 60px rgba(0,255,204,0.2)'
-            : '0 0 20px rgba(0,255,204,0.35), 0 0 40px rgba(0,255,204,0.1)',
+            ? '0 0 30px rgba(127, 200, 255,0.6), 0 0 60px rgba(127, 200, 255,0.2)'
+            : '0 0 20px rgba(127, 200, 255,0.35), 0 0 40px rgba(127, 200, 255,0.1)',
           transition: isDragging ? 'none' : 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
           zIndex: 2,
         }}

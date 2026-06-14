@@ -25,9 +25,9 @@ describe('WorkoutScreen', () => {
 
     expect(onEnterFocus).toHaveBeenCalledWith(expect.objectContaining({
       day: 2,
-      planName: 'Lower Body Power',
+      planName: 'Heavy Trunk',
       exercises: expect.arrayContaining([
-        expect.objectContaining({ name: 'Barbell Back Squat', section: 'main', sectionLabel: 'MAIN WORKOUT' }),
+        expect.objectContaining({ name: 'Contralateral Heavy Bulgarian Split Squat', section: 'main', sectionLabel: 'MAIN WORKOUT' }),
       ]),
     }));
   });

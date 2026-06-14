@@ -26,16 +26,16 @@ const THEMES = {
       '--vs-bg-b': '#09100d',
       '--vs-card': 'rgba(8, 16, 14, 0.74)',
       '--vs-card-strong': 'rgba(9, 22, 19, 0.9)',
-      '--vs-border': 'rgba(0, 255, 204, 0.25)',
+      '--vs-border': 'rgba(127, 200, 255, 0.25)',
       '--vs-border-soft': 'rgba(255, 255, 255, 0.08)',
       '--vs-text': '#f6fffb',
       '--vs-muted': '#89a19a',
       '--vs-soft': '#c8fff2',
-      '--vs-primary': '#00ffcc',
+      '--vs-primary': '#7FC8FF',
       '--vs-secondary': '#baff39',
       '--vs-tertiary': '#ff5a36',
       '--vs-warning': '#ffb84d',
-      '--vs-shadow': 'rgba(0, 255, 204, 0.3)',
+      '--vs-shadow': 'rgba(127, 200, 255, 0.3)',
     },
     matrix: ['FORCE', 'VOLUME', 'RECOVERY', 'HEAT'],
   },
@@ -277,7 +277,7 @@ function KineticCanvas({ visual, stageIndex }) {
             ? { primary: '#7affda', secondary: '#ff4df8', tertiary: '#ffe66d', grid: 'rgba(122,255,218,0.2)' }
             : visual === 'frosted-atlas'
               ? { primary: '#7fffe0', secondary: '#ffd86f', tertiary: '#d4a7ff', grid: 'rgba(229,255,248,0.18)' }
-              : { primary: '#00ffcc', secondary: '#baff39', tertiary: '#ff5a36', grid: 'rgba(0,255,204,0.16)' };
+              : { primary: '#7FC8FF', secondary: '#baff39', tertiary: '#ff5a36', grid: 'rgba(127, 200, 255,0.16)' };
 
       ctx.clearRect(0, 0, width, height);
       drawGrid(time, palette);

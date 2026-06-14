@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Aurora — Color Studies</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" />
+<style>
+  html, body { margin: 0; }
+  .phone { width: 390px; height: 800px; border-radius: 52px; padding: 11px;
+    background: linear-gradient(150deg,#23262c,#0a0b0d 60%);
+    box-shadow: 0 40px 90px rgba(0,0,0,.45), 0 0 0 1px rgba(0,0,0,.3), inset 0 1px 1px rgba(255,255,255,.14); }
+  .phone-screen { width: 100%; height: 100%; border-radius: 42px; overflow: hidden; position: relative; }
+  .note { font-family: 'Inter',sans-serif; font-size: 13px; line-height: 1.5; color: #4b5563; max-width: 390px; margin: 0 auto; padding-top: 16px; text-align: center; }
+  .note b { color: #111827; font-weight: 600; }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="DirAurora.jsx"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+  const { DesignCanvas, DCSection, DCArtboard } = window;
+  function Phone({ children }) { return <div className="phone"><div className="phone-screen">{children}</div></div>; }
+  const P = window.AURORA_PALETTES;
+
+  function App() {
+    return (
+      <DesignCanvas>
+        <DCSection id="aur" title="Aurora — Color Studies" subtitle="Same spatial frosted-glass design you loved, in four new color-ways. Pick a mood (or mix two).">
+          <DCArtboard id="verdant" label="A · Verdant — emerald & lime" width={440} height={910}>
+            <Phone><window.DirAurora palette={P.verdant} idp="vd" /></Phone>
+            <p className="note"><b>Verdant.</b> Northern-lights green into electric lime. Fresh, oxygenated, "go" energy — the most overtly fitness/vitality reading.</p>
+          </DCArtboard>
+          <DCArtboard id="ember" label="B · Ember — amber & rose" width={440} height={910}>
+            <Phone><window.DirAurora palette={P.ember} idp="em" /></Phone>
+            <p className="note"><b>Ember.</b> Warm aurora — amber, ember-orange, hot rose. Effort and heat, but soft and premium rather than aggressive.</p>
+          </DCArtboard>
+          <DCArtboard id="arctic" label="C · Arctic — ice blue & silver" width={440} height={910}>
+            <Phone><window.DirAurora palette={P.arctic} idp="ar" /></Phone>
+            <p className="note"><b>Arctic.</b> Icy blues and silver-white. The calmest, most minimal and clinical — luxe and restrained.</p>
+          </DCArtboard>
+          <DCArtboard id="orchid" label="D · Orchid — magenta & gold" width={440} height={910}>
+            <Phone><window.DirAurora palette={P.orchid} idp="or" /></Phone>
+            <p className="note"><b>Orchid.</b> Magenta into violet with a gold lift. Bold, luxe, distinctive — the most fashion-forward of the set.</p>
+          </DCArtboard>
+          <DCArtboard id="tide" label="E · Tide — original cyan (for reference)" width={440} height={910}>
+            <Phone><window.DirAurora palette={P.tide} idp="td" /></Phone>
+            <p className="note"><b>Tide.</b> The cyan→violet→pink version you first saw, here for side-by-side comparison.</p>
+          </DCArtboard>
+        </DCSection>
+      </DesignCanvas>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

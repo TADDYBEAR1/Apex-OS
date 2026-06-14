@@ -66,8 +66,8 @@ export default function TrendChart({
           <text x={pad.left - 4} y={py(gy) + 3} textAnchor="end" fontSize="8" fill="var(--muted)">{Math.round(gy * 10) / 10}</text>
         </g>
       ))}
-      {bandPath && <path d={bandPath} fill="rgba(0,255,204,0.07)" stroke="rgba(0,255,204,0.2)" strokeWidth="0.5" strokeDasharray="3 3" />}
-      <path d={linePath} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 0 4px rgba(0,229,255,0.35))' }} />
+      {bandPath && <path d={bandPath} fill="rgba(127, 200, 255,0.07)" stroke="rgba(127, 200, 255,0.2)" strokeWidth="0.5" strokeDasharray="3 3" />}
+      <path d={linePath} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ filter: 'drop-shadow(0 0 4px rgba(127, 200, 255,0.35))' }} />
       {points.map((p, i) => (
         <circle key={i} cx={px(p.x)} cy={py(p.y)} r={i === points.length - 1 ? 3.5 : 2} fill={i === points.length - 1 ? color : 'rgba(255,255,255,0.5)'} />
       ))}

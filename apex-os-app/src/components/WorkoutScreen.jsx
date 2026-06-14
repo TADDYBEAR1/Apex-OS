@@ -159,7 +159,7 @@ export default function WorkoutScreen({ workoutPlan, setWorkoutPlan, currentDay,
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '40px', animation: 'fadeInUp 0.4s ease-out' }}>
         <div>
-          <h1 style={{ fontSize: '40px', fontWeight: 300, marginBottom: '-4px', letterSpacing: '-0.04em' }}>Workout<span style={{ color:'var(--cyan)', textShadow: '0 0 10px rgba(0,229,255,0.5)' }}>.</span></h1>
+          <h1 style={{ fontSize: '40px', fontWeight: 300, marginBottom: '-4px', letterSpacing: '-0.04em' }}>Workout<span style={{ color:'var(--cyan)', textShadow: '0 0 10px rgba(127, 200, 255,0.5)' }}>.</span></h1>
           <p style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 300 }}>Plan your protocol</p>
         </div>
         <ProfileButton profile={profile} onClick={onOpenProfile} />
@@ -173,7 +173,7 @@ export default function WorkoutScreen({ workoutPlan, setWorkoutPlan, currentDay,
             color: currentDay === i ? 'var(--cyan)' : 'var(--muted)',
             fontFamily: 'var(--font-body)', fontWeight: currentDay === i ? 500 : 400, fontSize: '12px',
             cursor: 'pointer', transition: 'all 0.4s ease',
-            textShadow: currentDay === i ? '0 0 10px rgba(0,229,255,0.5)' : 'none',
+            textShadow: currentDay === i ? '0 0 10px rgba(127, 200, 255,0.5)' : 'none',
           }}>
             {day[0]}
           </button>
@@ -268,7 +268,7 @@ export default function WorkoutScreen({ workoutPlan, setWorkoutPlan, currentDay,
 
       <div style={{ marginTop: '40px', paddingBottom: '20px' }}>
         <input type="file" ref={importInputRef} accept=".md,text/markdown,text/plain" onChange={handleImportPlanFile} style={{ display: 'none' }} />
-        <button onClick={() => importInputRef.current?.click()} className="glass-interactive" style={{ width: '100%', padding: '16px', background: 'transparent', border: '1px solid rgba(0,229,255,0.4)', color: 'var(--cyan)', borderRadius: 'var(--radius-pill)', fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '13px', cursor: 'pointer', transition: 'all 0.3s ease' }}>
+        <button onClick={() => importInputRef.current?.click()} className="glass-interactive" style={{ width: '100%', padding: '16px', background: 'transparent', border: '1px solid rgba(127, 200, 255,0.4)', color: 'var(--cyan)', borderRadius: 'var(--radius-pill)', fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '13px', cursor: 'pointer', transition: 'all 0.3s ease' }}>
           📥 IMPORT PLAN FROM .MD FILE
         </button>
         <p style={{ fontSize: '11px', color: 'var(--muted)', textAlign: 'center', marginTop: '10px' }}>
@@ -295,7 +295,7 @@ export default function WorkoutScreen({ workoutPlan, setWorkoutPlan, currentDay,
                     <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '13px', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.name}</span>
                     <span style={{ fontSize: '11px', color: 'var(--muted)' }}>{entry.savedAt.slice(0, 10)}</span>
                   </div>
-                  <button onClick={() => handleLoadSnapshot(entry)} style={{ padding: '8px 14px', background: 'rgba(0,229,255,0.08)', border: '1px solid rgba(0,229,255,0.3)', borderRadius: 'var(--radius-pill)', color: 'var(--cyan)', cursor: 'pointer', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '11px' }}>LOAD</button>
+                  <button onClick={() => handleLoadSnapshot(entry)} style={{ padding: '8px 14px', background: 'rgba(127, 200, 255,0.08)', border: '1px solid rgba(127, 200, 255,0.3)', borderRadius: 'var(--radius-pill)', color: 'var(--cyan)', cursor: 'pointer', fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '11px' }}>LOAD</button>
                   <button onClick={() => onDeletePlan?.(entry.id)} aria-label={`Delete ${entry.name}`} style={{ padding: '8px 10px', background: 'transparent', border: '1px solid var(--surface-border)', borderRadius: 'var(--radius-pill)', color: 'var(--muted)', cursor: 'pointer', fontSize: '11px' }}>✕</button>
                 </div>
               ))}

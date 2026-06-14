@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import GlassCard from './GlassCard';
 import ProfileButton from './ProfileButton';
 import MorningCheckin from './MorningCheckin';
+import ReadinessRing from './ReadinessRing';
 import { HEATMAP_DAY_LABELS } from '../data/sampleData';
 import { buildHeatmapFromWorkoutHistory, calculateHistoryStats } from '../utils/stats';
 import { DEFAULT_MISSION, getMissionStatus } from '../utils/mission';
@@ -32,8 +33,8 @@ export default function HomeScreen({
 
   const cellColor = (val) =>
     val === 0 ? 'rgba(255,255,255,0.03)' :
-    val === 1 ? 'rgba(0,229,255,0.2)' :
-    val === 2 ? 'rgba(0,229,255,0.5)' : 'var(--cyan)';
+    val === 1 ? 'rgba(127, 200, 255,0.2)' :
+    val === 2 ? 'rgba(127, 200, 255,0.5)' : 'var(--cyan)';
 
   return (
     <div className="screen" style={{ paddingTop: '24px' }}>
@@ -50,7 +51,7 @@ export default function HomeScreen({
         <div>
           <span style={{ fontFamily:'var(--font-display)', fontSize:'11px', fontWeight:700, letterSpacing:'0.18em', color:'var(--cyan)' }}>MISSION CONTROL</span>
           <h1 style={{ fontSize:'32px', fontWeight:300, marginTop:'2px', letterSpacing: '-0.04em' }}>
-            {profile.name ? profile.name.split(' ')[0] : 'Operator'}<span style={{ color:'var(--cyan)', textShadow: '0 0 10px rgba(0,229,255,0.5)' }}>.</span>
+            {profile.name ? profile.name.split(' ')[0] : 'Operator'}<span style={{ color:'var(--cyan)', textShadow: '0 0 10px rgba(127, 200, 255,0.5)' }}>.</span>
           </h1>
           <p style={{ fontSize:'13px', color:'var(--text-secondary)', letterSpacing: '0.02em', fontWeight: 300 }}>{dayNames[now.getDay()]}, {months[now.getMonth()]} {now.getDate()}</p>
         </div>
@@ -83,8 +84,8 @@ export default function HomeScreen({
           <div style={{
             position:'absolute', left:0, top:0, bottom:0,
             width:`${missionStatus.progressPct}%`,
-            background:'linear-gradient(90deg, rgba(0,229,255,0.4), var(--cyan))',
-            boxShadow:'0 0 12px rgba(0,229,255,0.5)',
+            background:'linear-gradient(90deg, rgba(127, 200, 255,0.4), var(--cyan))',
+            boxShadow:'0 0 12px rgba(127, 200, 255,0.5)',
             borderRadius:'3px', transition:'width 1s ease',
           }} />
         </div>
@@ -104,7 +105,7 @@ export default function HomeScreen({
       {!todayCheckin ? (
         <GlassCard onClick={() => setShowCheckin(true)} style={{
           padding:'18px 20px', marginBottom:'20px', animation:'fadeInUp 0.7s ease-out',
-          border:'1px solid rgba(0,229,255,0.25)',
+          border:'1px solid rgba(127, 200, 255,0.25)',
         }}>
           <div style={{ display:'flex', alignItems:'center', gap:'14px' }}>
             <span style={{ fontSize:'24px' }}>☀️</span>
@@ -117,22 +118,27 @@ export default function HomeScreen({
         </GlassCard>
       ) : (
         <GlassCard onClick={() => setShowCheckin(true)} style={{
-          padding:'18px 20px', marginBottom:'20px', animation:'fadeInUp 0.7s ease-out',
+          padding:'24px 20px', marginBottom:'20px', animation:'fadeInUp 0.7s ease-out',
           border:`1px solid ${lightMeta.color}40`,
+          display:'flex', alignItems:'center', gap:'20px',
         }}>
-          <div style={{ display:'flex', alignItems:'center', gap:'14px' }}>
-            <div style={{ textAlign:'center' }}>
-              <span style={{ fontSize:'22px', display:'block' }}>{lightMeta.icon}</span>
-              <span style={{ fontFamily:'var(--font-display)', fontWeight:700, fontSize:'18px', color:lightMeta.color }}>{todayCheckin.score}</span>
-            </div>
-            <div style={{ flex:1 }}>
-              <span style={{ fontFamily:'var(--font-display)', fontWeight:700, fontSize:'12px', letterSpacing:'0.08em', color:lightMeta.color, display:'block' }}>
-                {lightMeta.title}
-              </span>
-              <span style={{ fontSize:'12px', color:'var(--text-secondary)', lineHeight:1.4, display:'block', marginTop:'2px' }}>
-                {todayCheckin.recommendation}
-              </span>
-            </div>
+          <ReadinessRing
+            value={todayCheckin.score}
+            score={todayCheckin.score}
+            label={todayCheckin.light === 'green' ? 'Ready' : todayCheckin.light === 'yellow' ? 'Caution' : 'Hold'}
+            light={todayCheckin.light}
+            size={104}
+            stroke={9}
+            breathe={todayCheckin.light === 'green'}
+            id="home-readiness"
+          />
+          <div style={{ flex:1, minWidth:0 }}>
+            <span style={{ fontFamily:'var(--font-display)', fontWeight:700, fontSize:'12px', letterSpacing:'0.1em', color:lightMeta.color, display:'block', textTransform:'uppercase' }}>
+              {lightMeta.icon} {lightMeta.title}
+            </span>
+            <span style={{ fontSize:'12px', color:'var(--text-secondary)', lineHeight:1.5, display:'block', marginTop:'6px' }}>
+              {todayCheckin.recommendation}
+            </span>
           </div>
         </GlassCard>
       )}
@@ -185,7 +191,7 @@ export default function HomeScreen({
         <div style={{ width: '1px', background: 'var(--surface-border)', margin: '0 16px' }} />
         <div style={{ display:'flex', flexDirection:'column', gap:'4px' }}>
           <span className="label-sm">TOTAL</span>
-          <div style={{ fontFamily:'var(--font-display)', fontWeight:300, fontSize:'32px', color:'var(--cyan)', textShadow: '0 0 10px rgba(0,229,255,0.2)' }}>
+          <div style={{ fontFamily:'var(--font-display)', fontWeight:300, fontSize:'32px', color:'var(--cyan)', textShadow: '0 0 10px rgba(127, 200, 255,0.2)' }}>
             {stats.totalSessions}
           </div>
         </div>
@@ -202,7 +208,7 @@ export default function HomeScreen({
                 color: heatmapRange===r ? 'var(--cyan)' : 'var(--muted)',
                 fontFamily:'var(--font-body)', fontWeight:500, fontSize:'11px', letterSpacing: '0.1em',
                 cursor:'pointer', transition:'all 0.3s ease',
-                textShadow: heatmapRange===r ? '0 0 8px rgba(0,229,255,0.4)' : 'none'
+                textShadow: heatmapRange===r ? '0 0 8px rgba(127, 200, 255,0.4)' : 'none'
               }}>{r}</button>
             ))}
           </div>
@@ -219,7 +225,7 @@ export default function HomeScreen({
                 <div key={ci} style={{
                   aspectRatio:'1/1', borderRadius:'4px',
                   background: cellColor(cell),
-                  boxShadow: cell === 3 ? '0 0 8px rgba(0,229,255,0.4)' : 'none',
+                  boxShadow: cell === 3 ? '0 0 8px rgba(127, 200, 255,0.4)' : 'none',
                   transition: 'all 0.5s ease',
                 }} />
               ))}

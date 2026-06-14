@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 function vasColor(value) {
-  if (value <= 2) return '#00FFCC';
+  if (value <= 2) return '#7FC8FF';
   if (value <= 4) return '#FFD54F';
   return '#FF5C5C';
 }
@@ -71,13 +71,13 @@ export default function WorkoutCompleteOverlay({ onDismiss, durationSeconds }) {
       {/* Icon Animation */}
       <div style={{
         width: '96px', height: '96px', borderRadius: '50%',
-        background: 'linear-gradient(135deg, rgba(0,255,204,0.2), rgba(0,255,204,0))',
-        border: '1px solid rgba(0,255,204,0.4)',
+        background: 'linear-gradient(135deg, rgba(127, 200, 255,0.2), rgba(127, 200, 255,0))',
+        border: '1px solid rgba(127, 200, 255,0.4)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         marginBottom: '24px', flexShrink: 0,
         transform: show ? 'scale(1) translateY(0)' : 'scale(0.8) translateY(20px)',
         transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)',
-        boxShadow: '0 0 60px rgba(0,255,204,0.2)',
+        boxShadow: '0 0 60px rgba(127, 200, 255,0.2)',
       }}>
         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" style={{
           opacity: show ? 1 : 0, transform: show ? 'scale(1)' : 'scale(0.5)',

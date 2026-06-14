@@ -157,7 +157,7 @@ export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, wo
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', animation: 'fadeInUp 0.4s ease-out' }}>
         <div>
-          <h1 style={{ fontSize: '40px', fontWeight: 300, letterSpacing: '-0.04em' }}>Records<span style={{ color:'var(--cyan)', textShadow: '0 0 10px rgba(0,229,255,0.5)' }}>.</span></h1>
+          <h1 style={{ fontSize: '40px', fontWeight: 300, letterSpacing: '-0.04em' }}>Records<span style={{ color:'var(--cyan)', textShadow: '0 0 10px rgba(127, 200, 255,0.5)' }}>.</span></h1>
         </div>
         <ProfileButton profile={profile} onClick={onOpenProfile} />
       </div>
@@ -225,8 +225,8 @@ export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, wo
                 {row.map((cell, ci) => (
                   <div key={ci} style={{
                     aspectRatio:'1/1', borderRadius:'4px', maxHeight:'32px',
-                    background: cell === 0 ? 'rgba(255,255,255,0.03)' : cell === 1 ? 'rgba(0,229,255,0.2)' : cell === 2 ? 'rgba(0,229,255,0.5)' : 'var(--cyan)',
-                    boxShadow: cell === 3 ? '0 0 8px rgba(0,229,255,0.4)' : 'none',
+                    background: cell === 0 ? 'rgba(255,255,255,0.03)' : cell === 1 ? 'rgba(127, 200, 255,0.2)' : cell === 2 ? 'rgba(127, 200, 255,0.5)' : 'var(--cyan)',
+                    boxShadow: cell === 3 ? '0 0 8px rgba(127, 200, 255,0.4)' : 'none',
                     transition: 'all 0.4s ease',
                   }} />
                 ))}
@@ -236,7 +236,7 @@ export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, wo
           <div style={{ display:'flex', alignItems:'center', justifyContent:'flex-end', gap:'5px', marginTop:'12px', fontSize:'10px', color:'var(--muted)' }}>
             <span>Less</span>
             {[0,1,2,3].map(l => (
-              <div key={l} style={{ width:'10px', height:'10px', borderRadius:'3px', background: l===0?'rgba(255,255,255,0.04)':l===1?'rgba(0,255,204,0.2)':l===2?'rgba(0,255,204,0.5)':'var(--cyan)' }} />
+              <div key={l} style={{ width:'10px', height:'10px', borderRadius:'3px', background: l===0?'rgba(255,255,255,0.04)':l===1?'rgba(127, 200, 255,0.2)':l===2?'rgba(127, 200, 255,0.5)':'var(--cyan)' }} />
             ))}
             <span style={{ color:'var(--cyan)' }}>More</span>
           </div>
@@ -309,7 +309,7 @@ export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, wo
                   background: recordingIndex === i ? 'var(--orange)' : 'var(--cyan)',
                   color: '#000', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '20px', cursor: 'pointer',
-                  boxShadow: recordingIndex === i ? '0 4px 12px rgba(255,68,0,0.2)' : '0 4px 12px rgba(0,255,204,0.2)',
+                  boxShadow: recordingIndex === i ? '0 4px 12px rgba(255,68,0,0.2)' : '0 4px 12px rgba(127, 200, 255,0.2)',
                   transition: 'all 0.25s ease',
                 }}
               >
@@ -321,7 +321,7 @@ export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, wo
             {recordingIndex === i && (
               <div style={{
                 padding: '16px', marginBottom: '16px',
-                background: 'rgba(0,255,204,0.03)', border: '1px solid rgba(0,255,204,0.15)',
+                background: 'rgba(127, 200, 255,0.03)', border: '1px solid rgba(127, 200, 255,0.15)',
                 borderRadius: 'var(--radius-md)', animation: 'fadeInUp 0.25s ease-out',
               }}>
                 <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '12px', letterSpacing: '0.1em', color: 'var(--cyan)', textTransform: 'uppercase', display: 'block', marginBottom: '12px' }}>
@@ -361,8 +361,8 @@ export default function RecordsScreen({ nutrition, benchmarks, setBenchmarks, wo
                   padding: '4px 10px',
                   borderRadius: 'var(--radius-pill)',
                   border: '1px solid',
-                  borderColor: showDetails ? 'rgba(255,255,255,0.12)' : 'rgba(0,255,204,0.25)',
-                  background: showDetails ? 'rgba(255,255,255,0.04)' : 'rgba(0,255,204,0.08)',
+                  borderColor: showDetails ? 'rgba(255,255,255,0.12)' : 'rgba(127, 200, 255,0.25)',
+                  background: showDetails ? 'rgba(255,255,255,0.04)' : 'rgba(127, 200, 255,0.08)',
                   color: showDetails ? 'var(--muted)' : 'var(--cyan)',
                   fontFamily: 'var(--font-display)',
                   fontWeight: 600,

@@ -1,0 +1,87 @@
+<!-- @template name="Apex OS App Screen" description="Phone-framed Mission Control screen built from Apex OS components — duplicate and edit the content." -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Apex OS — App Screen</title>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="./ds-base.js"></script>
+<style>
+  html, body { height: 100%; }
+  body {
+    margin: 0; background: #000;
+    background-image:
+      radial-gradient(800px 600px at 20% 10%, rgba(0,229,255,0.10), transparent 60%),
+      radial-gradient(700px 600px at 85% 90%, rgba(153,0,255,0.07), transparent 55%);
+    display: flex; align-items: center; justify-content: center; min-height: 100vh;
+    font-family: var(--font-body);
+  }
+  .phone {
+    position: relative; width: 390px; height: 800px; border-radius: 54px; padding: 12px;
+    background: linear-gradient(150deg, #1c1f24, #050607 55%);
+    box-shadow: 0 50px 120px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06), inset 0 1px 1px rgba(255,255,255,0.12), 0 0 60px rgba(0,229,255,0.06);
+  }
+  .screen { position: relative; width: 100%; height: 100%; border-radius: 44px; overflow: hidden; background: #000; }
+  .scroll { position: absolute; inset: 0; overflow-y: auto; padding: 56px 24px 110px; }
+  .scroll::-webkit-scrollbar { width: 0; }
+  .island { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); width: 112px; height: 30px; background: #000; border-radius: 16px; z-index: 60; }
+  .navhold { position: absolute; left: 0; right: 0; bottom: 0; z-index: 50; display: flex; justify-content: center; padding-bottom: 18px; background: linear-gradient(0deg, #000 35%, transparent); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+  // Wait for ds-base.js to attach the bundle before mounting.
+  function mount() {
+    const DS = window.ApexOSDesignSystem_1864eb;
+    if (!DS) { return setTimeout(mount, 40); }
+    const { GlassCard, ProgressBar, StatReadout, ReadinessLight, BottomNav, Button } = DS;
+    const { useState } = React;
+
+    function Screen() {
+      const [tab, setTab] = useState('home');
+      return (
+        <div className="phone">
+          <div className="screen">
+            <div className="island"></div>
+            <div className="scroll">
+              {/* ── Edit from here ─────────────────────────── */}
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: '11px', fontWeight: 700, letterSpacing: '0.18em', color: 'var(--cyan)' }}>MISSION CONTROL</span>
+              <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '32px', letterSpacing: '-0.04em', margin: '2px 0 20px' }}>
+                Operator<span style={{ color: 'var(--cyan)', textShadow: '0 0 10px rgba(0,229,255,0.5)' }}>.</span>
+              </h1>
+
+              <div style={{ marginBottom: '24px' }}>
+                <ReadinessLight light="green" score={88} recommendation="Sleep banked, joints quiet. Green light on today's plan." />
+              </div>
+
+              <GlassCard onClick={() => {}} padding={24} style={{ marginBottom: '24px' }}>
+                <span style={{ fontSize: '10px', fontWeight: 500, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--cyan)' }}>TODAY'S MISSION</span>
+                <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '26px', letterSpacing: '-0.02em', margin: '8px 0 4px' }}>The Heavy Trunk</h2>
+                <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>6 exercises · 90 min</span>
+              </GlassCard>
+
+              <ProgressBar value={62} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '24px' }}>
+                <StatReadout label="Week" value={4} unit="/5" />
+                <StatReadout label="Streak" value={6} unit="d" />
+                <StatReadout label="Total" value={128} accent />
+              </div>
+              {/* ── …to here. ──────────────────────────────── */}
+            </div>
+            <div className="navhold">
+              <BottomNav activeTab={tab} onTabChange={setTab} fixed={false} />
+            </div>
+          </div>
+        </div>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById('root')).render(<Screen />);
+  }
+  mount();
+</script>
+</body>
+</html>

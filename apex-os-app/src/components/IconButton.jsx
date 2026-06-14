@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function IconButton({ label, children, tone = 'muted', size = 32, style, ...props }) {
   const color = tone === 'danger' ? 'var(--orange)' : tone === 'primary' ? 'var(--cyan)' : 'var(--muted)';
-  const borderColor = tone === 'danger' ? 'rgba(255,68,0,0.2)' : tone === 'primary' ? 'rgba(0,255,204,0.2)' : 'var(--surface-border)';
+  const borderColor = tone === 'danger' ? 'rgba(255,68,0,0.2)' : tone === 'primary' ? 'rgba(127, 200, 255,0.2)' : 'var(--surface-border)';
 
   return (
     <button

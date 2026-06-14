@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { computeReadiness, READINESS_LIGHTS } from '../utils/readiness';
+import ReadinessRing from './ReadinessRing';
 
 function CheckinSlider({ label, value, min, max, step = 1, unit, onChange, color }) {
   return (
@@ -25,7 +26,7 @@ function CheckinSlider({ label, value, min, max, step = 1, unit, onChange, color
 }
 
 function vasColor(v) {
-  if (v <= 2) return '#00FFCC';
+  if (v <= 2) return '#7FC8FF';
   if (v <= 4) return '#FFD54F';
   return '#FF5C5C';
 }
@@ -73,7 +74,7 @@ export default function MorningCheckin({ initial, onSave, onClose }) {
         <CheckinSlider
           label="Sleep" value={sleepHours} min={0} max={12} step={0.5} unit="h"
           onChange={setSleepHours}
-          color={sleepHours >= 7 ? '#00FFCC' : sleepHours >= 6 ? '#FFD54F' : '#FF5C5C'}
+          color={sleepHours >= 7 ? '#7FC8FF' : sleepHours >= 6 ? '#FFD54F' : '#FF5C5C'}
         />
         <CheckinSlider
           label="Knee · VAS" value={kneeVas} min={0} max={10} unit="/10"
@@ -90,22 +91,29 @@ export default function MorningCheckin({ initial, onSave, onClose }) {
 
         {/* Live readiness preview */}
         <div style={{
-          borderRadius: 'var(--radius-md)', padding: '14px 16px',
+          borderRadius: 'var(--radius-md)', padding: '16px',
           background: 'rgba(255,255,255,0.03)',
           border: `1px solid ${lightMeta.color}40`,
+          display: 'flex', alignItems: 'center', gap: '16px',
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+          <ReadinessRing
+            value={preview.score}
+            score={preview.score}
+            label={preview.light === 'green' ? 'Ready' : preview.light === 'yellow' ? 'Caution' : 'Hold'}
+            light={preview.light}
+            size={92}
+            stroke={8}
+            id="checkin-preview"
+          />
+          <div style={{ flex: 1, minWidth: 0 }}>
             <span style={{
               fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '12px',
-              letterSpacing: '0.1em', color: lightMeta.color,
+              letterSpacing: '0.1em', color: lightMeta.color, display: 'block', textTransform: 'uppercase',
             }}>{lightMeta.icon} {lightMeta.title}</span>
-            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '20px', color: lightMeta.color }}>
-              {preview.score}
-            </span>
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5, marginTop: '6px' }}>
+              {preview.recommendation}
+            </p>
           </div>
-          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: 1.5 }}>
-            {preview.recommendation}
-          </p>
         </div>
 
         <button

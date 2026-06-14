@@ -1,0 +1,42 @@
+/* ============================================================
+   APEX OS — Typography Tokens
+   Space Grotesk for instrument readouts, Inter for prose.
+   Light weights, tight display tracking, wide caps labels.
+   ============================================================ */
+:root {
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  /* Weights */
+  --weight-light: 300;
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* Display / readout sizes (Space Grotesk) */
+  --size-metric-xl: 80px;   /* hero countdown */
+  --size-metric-lg: 64px;   /* big stat */
+  --size-display: 40px;     /* screen title */
+  --size-h1: 32px;
+  --size-h2: 28px;
+  --size-h3: 18px;
+
+  /* Body sizes (Inter) */
+  --size-body: 15px;
+  --size-sm: 13px;
+  --size-xs: 11px;
+  --size-label: 10px;       /* wide-tracked caps label */
+
+  /* Tracking */
+  --track-display: -0.04em;
+  --track-tight: -0.02em;
+  --track-body: 0.02em;
+  --track-label: 0.15em;
+  --track-caps: 0.1em;
+
+  /* Line height */
+  --leading-tight: 1;
+  --leading-snug: 1.4;
+  --leading-body: 1.6;
+}

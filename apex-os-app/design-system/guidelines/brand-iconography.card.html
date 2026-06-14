@@ -1,0 +1,33 @@
+<!-- @dsCard group="Brand" viewport="700x200" name="Iconography" subtitle="Lucide hairline icons + readiness emoji signals" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { background: #000; padding: 26px; }
+  .cap { font-family: var(--font-body); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); display:block; margin-bottom: 14px; }
+  .icons { display: flex; gap: 26px; align-items: center; color: var(--text); margin-bottom: 26px; }
+  .icons .cell { display:flex; flex-direction: column; align-items:center; gap: 8px; }
+  .icons span { font-size: 9px; color: var(--muted); letter-spacing: 0.05em; }
+  .sig { display: flex; gap: 18px; }
+  .sig .chip { display:flex; align-items:center; gap: 8px; font-family: var(--font-display); font-weight: 700; font-size: 12px; letter-spacing: 0.08em; padding: 8px 14px; border-radius: 999px; border: 1px solid; }
+</style>
+</head>
+<body>
+<span class="cap">UI icons · Lucide · 1.5px stroke, round caps</span>
+<div class="icons">
+  <div class="cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12 5 10l7-7 7 7 2 2"/><path d="M5 10v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V10"/></svg><span>home</span></div>
+  <div class="cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5v11M17.5 6.5v11M4 9h2.5M17.5 9H20M8 12h8M4 15h2.5M17.5 15H20"/></svg><span>workout</span></div>
+  <div class="cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 6-6"/></svg><span>stats</span></div>
+  <div class="cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg><span>advance</span></div>
+  <div class="cell"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>timer</span></div>
+</div>
+<span class="cap">Readiness signals · emoji as status, never decoration</span>
+<div class="sig">
+  <div class="chip" style="color:#00ffcc; border-color:rgba(0,255,204,0.4)">🟢 GO</div>
+  <div class="chip" style="color:#ffd54f; border-color:rgba(255,213,79,0.4)">🟡 CAUTION</div>
+  <div class="chip" style="color:#ff5c5c; border-color:rgba(255,92,92,0.4)">🔴 HOLD</div>
+</div>
+</body>
+</html>

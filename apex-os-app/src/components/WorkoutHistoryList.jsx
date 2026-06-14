@@ -85,7 +85,7 @@ export default function WorkoutHistoryList({ sessions = [], compact = false, onU
                     <span key={lift.name} style={{
                       padding: '4px 8px',
                       borderRadius: 'var(--radius-pill)',
-                      background: 'rgba(0,255,204,0.08)',
+                      background: 'rgba(127, 200, 255,0.08)',
                       color: 'var(--cyan)',
                       fontSize: '11px',
                       fontFamily: 'var(--font-display)',

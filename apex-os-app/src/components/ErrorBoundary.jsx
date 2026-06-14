@@ -62,7 +62,7 @@ export default class ErrorBoundary extends React.Component {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: '300px', marginTop: '8px' }}>
           <button onClick={this.handleRetry} style={{
             padding: '14px', borderRadius: '999px', border: 'none', cursor: 'pointer',
-            background: '#00FFCC', color: '#000', fontWeight: 700, fontSize: '14px',
+            background: '#7FC8FF', color: '#000', fontWeight: 700, fontSize: '14px',
             fontFamily: 'var(--font-display, sans-serif)', letterSpacing: '0.05em',
           }}>TRY AGAIN</button>
           <button onClick={this.handleExport} style={{

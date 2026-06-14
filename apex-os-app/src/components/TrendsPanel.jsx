@@ -70,7 +70,7 @@ export default function TrendsPanel({ checkins = {}, workoutHistory = [], weight
     { title: 'KNEE · VAS', points: kneePoints, color: '#4FC3F7', yMin: 0, yMax: 10, unit: '/10', empty: 'Log morning check-ins to see knee trend' },
     { title: 'LOWER BACK · VAS', points: backPoints, color: '#FFD54F', yMin: 0, yMax: 10, unit: '/10', empty: 'Log morning check-ins to see back trend' },
     { title: 'READINESS', points: readinessPoints, color: 'var(--cyan)', yMin: 0, yMax: 100, unit: '', empty: 'Morning check-ins build this chart' },
-    { title: 'BODY WEIGHT · target +0.2–0.3kg/wk', points: weightPoints, color: '#00FFCC', unit: 'kg', band: weightBand, empty: 'Log weight in Profile to track the armor build' },
+    { title: 'BODY WEIGHT · target +0.2–0.3kg/wk', points: weightPoints, color: '#7FC8FF', unit: 'kg', band: weightBand, empty: 'Log weight in Profile to track the armor build' },
   ];
 
   return (

@@ -1,0 +1,23 @@
+<!-- @dsCard group="Colors" viewport="700x160" name="Surfaces & borders" subtitle="White-alpha glass layers over black" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { background: #000; padding: 22px; }
+  .row { display: flex; gap: 12px; }
+  .sw { flex: 1; height: 110px; border-radius: var(--radius-md); display: flex; flex-direction: column; justify-content: flex-end; padding: 12px; }
+  .name { font-family: var(--font-display); font-weight: 600; font-size: 11px; color: #fff; }
+  .hex { font-family: var(--font-body); font-size: 10px; color: rgba(255,255,255,0.55); letter-spacing: 0.03em; }
+</style>
+</head>
+<body>
+<div class="row">
+  <div class="sw" style="background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.08)"><span class="name">Glass</span><span class="hex">white 1% · --surface-glass</span></div>
+  <div class="sw" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08)"><span class="name">Hover</span><span class="hex">white 3% · --surface-hover</span></div>
+  <div class="sw" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08)"><span class="name">Raised</span><span class="hex">white 5% · --surface-raised</span></div>
+  <div class="sw" style="background:#000; border:1px solid rgba(255,255,255,0.2)"><span class="name">Border</span><span class="hex">white 8–20% · --surface-border</span></div>
+</div>
+</body>
+</html>

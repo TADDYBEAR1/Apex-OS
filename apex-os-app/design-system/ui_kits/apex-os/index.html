@@ -1,0 +1,270 @@
+<!-- @dsCard group="Apex OS App" viewport="1100x760" name="Apex OS — Interactive app" subtitle="Mission Control · Focus Mode · Records · Readiness gate" -->
+<!-- @startingPoint section="Apex OS App" subtitle="Full interactive fitness-OS app in a phone" viewport="1100x760" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Apex OS — Training Operating System</title>
+<link rel="stylesheet" href="../../styles.css" />
+<style>
+  html, body { height: 100%; }
+  body {
+    background: var(--bg-deep);
+    background-image:
+      radial-gradient(900px 700px at 15% 8%, rgba(111,233,255,0.10), transparent 60%),
+      radial-gradient(800px 700px at 90% 92%, rgba(143,168,255,0.10), transparent 58%),
+      radial-gradient(600px 500px at 80% 12%, rgba(201,240,255,0.06), transparent 55%);
+    overflow: hidden;
+  }
+  /* faint instrument grid */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(circle at center, black, transparent 78%);
+    -webkit-mask-image: radial-gradient(circle at center, black, transparent 78%);
+    pointer-events: none;
+  }
+
+  .stage {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    gap: 72px;
+    padding: 40px;
+  }
+
+  /* ── Context panel (wide screens only) ── */
+  .context { max-width: 360px; animation: fadeInUp 0.9s var(--ease-out-expo) both; }
+  .context .mark {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 28px;
+  }
+  .context .mark .glyph {
+    width: 44px; height: 44px; border-radius: 12px;
+    border: 1px solid rgba(127,200,255,0.4);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-weight: 700; font-size: 22px; color: var(--cyan);
+    box-shadow: inset 0 0 16px rgba(127,200,255,0.15), 0 0 20px rgba(127,200,255,0.1);
+  }
+  .context .mark .name { font-family: var(--font-display); font-weight: 600; font-size: 17px; letter-spacing: 0.02em; }
+  .context .mark .name small { display: block; font-family: var(--font-body); font-weight: 400; font-size: 10px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
+  .context h1 {
+    font-family: var(--font-display); font-weight: 300; font-size: 46px; line-height: 1.05;
+    letter-spacing: -0.04em; margin-bottom: 18px;
+  }
+  .context h1 em { font-style: normal; color: var(--cyan); text-shadow: 0 0 24px rgba(127,200,255,0.4); }
+  .context p { font-size: 15px; font-weight: 300; line-height: 1.65; color: var(--text-secondary); margin-bottom: 28px; }
+  .pillars { display: flex; flex-direction: column; gap: 14px; }
+  .pillar { display: flex; gap: 14px; align-items: flex-start; }
+  .pillar .dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; box-shadow: 0 0 8px currentColor; }
+  .pillar .t { font-family: var(--font-display); font-weight: 600; font-size: 14px; }
+  .pillar .d { font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+
+  /* ── Phone ── */
+  .phone-wrap { animation: fadeInUp 0.9s var(--ease-out-expo) 0.1s both; }
+  .phone {
+    position: relative;
+    width: 390px; height: 800px;
+    border-radius: 54px;
+    padding: 12px;
+    background: linear-gradient(150deg, #1c1f24, #050607 55%);
+    box-shadow:
+      0 50px 120px rgba(0,0,0,0.7),
+      0 0 0 1px rgba(255,255,255,0.06),
+      inset 0 1px 1px rgba(255,255,255,0.12),
+      0 0 60px rgba(127,200,255,0.06);
+  }
+  .screen {
+    position: relative;
+    width: 100%; height: 100%;
+    border-radius: 44px;
+    overflow: hidden;
+    background: var(--bg);
+  }
+  /* aurora field painted inside the phone screen */
+  .screen::before, .screen::after, .aurora-a {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    z-index: 0;
+    pointer-events: none;
+  }
+  .screen::before { width: 280px; height: 280px; top: -70px; left: -50px; background: var(--aurora-1); opacity: 0.42; }
+  .screen::after  { width: 320px; height: 320px; top: 38%; right: -110px; background: var(--aurora-2); opacity: 0.42; }
+  .aurora-a { width: 300px; height: 300px; bottom: -90px; left: 10px; background: var(--aurora-3); opacity: 0.3; }
+  .scroll {
+    position: absolute; inset: 0;
+    overflow-y: auto; overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding-top: 34px;
+    z-index: 2;
+  }
+  .scroll::-webkit-scrollbar { width: 0; }
+  /* dynamic island */
+  .island {
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    width: 112px; height: 30px; background: #000; border-radius: 16px; z-index: 60;
+  }
+  /* status bar */
+  .statusbar {
+    position: absolute; top: 0; left: 0; right: 0; height: 50px; z-index: 55;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 32px 0; pointer-events: none;
+  }
+  .statusbar .time { font-family: var(--font-display); font-weight: 600; font-size: 14px; color: #fff; }
+  .statusbar .icons { display: flex; gap: 6px; align-items: center; color: #fff; }
+  .topfade {
+    position: absolute; top: 0; left: 0; right: 0; height: 64px; z-index: 40;
+    background: linear-gradient(180deg, var(--bg) 28%, transparent);
+    pointer-events: none;
+  }
+  .navhold {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 50;
+    display: flex; justify-content: center;
+    padding-bottom: 18px;
+    background: linear-gradient(0deg, var(--bg) 32%, transparent);
+    pointer-events: none;
+  }
+  .navhold > * { pointer-events: auto; }
+
+  @media (max-width: 880px) {
+    .context { display: none; }
+    .stage { padding: 16px; }
+  }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<script src="data.js"></script>
+<script type="text/babel" src="HomeScreen.jsx"></script>
+<script type="text/babel" src="RecordsScreen.jsx"></script>
+<script type="text/babel" src="FocusScreen.jsx"></script>
+<script type="text/babel" src="MorningCheckin.jsx"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+  const { BottomNav } = window.ApexOSDesignSystem_1864eb;
+  const { useState, useRef, useEffect } = React;
+
+  function FuelScreen() {
+    const { GlassCard, ProgressBar, StatReadout } = window.ApexOSDesignSystem_1864eb;
+    const macros = [
+      { label: 'Protein', val: 168, target: 190, unit: 'g', color: 'var(--cyan)' },
+      { label: 'Carbs', val: 240, target: 320, unit: 'g', color: 'var(--green)' },
+      { label: 'Fats', val: 62, target: 78, unit: 'g', color: 'var(--orange)' },
+    ];
+    return (
+      <div style={{ padding: '16px 24px 120px' }}>
+        <h1 style={{ fontSize: '40px', fontWeight: 300, letterSpacing: '-0.04em', marginBottom: '4px' }}>Fuel<span style={{ color: 'var(--cyan)' }}>.</span></h1>
+        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '28px' }}>Tuned to The Yoke Block · surplus day</p>
+
+        <GlassCard padding={24} glow style={{ marginBottom: '20px', textAlign: 'center' }}>
+          <span style={{ fontFamily: 'var(--font-body)', fontSize: '10px', fontWeight: 500, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--muted)' }}>Energy Remaining</span>
+          <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '6px', margin: '8px 0 16px' }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '64px', lineHeight: 1, letterSpacing: '-0.03em', color: 'var(--cyan)', textShadow: 'var(--cyan-glow)' }}>980</span>
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '20px', color: 'var(--muted)' }}>/ 2940 kcal</span>
+          </div>
+          <ProgressBar value={67} />
+        </GlassCard>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {macros.map((m, i) => (
+            <GlassCard key={i} padding={18}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '15px' }}>{m.label}</span>
+                <span style={{ fontFamily: 'var(--font-display)', fontSize: '14px', color: 'var(--text-secondary)' }}><span style={{ color: m.color, fontWeight: 700 }}>{m.val}</span> / {m.target}{m.unit}</span>
+              </div>
+              <div style={{ height: '6px', borderRadius: '999px', background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+                <div style={{ width: `${(m.val / m.target) * 100}%`, height: '100%', borderRadius: '999px', background: m.color, boxShadow: `0 0 10px ${m.color}` }} />
+              </div>
+            </GlassCard>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  function StatusBar() {
+    return (
+      <>
+        <div className="island"></div>
+        <div className="statusbar">
+          <span className="time">9:41</span>
+          <span className="icons">
+            <svg width="17" height="11" viewBox="0 0 17 11" fill="currentColor"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></svg>
+            <svg width="16" height="11" viewBox="0 0 16 11" fill="currentColor"><path d="M8 2.2c2.1 0 4 .8 5.4 2.1l1.1-1.2A9.3 9.3 0 0 0 8 .5 9.3 9.3 0 0 0 1.5 3.1l1.1 1.2A7.7 7.7 0 0 1 8 2.2Zm0 3.1c1.2 0 2.4.5 3.2 1.3l1.1-1.2A6.3 6.3 0 0 0 8 4.6a6.3 6.3 0 0 0-4.3 1.8l1.1 1.2A4.6 4.6 0 0 1 8 5.3Zm0 3.1c.6 0 1.2.3 1.6.7L8 10.5 6.4 9.1c.4-.4 1-.7 1.6-.7Z"/></svg>
+            <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3" stroke="currentColor" opacity="0.5"/><rect x="2" y="2" width="16" height="8" rx="1.5" fill="currentColor"/><rect x="23" y="4" width="1.5" height="4" rx="0.75" fill="currentColor" opacity="0.5"/></svg>
+          </span>
+        </div>
+      </>
+    );
+  }
+
+  function App() {
+    const [tab, setTab] = useState('home');
+    const [focus, setFocus] = useState(false);
+    const [checkin, setCheckin] = useState(false);
+    const scrollRef = useRef(null);
+
+    useEffect(() => { if (scrollRef.current) scrollRef.current.scrollTop = 0; }, [tab, focus]);
+
+    const renderScreen = () => {
+      if (focus) return <FocusScreen onExit={() => setFocus(false)} />;
+      switch (tab) {
+        case 'home': return <HomeScreen onOpenCheckin={() => setCheckin(true)} onStartSession={() => setFocus(true)} />;
+        case 'workout': return <FocusScreen onExit={() => setTab('home')} />;
+        case 'records': return <RecordsScreen />;
+        case 'fuel': return <FuelScreen />;
+        default: return null;
+      }
+    };
+
+    return (
+      <div className="stage">
+        <aside className="context">
+          <div className="mark">
+            <div className="glyph">A</div>
+            <div className="name">Apex OS<small>Training Operating System</small></div>
+          </div>
+          <h1>The body, run like <em>mission control</em>.</h1>
+          <p>Apex OS turns a training block into a countdown. Every morning gates the day through a readiness check; every set is logged in Focus Mode; every record compounds toward one target date.</p>
+          <div className="pillars">
+            <div className="pillar"><span className="dot" style={{ color: 'var(--signal-go)' }}></span><div><div className="t">Readiness gate</div><div className="d">A 20-second check returns a GO / CAUTION / HOLD verdict that reshapes the plan.</div></div></div>
+            <div className="pillar"><span className="dot" style={{ color: 'var(--cyan)' }}></span><div><div className="t">Focus Mode</div><div className="d">Big-target steppers and a glowing rest timer — built for chalky thumbs mid-set.</div></div></div>
+            <div className="pillar"><span className="dot" style={{ color: 'var(--orange)' }}></span><div><div className="t">The countdown</div><div className="d">Phases, microcycles and benchmarks all resolve to a single D-day.</div></div></div>
+          </div>
+        </aside>
+
+        <div className="phone-wrap">
+          <div className="phone">
+            <div className="screen">
+              <div className="aurora-a"></div>
+              <StatusBar />
+              <div className="topfade"></div>
+              <div className="scroll" ref={scrollRef}>
+                {renderScreen()}
+              </div>
+              {checkin && <MorningCheckin onComplete={() => { setCheckin(false); }} onClose={() => setCheckin(false)} />}
+              {!focus && !checkin && (
+                <div className="navhold">
+                  <BottomNav activeTab={tab} onTabChange={(t) => { setFocus(false); setTab(t); }} fixed={false} />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

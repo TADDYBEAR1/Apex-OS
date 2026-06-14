@@ -1,0 +1,62 @@
+/* ============================================================
+   APEX OS — Color Tokens · "Arctic Aurora"
+   Deep glacial canvas, frosted glass, iridescent ice accents
+   over a living aurora field.
+   ============================================================ */
+:root {
+  /* ── Canvas & Surfaces ─────────────────────────────── */
+  --bg: #070A10;
+  --bg-deep: #04060B;
+  --surface: rgba(255, 255, 255, 0.06);
+  --surface-glass: rgba(255, 255, 255, 0.04);
+  --surface-hover: rgba(255, 255, 255, 0.10);
+  --surface-raised: rgba(255, 255, 255, 0.08);
+  --surface-border: rgba(255, 255, 255, 0.12);
+  --surface-border-top: rgba(255, 255, 255, 0.22);
+  --surface-border-light: rgba(255, 255, 255, 0.28);
+
+  /* ── Aurora field (background blobs) ───────────────── */
+  --aurora-1: #6FE9FF;   /* glacier cyan   */
+  --aurora-2: #8FA8FF;   /* periwinkle     */
+  --aurora-3: #C9F0FF;   /* frost white-blue */
+
+  /* ── Primary — Ice blue (active, signal, success) ──── */
+  --ice-bright: #CFEFFF;
+  --ice: #7FC8FF;
+  --ice-soft: #9FB8FF;
+  --cyan: #7FC8FF;                                  /* legacy alias → ice */
+  --cyan-dim: rgba(127, 200, 255, 0.12);
+  --cyan-glow: 0 0 16px rgba(127, 200, 255, 0.45), 0 0 34px rgba(143, 168, 255, 0.18);
+  --cyan-glow-sm: 0 0 9px rgba(127, 200, 255, 0.35);
+  /* iridescent accent gradient (ring strokes, fills) */
+  --ice-gradient: linear-gradient(135deg, #CFEFFF, #7FC8FF 50%, #9FB8FF); /* @kind color */
+
+  /* ── Secondary — Amber (warning, heat) ─────────────── */
+  --orange: #ffb14d;
+  --orange-dim: rgba(255, 177, 77, 0.12);
+  --orange-glow: 0 0 15px rgba(255, 177, 77, 0.3);
+
+  /* ── Tertiary — Mint (go, gains) ───────────────────── */
+  --green: #7CFFD9;
+  --green-dim: rgba(124, 255, 217, 0.12);
+
+  /* ── Traffic-light / readiness palette ─────────────── */
+  --signal-go: #7CFFD9;
+  --signal-caution: #ffd54f;
+  --signal-stop: #ff8095;
+
+  /* ── Text ──────────────────────────────────────────── */
+  --text: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.62);
+  --muted: rgba(255, 255, 255, 0.42);
+  --muted-dark: rgba(255, 255, 255, 0.18);
+
+  /* ── Semantic aliases ──────────────────────────────── */
+  --accent: var(--ice);
+  --accent-warm: var(--orange);
+  --text-body: var(--text-secondary);
+  --text-heading: var(--text);
+  --surface-card: var(--surface);
+  --border-default: var(--surface-border);
+  --border-strong: var(--surface-border-light);
+}

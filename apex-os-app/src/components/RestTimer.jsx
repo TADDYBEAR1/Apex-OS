@@ -121,12 +121,12 @@ export default function RestTimer({ duration = 90, onComplete, onSkip }) {
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
-            style={{ transition: 'stroke-dashoffset 0.25s linear', filter: 'drop-shadow(0 0 8px rgba(0,255,204,0.4))' }}
+            style={{ transition: 'stroke-dashoffset 0.25s linear', filter: 'drop-shadow(0 0 8px rgba(127, 200, 255,0.4))' }}
           />
           <defs>
             <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#00FFCC" />
-              <stop offset="100%" stopColor="#00DDAA" />
+              <stop offset="0%" stopColor="#7FC8FF" />
+              <stop offset="100%" stopColor="#7FC8FF" />
             </linearGradient>
           </defs>
         </svg>
@@ -176,7 +176,7 @@ export default function RestTimer({ duration = 90, onComplete, onSkip }) {
           transition: 'all 0.25s ease',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = 'rgba(0,255,204,0.2)';
+          e.currentTarget.style.borderColor = 'rgba(127, 200, 255,0.2)';
           e.currentTarget.style.color = 'var(--cyan)';
         }}
         onMouseLeave={(e) => {

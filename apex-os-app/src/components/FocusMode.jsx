@@ -214,7 +214,7 @@ export default function FocusMode({ exercises, onExit, startedAt, workoutHistory
         <span style={{
           fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '14px',
           letterSpacing: '0.08em', color: 'var(--cyan)',
-          textShadow: '0 0 8px rgba(0,255,204,0.3)',
+          textShadow: '0 0 8px rgba(127, 200, 255,0.3)',
         }} aria-label="Session time">⏱ {formatElapsed(elapsed)}</span>
         <div style={{ display: 'flex', gap: '12px' }}>
           <button onClick={handleSkip} style={{
@@ -253,7 +253,7 @@ export default function FocusMode({ exercises, onExit, startedAt, workoutHistory
         {/* Exercise Image */}
         <div style={{
           width: '100%', height: '200px', borderRadius: 'var(--radius-lg)',
-          background: exercise.image ? `url(${exercise.image}) center/cover` : 'linear-gradient(135deg, rgba(0,255,204,0.08), rgba(0,255,204,0.02))',
+          background: exercise.image ? `url(${exercise.image}) center/cover` : 'linear-gradient(135deg, rgba(127, 200, 255,0.08), rgba(127, 200, 255,0.02))',
           border: '1px solid var(--surface-border)', marginBottom: '24px',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           overflow: 'hidden',
@@ -287,8 +287,8 @@ export default function FocusMode({ exercises, onExit, startedAt, workoutHistory
         {progressionHint && (
           <div style={{
             display: 'flex', alignItems: 'center', gap: '10px',
-            background: progressionHint.level === 'up' ? 'rgba(0,255,204,0.08)' : 'rgba(255,213,79,0.07)',
-            border: `1px solid ${progressionHint.level === 'up' ? 'rgba(0,255,204,0.35)' : 'rgba(255,213,79,0.3)'}`,
+            background: progressionHint.level === 'up' ? 'rgba(127, 200, 255,0.08)' : 'rgba(255,213,79,0.07)',
+            border: `1px solid ${progressionHint.level === 'up' ? 'rgba(127, 200, 255,0.35)' : 'rgba(255,213,79,0.3)'}`,
             borderRadius: 'var(--radius-md)', padding: '12px 16px', marginBottom: '20px',
           }}>
             <span style={{ fontSize: '18px' }}>{progressionHint.level === 'up' ? '📈' : '🎯'}</span>

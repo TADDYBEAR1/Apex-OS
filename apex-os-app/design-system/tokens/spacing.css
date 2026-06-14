@@ -1,0 +1,39 @@
+/* ============================================================
+   APEX OS — Spacing, Radii, Elevation & Motion Tokens
+   ============================================================ */
+:root {
+  /* ── Spacing scale (8pt-ish) ───────────────────────── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-9: 36px;
+  --space-12: 48px;
+
+  /* ── Corner radii ──────────────────────────────────── */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+
+  /* ── Blur (glassmorphism) ──────────────────────────── */
+  --blur: blur(20px); /* @kind other */
+  --blur-heavy: blur(40px); /* @kind other */
+
+  /* ── Elevation / shadows ───────────────────────────── */
+  --shadow-float: 0 20px 40px rgba(0, 0, 0, 0.5);
+  --shadow-sheet: 0 -20px 60px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  --shadow-inset: inset 0 1px 1px rgba(255, 255, 255, 0.04);
+
+  /* ── Motion ────────────────────────────────────────── */
+  --transition: 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* @kind other */
+  --transition-spring: 0.6s cubic-bezier(0.16, 1, 0.3, 1); /* @kind other */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1); /* @kind other */
+
+  /* ── Layout ────────────────────────────────────────── */
+  --app-width: 420px;
+}

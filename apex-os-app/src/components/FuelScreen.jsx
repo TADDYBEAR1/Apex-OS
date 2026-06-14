@@ -193,7 +193,7 @@ export default function FuelScreen({ nutrition, setNutrition, profile, onOpenPro
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', animation: 'fadeInUp 0.4s ease-out' }}>
         <div>
-          <h1 style={{ fontSize: '40px', fontWeight: 300, marginBottom: '-4px', letterSpacing: '-0.04em' }}>Fuel<span style={{ color:'var(--cyan)', textShadow: '0 0 10px rgba(0,229,255,0.5)' }}>.</span></h1>
+          <h1 style={{ fontSize: '40px', fontWeight: 300, marginBottom: '-4px', letterSpacing: '-0.04em' }}>Fuel<span style={{ color:'var(--cyan)', textShadow: '0 0 10px rgba(127, 200, 255,0.5)' }}>.</span></h1>
           <p style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 300 }}>Daily Macro Tracking & Provisioning</p>
         </div>
         <ProfileButton profile={profile} onClick={onOpenProfile} />
@@ -217,7 +217,7 @@ export default function FuelScreen({ nutrition, setNutrition, profile, onOpenPro
               setEditFats(nutrition.fats.target);
               setEditWater(nutrition.water?.target || 3000);
               setShowEditTargets(true);
-            }} style={{ padding: '6px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(0,255,204,0.2)', borderRadius: 'var(--radius-pill)', color: 'var(--cyan)', fontSize: '11px', fontFamily: 'var(--font-display)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', cursor: 'pointer' }}>Edit Targets</button>
+            }} style={{ padding: '6px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(127, 200, 255,0.2)', borderRadius: 'var(--radius-pill)', color: 'var(--cyan)', fontSize: '11px', fontFamily: 'var(--font-display)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', cursor: 'pointer' }}>Edit Targets</button>
             <button onClick={handleResetMeals} style={{ padding: '6px 12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--surface-border)', borderRadius: 'var(--radius-pill)', color: 'var(--muted)', fontSize: '11px', fontFamily: 'var(--font-display)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', cursor: 'pointer' }}>Reset Today</button>
           </div>
 
@@ -259,8 +259,8 @@ export default function FuelScreen({ nutrition, setNutrition, profile, onOpenPro
             {macros.map((macro, i) => {
               const isOver = macro.current > macro.target;
               const fillWidth = Math.min((macro.current / Math.max(macro.target, 1)) * 100, 100);
-              const barColor = isOver ? 'var(--orange)' : (macro.color === 'var(--cyan)' ? 'linear-gradient(90deg, var(--cyan), #00DDAA)' : macro.color);
-              const shadowColor = isOver ? 'rgba(255,100,0,0.3)' : (macro.color === 'var(--cyan)' ? 'rgba(0,255,204,0.3)' : 'rgba(0,0,0,0.1)');
+              const barColor = isOver ? 'var(--orange)' : (macro.color === 'var(--cyan)' ? 'linear-gradient(90deg, var(--cyan), #7FC8FF)' : macro.color);
+              const shadowColor = isOver ? 'rgba(255,100,0,0.3)' : (macro.color === 'var(--cyan)' ? 'rgba(127, 200, 255,0.3)' : 'rgba(0,0,0,0.1)');
               
               return (
                 <div key={i} style={{ marginBottom: i < macros.length - 1 ? '16px' : 0 }}>

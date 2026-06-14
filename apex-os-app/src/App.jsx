@@ -71,7 +71,7 @@ function CoreApp() {
     const initNative = async () => {
       try {
         await StatusBar.setStyle({ style: Style.Dark });
-        await StatusBar.setBackgroundColor({ color: '#000000' });
+        await StatusBar.setBackgroundColor({ color: '#070A10' });
       } catch (e) {
         // web fallback
       }
@@ -362,6 +362,7 @@ function CoreApp() {
   return (
     <>
       {dialogElement}
+      <div className="aurora-accent" aria-hidden="true" />
       {saveFailed && (
         <div role="alert" style={{
           position: 'fixed', top: 'calc(env(safe-area-inset-top, 0px) + 8px)', left: '50%',

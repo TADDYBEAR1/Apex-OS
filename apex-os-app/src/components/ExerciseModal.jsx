@@ -91,7 +91,7 @@ export default function ExerciseModal({ onClose, onSave, editExercise = null, se
                 cursor: 'pointer', fontFamily: 'var(--font-display)', fontSize: '15px', fontWeight: 600,
                 transition: 'all 0.2s ease', letterSpacing: '0.04em',
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(0,255,204,0.12)'; }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(127, 200, 255,0.12)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--cyan-dim)'; }}
             >
               ＋ Create Custom Exercise
@@ -147,7 +147,7 @@ export default function ExerciseModal({ onClose, onSave, editExercise = null, se
                     textAlign: 'left',
                     width: '100%',
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(0,255,204,0.2)'; }}
+                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'rgba(127, 200, 255,0.2)'; }}
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--surface-border)'; }}
                 >
                   <div style={{
@@ -194,7 +194,7 @@ export default function ExerciseModal({ onClose, onSave, editExercise = null, se
                   fontFamily: 'var(--font-body)', fontSize: '16px', outline: 'none',
                   transition: 'border-color 0.2s',
                 }}
-                onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(0,255,204,0.3)'; }}
+                onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(127, 200, 255,0.3)'; }}
                 onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--surface-border)'; }}
               />
             </div>
@@ -214,16 +214,16 @@ export default function ExerciseModal({ onClose, onSave, editExercise = null, se
                 style={{
                   width: '100%', height: imagePreview ? 'auto' : '100px',
                   borderRadius: 'var(--radius-md)',
-                  border: '1px dashed rgba(0,255,204,0.25)',
-                  background: imagePreview ? 'transparent' : 'rgba(0,255,204,0.03)',
+                  border: '1px dashed rgba(127, 200, 255,0.25)',
+                  background: imagePreview ? 'transparent' : 'rgba(127, 200, 255,0.03)',
                   cursor: 'pointer', overflow: 'hidden',
                   display: 'flex', flexDirection: 'column',
                   alignItems: 'center', justifyContent: 'center',
                   gap: '8px', transition: 'all 0.2s ease',
                   padding: imagePreview ? '0' : '16px',
                 }}
-                onMouseEnter={(e) => { if (!imagePreview) e.currentTarget.style.borderColor = 'rgba(0,255,204,0.5)'; }}
-                onMouseLeave={(e) => { if (!imagePreview) e.currentTarget.style.borderColor = 'rgba(0,255,204,0.25)'; }}
+                onMouseEnter={(e) => { if (!imagePreview) e.currentTarget.style.borderColor = 'rgba(127, 200, 255,0.5)'; }}
+                onMouseLeave={(e) => { if (!imagePreview) e.currentTarget.style.borderColor = 'rgba(127, 200, 255,0.25)'; }}
               >
                 {imagePreview ? (
                   <div style={{ position: 'relative', width: '100%' }}>
@@ -316,7 +316,7 @@ export default function ExerciseModal({ onClose, onSave, editExercise = null, se
                   fontFamily: 'var(--font-body)', fontSize: '14px', outline: 'none',
                   transition: 'border-color 0.2s', resize: 'none'
                 }}
-                onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(0,255,204,0.3)'; }}
+                onFocus={(e) => { e.currentTarget.style.borderColor = 'rgba(127, 200, 255,0.3)'; }}
                 onBlur={(e) => { e.currentTarget.style.borderColor = 'var(--surface-border)'; }}
               />
             </div>

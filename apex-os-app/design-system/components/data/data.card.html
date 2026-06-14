@@ -1,0 +1,50 @@
+<!-- @dsCard group="Components" viewport="700x360" name="Data display" subtitle="Readiness ring, progress bar, stat readouts & light" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="../../styles.css" />
+<style>
+  body { background: var(--bg); padding: 28px; }
+  .cap { font-family: var(--font-body); font-size: 10px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 14px; }
+  .stats { display: flex; gap: 36px; margin: 22px 0 30px; }
+</style>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+  const { ProgressBar, StatReadout, ReadinessLight, ReadinessRing } = window.ApexOSDesignSystem_1864eb;
+  function Demo() {
+    return (
+      <div>
+        <div style={{ display: 'flex', gap: '28px', alignItems: 'center', marginBottom: '24px' }}>
+          <ReadinessRing value={88} label="Ready" size={140} id="c1" />
+          <ReadinessRing value={64} label="Caution" size={110} stops={['#FFE9A8','#FFD54F','#FFB14D']} id="c2" />
+          <div style={{ flex: 1 }}>
+            <span className="cap">Readiness ring · the signature</span>
+            <ProgressBar value={62} />
+            <div className="stats">
+              <StatReadout label="Week" value="4" unit="/5" />
+              <StatReadout label="Streak" value={6} unit="d" />
+              <StatReadout label="Total" value={128} accent />
+            </div>
+          </div>
+        </div>
+        <span className="cap">Readiness light</span>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+          <ReadinessLight light="green" score={88} recommendation="Full send today." />
+          <ReadinessLight light="yellow" score={64} recommendation="Cut top sets." />
+          <ReadinessLight light="red" score={38} recommendation="Recovery only." />
+        </div>
+      </div>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(<Demo />);
+</script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!-- @dsCard group="Colors" viewport="700x150" name="Primary — Cyan" subtitle="Active state, signal, success accent" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<link rel="stylesheet" href="../styles.css" />
+<style>
+  body { background: #000; padding: 22px; }
+  .row { display: flex; gap: 14px; }
+  .sw { flex: 1; height: 96px; border-radius: var(--radius-md); display: flex; flex-direction: column; justify-content: flex-end; padding: 12px; border: 1px solid var(--surface-border); }
+  .name { font-family: var(--font-display); font-weight: 600; font-size: 12px; color: #fff; }
+  .hex { font-family: var(--font-body); font-size: 11px; color: rgba(255,255,255,0.65); letter-spacing: 0.04em; }
+</style>
+</head>
+<body>
+<div class="row">
+  <div class="sw" style="background:#7FC8FF; box-shadow: var(--cyan-glow);"><span class="name" style="color:#000">Cyan</span><span class="hex" style="color:rgba(0,0,0,0.7)">#7FC8FF · --cyan</span></div>
+  <div class="sw" style="background:rgba(127,200,255,0.1)"><span class="name" style="color:var(--cyan)">Cyan Dim</span><span class="hex">10% · --cyan-dim</span></div>
+  <div class="sw" style="background:#000; box-shadow: var(--cyan-glow); border-color: rgba(127,200,255,0.3)"><span class="name" style="color:var(--cyan)">Glow</span><span class="hex">--cyan-glow</span></div>
+</div>
+</body>
+</html>

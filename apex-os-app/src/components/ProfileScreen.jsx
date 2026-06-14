@@ -202,10 +202,10 @@ export default function ProfileScreen({ onClose, profile, setProfile, appState, 
             aria-label={profile.photo ? 'Change profile photo' : 'Add profile photo'}
             style={{
               width: 'clamp(104px, 28vw, 120px)', height: 'clamp(104px, 28vw, 120px)', borderRadius: '50%',
-              border: '3px solid var(--cyan)', background: profile.photo ? 'transparent' : 'linear-gradient(135deg, var(--cyan), #00AA88)',
+              border: '3px solid var(--cyan)', background: profile.photo ? 'transparent' : 'linear-gradient(135deg, var(--cyan), #5BB0F0)',
               cursor: 'pointer', overflow: 'hidden', display: 'flex',
               alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 0 30px rgba(0,255,204,0.2)',
+              boxShadow: '0 0 30px rgba(127, 200, 255,0.2)',
               transition: 'all 0.3s ease', position: 'relative',
             }}
           >
@@ -368,8 +368,8 @@ export default function ProfileScreen({ onClose, profile, setProfile, appState, 
           {dataMessage && (
             <div role="status" style={{
               marginBottom: '12px', padding: '10px 14px', borderRadius: 'var(--radius-md)',
-              background: dataMessage.tone === 'err' ? 'rgba(255,92,92,0.12)' : 'rgba(0,255,204,0.1)',
-              border: `1px solid ${dataMessage.tone === 'err' ? 'rgba(255,92,92,0.4)' : 'rgba(0,255,204,0.3)'}`,
+              background: dataMessage.tone === 'err' ? 'rgba(255,92,92,0.12)' : 'rgba(127, 200, 255,0.1)',
+              border: `1px solid ${dataMessage.tone === 'err' ? 'rgba(255,92,92,0.4)' : 'rgba(127, 200, 255,0.3)'}`,
               color: dataMessage.tone === 'err' ? '#FF5C5C' : 'var(--cyan)',
               fontSize: '13px', fontFamily: 'var(--font-display)', fontWeight: 600,
             }}>{dataMessage.text}</div>
